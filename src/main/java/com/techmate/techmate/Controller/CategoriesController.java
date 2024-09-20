@@ -19,6 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.techmate.techmate.DTO.CategoriesDTO;
 import com.techmate.techmate.Service.CategoriesService;
 
+/**
+ * La clase {@code CategoriesController} maneja las solicitudes HTTP relacionadas
+ * con las categorías en el sistema.
+ * 
+ * <p>Proporciona métodos para crear, obtener, actualizar y eliminar categorías,
+ * así como para manejar la carga y recuperación de imágenes asociadas.</p>
+ */
 @RestController
 @CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
 @RequestMapping("/categories")
@@ -36,7 +43,7 @@ public class CategoriesController {
     /**
      * Obtiene todas las categorías con las rutas completas de las imágenes.
      * 
-     * @return Una lista de todas las categorías con sus imágenes.
+     * @return Una lista de {@code CategoriesDTO} con todas las categorías y sus imágenes.
      */
     @GetMapping("/all")
     public ResponseEntity<List<CategoriesDTO>> getAllCategories() {
@@ -53,7 +60,7 @@ public class CategoriesController {
     /**
      * Crea una nueva categoría y guarda la imagen asociada.
      * 
-     * @param name El nombre de la categoría.
+     * @param name  El nombre de la categoría.
      * @param image El archivo de imagen asociado a la categoría.
      * @return La categoría creada con la ruta completa de la imagen.
      */
@@ -81,7 +88,7 @@ public class CategoriesController {
      * Obtiene una categoría por su ID.
      * 
      * @param id El ID de la categoría.
-     * @return La categoría con la ruta completa de la imagen.
+     * @return La categoría correspondiente o un estado NOT_FOUND si no existe.
      */
     @GetMapping("/{id}")
     public ResponseEntity<CategoriesDTO> getCategoryById(@PathVariable("id") Integer id) {
@@ -96,8 +103,8 @@ public class CategoriesController {
     /**
      * Actualiza una categoría existente. Permite cambiar el nombre y/o la imagen.
      * 
-     * @param id El ID de la categoría.
-     * @param name El nuevo nombre de la categoría (opcional).
+     * @param id    El ID de la categoría.
+     * @param name  El nuevo nombre de la categoría (opcional).
      * @param image El nuevo archivo de imagen (opcional).
      * @return La categoría actualizada con la ruta completa de la imagen.
      */
@@ -169,7 +176,7 @@ public class CategoriesController {
      * Obtiene una imagen por su nombre de archivo.
      * 
      * @param filename El nombre del archivo de la imagen.
-     * @return La imagen en formato de bytes.
+     * @return La imagen en formato de bytes o un estado NOT_FOUND si no se encuentra.
      * @throws IOException Si ocurre un error al leer el archivo de la imagen.
      */
     @GetMapping("/images/{filename:.+}")
@@ -192,6 +199,7 @@ public class CategoriesController {
      * 
      * @param image El archivo de imagen a guardar.
      * @return El nombre del archivo guardado.
+     * @throws RuntimeException Si ocurre un error al guardar la imagen.
      */
     private String saveImage(MultipartFile image) {
         Path path = Paths.get(storageLocation, image.getOriginalFilename());
