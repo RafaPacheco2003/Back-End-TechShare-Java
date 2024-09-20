@@ -28,7 +28,7 @@ public class SubCategoriesServiceImp implements SubCategoriesService {
     // Método para convertir de entidad a DTO
     private SubCategoriesDTO convertToDTO(SubCategories subCategory) {
         SubCategoriesDTO dto = new SubCategoriesDTO();
-        dto.setSubCategoriesID(subCategory.getSubCategoryId());
+        dto.setSubCategoriesId(subCategory.getSubCategoryId());
         dto.setName(subCategory.getName());
         dto.setImagePath(subCategory.getImagePath());
         dto.setCategoryId(subCategory.getCategory().getCategoryId());

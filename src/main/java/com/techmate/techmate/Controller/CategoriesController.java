@@ -28,6 +28,8 @@ import com.techmate.techmate.Service.CategoriesService;
  */
 @RestController
 @CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+
+
 @RequestMapping("/categories")
 public class CategoriesController {
 
@@ -40,6 +42,9 @@ public class CategoriesController {
     @Value("${server.url}")
     private String serverUrl; // URL base del servidor
 
+
+
+
     /**
      * Obtiene todas las categorías con las rutas completas de las imágenes.
      * 
@@ -47,6 +52,7 @@ public class CategoriesController {
      */
     @GetMapping("/all")
     public ResponseEntity<List<CategoriesDTO>> getAllCategories() {
+        
         List<CategoriesDTO> categories = categoriesService.getAllCategories().stream()
                 .map(category -> {
                     String imagePath = serverUrl + "/categories/images/" + category.getImagePath();

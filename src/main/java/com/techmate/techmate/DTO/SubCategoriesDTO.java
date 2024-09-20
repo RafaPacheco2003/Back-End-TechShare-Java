@@ -2,7 +2,7 @@ package com.techmate.techmate.DTO;
 
 public class SubCategoriesDTO {
 
-    private int subCategoriesID;
+    private int subCategoriesId;
     private String name;
     private String imagePath;
     private int categoryId; // ID de la categoría a la que pertenece la subcategoría
@@ -11,20 +11,20 @@ public class SubCategoriesDTO {
     // Constructores
     public SubCategoriesDTO() {}
 
-    public SubCategoriesDTO(int subCategoriesID, String name, String imagePath, int categoryId) {
-        this.subCategoriesID = subCategoriesID;
+    public SubCategoriesDTO(int subCategoriesId, String name, String imagePath, int categoryId) {
+        this.subCategoriesId = subCategoriesId;
         this.name = name;
         this.imagePath = imagePath;
         this.categoryId = categoryId;
     }
 
     // Getters y Setters
-    public int getSubCategoriesID() {
-        return subCategoriesID;
+    public int getSubCategoriesId() {
+        return subCategoriesId;
     }
 
-    public void setSubCategoriesID(int subCategoriesID) {
-        this.subCategoriesID = subCategoriesID;
+    public void setSubCategoriesId(int subCategoriesId) {
+        this.subCategoriesId = subCategoriesId;
     }
 
     public String getName() {

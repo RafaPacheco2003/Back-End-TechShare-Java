@@ -1,6 +1,7 @@
 package com.techmate.techmate.Entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "subCategories")
@@ -20,6 +21,11 @@ public class SubCategories {
     @ManyToOne
     @JoinColumn(name = "category_id")  // Clave foránea que apunta a la categoría
     private Categories category;
+
+    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Materials> materials;
+
+    
 
     // Getters y Setters
     public int getSubCategoryId() {
