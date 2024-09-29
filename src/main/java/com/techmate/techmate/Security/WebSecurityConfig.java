@@ -62,7 +62,7 @@ public class WebSecurityConfig {
     }
 
 
-    public static void main(String [] args){
+    /*public static void main(String [] args){
         System.out.println("pass " + new BCryptPasswordEncoder().encode("12345"));
-    }
+    }*/
 }

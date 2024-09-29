@@ -9,12 +9,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name= "materials")
+@Table(name = "materials")
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class Materials {
 
     @Id
@@ -22,17 +24,21 @@ public class Materials {
     @Column(name = "materials_id")
     private int materialsId;
 
+    @Column(name = "imagePath") 
+    private String imagePath;
+
     @Column(name = "name")
     private String name;
 
     @Column(name = "description")
-    private String descrption;
+    private String description;
 
     @Column(name = "price")
     private double price;
 
     @Column(name = "stock")
     private int stock;
+
 
     @Column(name = "borrowable_stock")
     private int borrowable_stock;
@@ -41,61 +47,7 @@ public class Materials {
     @JoinColumn(name = "subCategory_id")
     private SubCategories subCategory;
 
-    public int getMaterialsId() {
-        return materialsId;
-    }
-
-    public void setMaterialsId(int materialsId) {
-        this.materialsId = materialsId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescrption() {
-        return descrption;
-    }
-
-    public void setDescrption(String descrption) {
-        this.descrption = descrption;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public int getBorrowable_stock() {
-        return borrowable_stock;
-    }
-
-    public void setBorrowable_stock(int borrowable_stock) {
-        this.borrowable_stock = borrowable_stock;
-    }
-
-    public SubCategories getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(SubCategories subCategory) {
-        this.subCategory = subCategory;
-    }
-    
-    
+    @ManyToOne
+    @JoinColumn(name = "rol_id")
+    private Role role;
 }

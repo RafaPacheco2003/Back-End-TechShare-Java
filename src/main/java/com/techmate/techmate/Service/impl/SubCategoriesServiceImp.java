@@ -31,6 +31,7 @@ public class SubCategoriesServiceImp implements SubCategoriesService {
         dto.setSubCategoriesId(subCategory.getSubCategoryId());
         dto.setName(subCategory.getName());
         dto.setImagePath(subCategory.getImagePath());
+        
         dto.setCategoryId(subCategory.getCategory().getCategoryId());
         dto.setCategoryName(categoriesService.getCategoryNameById(subCategory.getCategory().getCategoryId())); // Llama al nuevo método
         return dto;
@@ -90,8 +91,17 @@ public class SubCategoriesServiceImp implements SubCategoriesService {
 
     @Override
     public List<SubCategoriesDTO> getAllSubCategories() {
-        return subCategoriesRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return subCategoriesRepository.findAll().stream() // Obtiene una lista de SubCategories y la convierte en un stream.
+                .map(this::convertToDTO) // Transforma cada SubCategory en un SubCategoriesDTO usando convertToDTO.
+                .collect(Collectors.toList()); // Reúne todos los SubCategoriesDTO en una nueva lista y la devuelve.
+    }
+
+
+
+    @Override
+    public String getSubCategoryNameById(int subCategoryID) {
+        SubCategories subCategory = subCategoriesRepository.findById(subCategoryID).orElse(null);
+        
+        return subCategory != null ? subCategory.getName() : null;
     }
 }

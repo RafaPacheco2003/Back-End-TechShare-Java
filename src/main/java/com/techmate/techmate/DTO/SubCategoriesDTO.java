@@ -5,6 +5,7 @@ public class SubCategoriesDTO {
     private int subCategoriesId;
     private String name;
     private String imagePath;
+    
     private int categoryId; // ID de la categoría a la que pertenece la subcategoría
     private String categoryName; // Nuevo campo para el nombre de la categoría
 

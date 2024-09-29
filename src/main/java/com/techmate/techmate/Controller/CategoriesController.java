@@ -78,6 +78,7 @@ public class CategoriesController {
         if (image.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error si la imagen está vacía
         }
+        
         String imagePath = saveImage(image);
 
         CategoriesDTO categoryDTO = new CategoriesDTO();

@@ -1,10 +1,18 @@
 package com.techmate.techmate.DTO;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MaterialsDTO {
     
     private int materialsId;
+    private String imagePath;
     private String name;
-    private String descrption;
+    private String description;
     private double price;
     private int stock;
     private int borrowable_stock;
@@ -12,22 +20,10 @@ public class MaterialsDTO {
     private int subCategoryId;
     private String subCategoryName;
 
+    private int rolId;
+    private String rolName;
 
-    public MaterialsDTO() {
-    }
 
-
-    public MaterialsDTO(int materialsId, String name, String descrption, double price, int stock, int borrowable_stock,
-            int subCategoryId, String subCategoryName) {
-        this.materialsId = materialsId;
-        this.name = name;
-        this.descrption = descrption;
-        this.price = price;
-        this.stock = stock;
-        this.borrowable_stock = borrowable_stock;
-        this.subCategoryId = subCategoryId;
-        this.subCategoryName = subCategoryName;
-    }
 
 
     public int getMaterialsId() {
@@ -50,15 +46,7 @@ public class MaterialsDTO {
     }
 
 
-    public String getDescrption() {
-        return descrption;
-    }
-
-
-    public void setDescrption(String descrption) {
-        this.descrption = descrption;
-    }
-
+ 
 
     public double getPrice() {
         return price;

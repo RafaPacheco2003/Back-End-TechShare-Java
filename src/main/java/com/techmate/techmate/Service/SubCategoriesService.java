@@ -12,4 +12,7 @@ public interface SubCategoriesService {
     SubCategoriesDTO updateSubCategory(int subCategoryID, SubCategoriesDTO subCategoryDTO);
     void deleteSubCategory(int subCategoryID);
     List<SubCategoriesDTO> getAllSubCategories();
+
+
+    String getSubCategoryNameById(int subCategoryID);
 }

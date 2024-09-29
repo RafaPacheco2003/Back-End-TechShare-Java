@@ -40,6 +40,8 @@ public class Categories {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubCategories> subCategories;
 
+    
+
     // Getters y Setters
 
     /**
