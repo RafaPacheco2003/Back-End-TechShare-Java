@@ -15,61 +15,126 @@ import com.techmate.techmate.Repository.UsuarioRoleRepository;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * Implementación de la interfaz UserDetails para integrar la autenticación
+ * de Spring Security con la entidad Usuario.
+ * 
+ * Esta clase convierte la información de la entidad Usuario en un formato 
+ * que Spring Security entiende para realizar la autenticación y autorización.
+ */
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
     private final Usuario usuario;
-    private final UsuarioRoleRepository usuarioRoleRepository; // Repositorio para buscar los roles
+    private final UsuarioRoleRepository usuarioRoleRepository; // Repositorio para buscar los roles asociados al usuario.
 
+    /**
+     * Método para obtener el objeto Usuario completo.
+     *
+     * @return el objeto Usuario asociado a este UserDetails.
+     */
     public Usuario getUsuario() {
-        return this.usuario; // Devuelve el objeto Usuario para acceder a sus propiedades, incluido el id
+        return this.usuario;
     }
 
-    // Método para obtener el id del usuario
+    /**
+     * Método para obtener el ID del usuario.
+     *
+     * @return ID del usuario (tipo Integer).
+     */
     public Integer getId() {
-        return usuario.getId(); // Asumiendo que el id es de tipo Integer
+        return usuario.getId();
     }
 
-    // Método para obtener los ids de los roles asociados al usuario
+    /**
+     * Método para obtener una lista de IDs de roles asociados al usuario.
+     *
+     * Utiliza el repositorio `UsuarioRoleRepository` para buscar los roles
+     * de acuerdo al ID del usuario y mapea cada `UsuarioRole` al `idRole`.
+     *
+     * @return Lista de IDs de roles asociados.
+     */
     public List<Integer> getIdRoles() {
-        // Obtener los roles asociados al usuario usando el repositorio
-        // `UsuarioRoleRepository`
         List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByUsuarioId(usuario.getId());
 
-        // Mapear los ids de los roles
         return usuarioRoles.stream()
-                .map(UsuarioRole::getId) // Asumiendo que `getId()` devuelve el `idRole` de la entidad `UsuarioRole`
+                .map(UsuarioRole::getId) // Suponiendo que `getId()` devuelve el ID del rol asociado.
                 .collect(Collectors.toList());
     }
 
-    // Método para obtener los roles asociados al usuario
+    /**
+     * Método para obtener los roles del usuario en forma de `GrantedAuthority`.
+     *
+     * @return Colección de roles (autoridades) asociadas al usuario.
+     */
     public Collection<? extends GrantedAuthority> getRoles() {
-        return getAuthorities(); // Devuelve las autoridades (roles) asociados al usuario
+        return getAuthorities();
     }
 
+    /**
+     * Implementación de `getAuthorities()` para Spring Security.
+     *
+     * Este método convierte cada rol del usuario a un `GrantedAuthority`,
+     * necesario para la autorización en Spring Security.
+     *
+     * @return Colección de objetos `GrantedAuthority` basados en los roles del usuario.
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Obtener los roles asociados al usuario usando el repositorio
-        // `UsuarioRoleRepository`
         List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByUsuarioId(usuario.getId());
 
-        // Mapear los roles a `GrantedAuthority`
         return usuarioRoles.stream()
                 .map(usuarioRole -> new SimpleGrantedAuthority(usuarioRole.getRole().getNombre()))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene la contraseña del usuario.
+     *
+     * @return Contraseña del usuario (String).
+     */
     @Override
     public String getPassword() {
         return usuario.getPassword();
     }
 
+    /**
+     * Obtiene el nombre de usuario (email en este caso).
+     *
+     * @return Email del usuario.
+     */
     @Override
     public String getUsername() {
         return usuario.getEmail();
     }
 
+    /**
+     * Método adicional para obtener el nombre completo del usuario.
+     *
+     * @return Nombre del usuario.
+     */
     public String getNombre() {
         return usuario.getNombre();
+    }
+
+    // Otros métodos requeridos por UserDetails para la autenticación.
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Devuelve true, asumiendo que la cuenta no expira.
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Devuelve true, asumiendo que la cuenta no está bloqueada.
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Devuelve true, asumiendo que las credenciales no expiran.
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // Devuelve true, asumiendo que la cuenta está habilitada.
     }
 }

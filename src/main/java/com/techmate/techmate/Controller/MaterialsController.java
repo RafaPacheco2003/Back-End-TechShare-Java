@@ -1,19 +1,7 @@
 package com.techmate.techmate.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.techmate.techmate.DTO.MaterialsDTO;
+import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.MaterialsService;
 
 import java.io.File;
@@ -22,6 +10,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin/materials")
@@ -36,6 +32,9 @@ public class MaterialsController {
     @Value("${server.url}")
     private String serverUrl; // URL base del servidor
 
+    @Autowired
+    private ImageStorageStrategy imageStorageStrategy;
+
     @PostMapping("/create")
     public ResponseEntity<MaterialsDTO> createMaterials(
             @RequestParam("image") MultipartFile image,
@@ -45,11 +44,8 @@ public class MaterialsController {
             @RequestParam("subCategoryId") int subCategoryId,
             @RequestParam("roleId") int roleId) {
 
-        if (image.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error si la imagen está vacía
-        }
-
-        String imagePath = saveImage(image);
+        // Guardamos la imagen usando la estrategia de almacenamiento
+        String imagePath = imageStorageStrategy.saveImage(image);
 
         // Crear un nuevo DTO de Materials
         MaterialsDTO materialsDTO = new MaterialsDTO();
@@ -63,84 +59,92 @@ public class MaterialsController {
         // Llamar al servicio para guardar el material
         MaterialsDTO createdMaterial = materialsService.createMaterials(materialsDTO);
 
-        // Retornar la respuesta con el material creado y el estado HTTP 201
         return new ResponseEntity<>(createdMaterial, HttpStatus.CREATED);
-
     }
 
-    /**
-     * Obtiene todos los materiales filtrados por el rol del usuario autenticado.
-     * 
-     * @return Una lista de materiales filtrados por el rol.
-     */
-    @GetMapping("/by-role")
-    public ResponseEntity<List<MaterialsDTO>> getMaterialsByRole() {
+    @GetMapping("/{id}")
+    public ResponseEntity<MaterialsDTO> getMaterialById(@PathVariable("id") Integer id) {
         try {
-            List<MaterialsDTO> materials = materialsService.getAllMaterialsByRole();
-            return ResponseEntity.ok(materials);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // o maneja el error según lo necesites
+            MaterialsDTO materialsDTO = materialsService.getMaterialsById(id);
+            materialsDTO.setImagePath(serverUrl + "/admin/materials/images/" + materialsDTO.getImagePath());
+            return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
-    /**
-     * Obtiene una imagen por su nombre de archivo.
-     * 
-     * @param filename El nombre del archivo de la imagen.
-     * @return La imagen en formato de bytes.
-     * @throws IOException Si ocurre un error al leer el archivo de la imagen.
-     */
+    @PutMapping("/update/{id}")
+    public ResponseEntity<MaterialsDTO> updateMaterials(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "price", required = false) Double price,
+            @RequestParam(value = "subCategoryId", required = false) Integer subCategoryId,
+            @RequestParam(value = "roleId", required = false) Integer roleId) {
+
+        MaterialsDTO materialsDTO = new MaterialsDTO();
+
+        if (name != null) materialsDTO.setName(name);
+        if (description != null) materialsDTO.setDescription(description);
+        if (price != null && price > 0) materialsDTO.setPrice(price);
+        if (subCategoryId != null && subCategoryId > 0) materialsDTO.setSubCategoryId(subCategoryId);
+        if (roleId != null && roleId > 0) materialsDTO.setRolId(roleId);
+
+        if (image != null && !image.isEmpty()) {
+            String imagePath = imageStorageStrategy.saveImage(image);
+            materialsDTO.setImagePath(imagePath);
+        }
+
+        MaterialsDTO updatedMaterial = materialsService.updateMaterials(id, materialsDTO);
+
+        if (updatedMaterial.getImagePath() != null) {
+            updatedMaterial.setImagePath(serverUrl + "/admin/materials/images/" + updatedMaterial.getImagePath());
+        }
+
+        return new ResponseEntity<>(updatedMaterial, HttpStatus.OK);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<MaterialsDTO>> getAllMaterials() {
+        List<MaterialsDTO> materialsDTO = materialsService.getAllMaterials();
+
+        if (materialsDTO.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        materialsDTO.forEach(material -> {
+            if (material.getImagePath() != null) {
+                material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
+            }
+        });
+
+        return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteMaterials(@PathVariable("id") Integer id) {
+        try {
+            materialsService.deleteMaterials(id);
+            return new ResponseEntity<>("Material eliminado con éxito", HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
-        // Crea un objeto Path que representa la ruta completa del archivo de imagen
         Path imagePath = Paths.get(storageLocation).resolve(filename);
-
-        // Convierte el objeto Path a un objeto File para poder trabajar con él
         File file = imagePath.toFile();
 
-        // Verifica si el archivo de imagen no existe
         if (!file.exists()) {
-            // Si el archivo no se encuentra, devuelve un ResponseEntity con el estado
-            // NOT_FOUND (404)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Error si la imagen no se encuentra
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // Lee todos los bytes del archivo de imagen y los almacena en un arreglo de
-        // bytes
         byte[] imageBytes = Files.readAllBytes(imagePath);
 
-        // Crea una respuesta HTTP con estado OK (200) y agrega el tipo de contenido de
-        // la imagen
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(imagePath)) // Establece el tipo de contenido
-                .body(imageBytes); // Establece el cuerpo de la respuesta con los bytes de la imagen
+                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(imagePath))
+                .body(imageBytes);
     }
-
-    /**
-     * Guardamos una imagen en el directorio especifico
-     * 
-     * @param image El archivo de imagen a guardar.
-     * @return El nombre de la imagen guardado.
-     */
-    private String saveImage(MultipartFile image) {
-
-        // Crea un objeto Path que representa la ruta donde se guardará la imagen
-        Path path = Paths.get(storageLocation, image.getOriginalFilename());
-
-        try {
-            // Crea los directorios necesarios para la ruta del archivo, si no existen
-            Files.createDirectories(path.getParent());
-
-            // Escribe los bytes de la imagen en el archivo en la ruta especificada
-            Files.write(path, image.getBytes());
-
-        } catch (Exception e) {
-            // Si ocurre un error al guardar la imagen, lanza una RuntimeException con un
-            // mensaje de error
-            throw new RuntimeException("Failed to save image", e);
-        }
-        // Devuelve solo el nombre del archivo original de la imagen
-        return image.getOriginalFilename();
-    }
-
 }

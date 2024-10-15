@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class TokenUtils {
 
     private final static String ACCESS_TOKEN_SECRET = "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc";
+    
     private final static Long ACCESS_TOKEN_VALIDITY_SECONDS = 2_592_000L; // 30 días
 
     // Método para crear el token

@@ -3,7 +3,7 @@ package com.techmate.techmate.Service;
 import java.util.List;
 
 import com.techmate.techmate.DTO.MaterialsDTO;
-import com.techmate.techmate.Entity.Materials;
+
 
 public interface MaterialsService {
 
@@ -13,7 +13,6 @@ public interface MaterialsService {
     void deleteMaterials(int materialsID);
     List<MaterialsDTO> getAllMaterials();
 
-    List<MaterialsDTO> getAllMaterialsByRole();
-    
+
     
 }
