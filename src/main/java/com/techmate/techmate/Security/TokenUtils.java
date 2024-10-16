@@ -29,14 +29,13 @@ public class TokenUtils {
 
     // Método para crear el token
     // Modifica el método para aceptar el id del usuario
-    public static String createToken(Integer id, String nombre, String email, List<String> roles, List<Integer> idRoles) {
+    public static String createToken(Integer id, String email, List<String> roles, List<Integer> idRoles) {
         Long expirationTime = ACCESS_TOKEN_VALIDITY_SECONDS * 1_000;
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
         // Añade el id a los claims personalizados
         Map<String, Object> extra = new HashMap<>();
         extra.put("id", id);   // Aquí se añade el id del usuario
-        extra.put("nombre", nombre);
         extra.put("roles", roles); // Aquí se añaden los roles del usuario
         extra.put("idRoles", idRoles);
 

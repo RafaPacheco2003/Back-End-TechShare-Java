@@ -8,9 +8,9 @@ import com.techmate.techmate.DTO.MaterialsDTO;
 public interface MaterialsService {
 
     MaterialsDTO createMaterials(MaterialsDTO materialsDTO);
-    MaterialsDTO getMaterialsById(int materialsID);
-    MaterialsDTO updateMaterials(int materialsID, MaterialsDTO materialsDTO);
-    void deleteMaterials(int materialsID);
+    MaterialsDTO getMaterialsById(int materialsId);
+    MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO);
+    void deleteMaterials(int materialsId);
     List<MaterialsDTO> getAllMaterials();
 
 

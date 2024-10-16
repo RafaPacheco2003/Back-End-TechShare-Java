@@ -5,6 +5,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "subCategories")
+
+
 public class SubCategories {
 
     @Id

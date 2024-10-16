@@ -1,7 +1,6 @@
 package com.techmate.techmate.Security;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,9 +80,7 @@ public class UserDetailsImpl implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByUsuarioId(usuario.getId());
-
-        return usuarioRoles.stream()
+        return usuarioRoleRepository.findByUsuarioId(usuario.getId()).stream()
                 .map(usuarioRole -> new SimpleGrantedAuthority(usuarioRole.getRole().getNombre()))
                 .collect(Collectors.toList());
     }
@@ -114,7 +111,7 @@ public class UserDetailsImpl implements UserDetails {
      * @return Nombre del usuario.
      */
     public String getNombre() {
-        return usuario.getNombre();
+        return usuario.getUser_name();
     }
 
     // Otros métodos requeridos por UserDetails para la autenticación.

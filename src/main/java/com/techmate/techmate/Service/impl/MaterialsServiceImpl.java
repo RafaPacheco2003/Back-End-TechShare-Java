@@ -22,7 +22,7 @@ import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
 
 @Service
-public class MaterialsServiceImp implements MaterialsService {
+public class MaterialsServiceImpl implements MaterialsService {
 
         /*
          * Repository

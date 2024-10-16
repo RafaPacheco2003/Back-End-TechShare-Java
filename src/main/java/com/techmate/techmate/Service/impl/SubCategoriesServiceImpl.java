@@ -15,7 +15,7 @@ import com.techmate.techmate.Service.CategoriesService;
 import com.techmate.techmate.Service.SubCategoriesService;
 
 @Service
-public class SubCategoriesServiceImp implements SubCategoriesService {
+public class SubCategoriesServiceImpl implements SubCategoriesService {
 
     @Autowired
     private SubCategoriesRepository subCategoriesRepository;

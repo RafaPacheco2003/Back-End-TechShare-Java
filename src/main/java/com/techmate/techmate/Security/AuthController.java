@@ -14,7 +14,6 @@ import com.techmate.techmate.Entity.Role;
 import com.techmate.techmate.Entity.Usuario;
 import com.techmate.techmate.Repository.RoleRepository;
 import com.techmate.techmate.Repository.UsuarioRepository;
-
 @RestController
 public class AuthController {
 
@@ -36,7 +35,9 @@ public class AuthController {
 
         // Crear un nuevo usuario
         Usuario usuario = new Usuario();
-        usuario.setNombre(registerRequest.getNombre());
+        usuario.setUser_name(registerRequest.getUser_name()); // Usando el nuevo campo
+        usuario.setFirst_name(registerRequest.getFirst_name()); // Usando el nuevo campo
+        usuario.setLast_name(registerRequest.getLast_name()); // Usando el nuevo campo
         usuario.setEmail(registerRequest.getEmail());
         usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
@@ -57,5 +58,4 @@ public class AuthController {
 
         return ResponseEntity.ok("Usuario registrado con éxito");
     }
-
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -14,7 +15,9 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String nombre;
+    private String user_name; // Cambiado de 'nombre' a 'user_name'
+    private String first_name; // Nuevo campo
+    private String last_name; // Nuevo campo
     private String email;
     private String password;
 
@@ -25,4 +28,8 @@ public class Usuario {
         inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role
     )
     private Set<Role> roles = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Movements> movements;
 }
