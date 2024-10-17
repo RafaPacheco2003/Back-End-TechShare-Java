@@ -2,6 +2,8 @@ package com.techmate.techmate.DTO;
 
 import java.util.Date;
 
+import com.techmate.techmate.Entity.MoveType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class MovementsDTO {
     
     private int movementsId;
-    private String moveType;
+    private MoveType moveType;
     private String comment;
     private int quantity;
     private Date date;

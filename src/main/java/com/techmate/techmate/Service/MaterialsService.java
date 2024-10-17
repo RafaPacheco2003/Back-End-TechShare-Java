@@ -1,9 +1,10 @@
 package com.techmate.techmate.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.techmate.techmate.DTO.MaterialsDTO;
-
+import com.techmate.techmate.Entity.Materials;
 
 public interface MaterialsService {
 
@@ -12,7 +13,5 @@ public interface MaterialsService {
     MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO);
     void deleteMaterials(int materialsId);
     List<MaterialsDTO> getAllMaterials();
-
-
-    
+   String getMaterialsNameById(int materialId);
 }
