@@ -28,7 +28,7 @@ public class Movements {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "movements_id")
-    private int movements_id;
+    private int movementsId;
 
     private MoveType moveType;
 

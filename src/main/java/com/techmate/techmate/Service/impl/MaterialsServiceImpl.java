@@ -1,6 +1,7 @@
 package com.techmate.techmate.Service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,6 +169,16 @@ public void deleteMaterials(int materialsId) {
 
                 return convertToDTO(materials);
         }
+
+        @Override
+        public String getMaterialsNameById(int materialId) {
+            // Busca el material por su ID en el repositorio y obtiene el nombre si se encuentra
+            return materialsRepository.findById(materialId)
+                .map(Materials::getName) // Obtiene el nombre del material si se encuentra
+                .orElse(null); // Devuelve null si no se encuentra el material
+        }
+        
+        
 
 
 }

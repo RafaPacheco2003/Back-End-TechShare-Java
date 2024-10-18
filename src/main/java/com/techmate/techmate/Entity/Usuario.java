@@ -22,14 +22,16 @@ public class Usuario {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "usuario_role", // Nombre de la tabla intermedia
-        joinColumns = @JoinColumn(name = "usuario_id"), // Columna que se refiere a Usuario
-        inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role
+    @JoinTable(name = "usuario_role", // Nombre de la tabla intermedia
+            joinColumns = @JoinColumn(name = "usuario_id"), // Columna que se refiere a Usuario
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role
     )
     private Set<Role> roles = new HashSet<>();
 
-
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movements> movements;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Borrow> borrows;
+
 }

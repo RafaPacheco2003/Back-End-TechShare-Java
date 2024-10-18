@@ -1,5 +1,6 @@
 package com.techmate.techmate.Security;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -55,6 +56,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         // Retorna una instancia de UserDetailsImpl que envuelve al usuario encontrado.
         // UserDetailsImpl es una implementación de UserDetails que adapta el objeto Usuario.
         return new UserDetailsImpl(usuario, usuarioRoleRepository);
+    }
+
+    public String getUsuarioUsernamById(int usernameId){
+        return usuarioRepository.getUsuarioUsernamById(usernameId)
+            .map(Usuario::getUser_name)
+            .orElse(null);
     }
 }
 
