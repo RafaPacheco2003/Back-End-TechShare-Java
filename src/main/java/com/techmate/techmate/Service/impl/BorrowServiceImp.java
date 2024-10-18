@@ -67,6 +67,7 @@ public class BorrowServiceImp implements BorrowService {
         detailsBorrow.setMaterials(material); // Establecer la relación con Materials
         
         return detailsBorrow;
+        
     }
 
     private DetailsBorrowDTO convertDetailsBorrowToDTO(DetailsBorrow detailsBorrow) {
