@@ -1,0 +1,53 @@
+[33mcommit a5d68715e90805fe3154bbb58fe23a965f304b54[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmovements-borrow[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Fri Oct 18 09:44:27 2024 -0600
+
+    feat: Se agrega funciones de Movemnts y Borrow.
+
+[33mcommit 2e3f9b486fabf79ca341947cd32809ed5eeebf27[m[33m ([m[1;32mdev[m[33m, [m[1;32mMovements[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Thu Oct 17 13:40:10 2024 -0600
+
+    Add Movements model with service, repository, and controller for movements functionality
+
+[33mcommit 60a6a39542a6e71cb6c7cfe4c102a73b9fcfde20[m[33m ([m[1;31morigin/dev[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Wed Oct 16 11:46:09 2024 -0600
+
+    feat(entities): Add various DTOs & services
+
+[33mcommit a6cb82c792604bb62413237ff780c5d1c00ee873[m[33m ([m[1;31morigin/avance-y-mejoras[m[33m, [m[1;32mavance-y-mejoras[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Mon Oct 14 22:59:59 2024 -0600
+
+    Avance y mejoras en materiales
+
+[33mcommit d88120fd4d2331d5d54cac07384d13e9ed18defc[m[33m ([m[1;31morigin/feature-materials[m[33m, [m[1;32mfeature-materials[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Sat Sep 28 22:31:54 2024 -0600
+
+    Agregado de MaterialController, RoleController, y ajustes en entidades y repositorios
+
+[33mcommit e85d6aa22ead9ab56f56c5c2661e1462b0bb8c3e[m[33m ([m[1;31morigin/Integrar-JWT[m[33m, [m[1;32mIntegrar-JWT[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Tue Sep 24 14:46:28 2024 -0600
+
+    Integrar JWT: descripción de los cambios realizados
+
+[33mcommit dee127fbe46ebab5e959c36ed48b2eafcf597e5a[m[33m ([m[1;31morigin/feature/materials-module[m[33m, [m[1;32mfeature/materials-module[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Fri Sep 20 11:50:16 2024 -0600
+
+    Se incorporo entity, repositorio y dto en materials
+
+[33mcommit b2d8649bc90953fcf4cbbd076a54bfc31c1c6838[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Thu Sep 19 20:18:55 2024 -0600
+
+    Se actualizo la documentacion de los archivos de categoria
+
+[33mcommit 9faf126c3c044087b512d6652a49c53ec73a61ce[m
+Author: RafaPacheco2003 <115204774+RafaPacheco2003@users.noreply.github.com>
+Date:   Thu Sep 19 19:35:26 2024 -0600
+
+    Primer commit
