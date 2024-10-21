@@ -1,8 +1,11 @@
 package com.techmate.techmate.Service.impl;
 
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import com.techmate.techmate.DTO.MovementsDTO;
 import com.techmate.techmate.Entity.Materials;
@@ -36,77 +39,106 @@ public class MovementsServiceImpl implements MovementsService {
 
     private Movements convertToEntity(MovementsDTO movementsDTO) {
         Movements movements = new Movements();
-    
+
         movements.setMovementsId(movementsDTO.getMovementsId());
         // Asignar MoveType directamente desde el DTO
         movements.setMoveType(movementsDTO.getMoveType());
-    
+
         movements.setComment(movementsDTO.getComment());
         movements.setQuantity(movementsDTO.getQuantity());
         movements.setDate(movementsDTO.getDate());
-    
+
         Usuario usuario = usuarioRepository.findById(movementsDTO.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + movementsDTO.getUsuarioId()));
+                .orElseThrow(
+                        () -> new RuntimeException("Usuario no encontrado con ID: " + movementsDTO.getUsuarioId()));
         movements.setUsuario(usuario);
-    
+
         Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
-                .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
+                .orElseThrow(
+                        () -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
         movements.setMaterials(materials);
-    
+
         return movements;
     }
-    
 
     private MovementsDTO convertToDTO(Movements movements) {
         MovementsDTO dto = new MovementsDTO();
-    
+        dto.setMovementsId(movements.getMovementsId());
+
         // Asignar MoveType directamente, ya que es del mismo tipo
         dto.setMoveType(movements.getMoveType());
-    
+
         dto.setComment(movements.getComment());
         dto.setQuantity(movements.getQuantity());
         dto.setDate(movements.getDate());
-    
+
         // Obtener y asignar IDs y nombres
         dto.setUsuarioId(movements.getUsuario().getId());
         dto.setMaterialsId(movements.getMaterials().getMaterialsId());
-    
+
         // Obtener y asignar nombres de Usuario y Materials mediante los servicios
         dto.setUsuarioName(userService.getUsuarioUsernamById(movements.getUsuario().getId()));
         dto.setMaterialsName(materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId()));
-    
+
         return dto;
     }
-    
 
     @Override
-public MovementsDTO createMovementsDTO(MovementsDTO movementsDTO) {
-    // Convertir DTO a entidad
-    Movements movements = convertToEntity(movementsDTO);
+    public MovementsDTO createMovementsDTO(MovementsDTO movementsDTO) {
 
-    // Obtener el material correspondiente antes de ajustar el stock
-    Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
-            .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
+        // Verificar si la cantidad es menor o igual a 0
+        if (movementsDTO.getQuantity() <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+        }
 
-    // Ajustar el stock según el tipo de movimiento
-    if (movements.getMoveType() == MoveType.IN) {
-        int plusStock = materials.getStock() + movements.getQuantity();
-        materials.setStock(plusStock);
-    } else if (movements.getMoveType() == MoveType.OUT) {
-        int minusStock = materials.getStock() - movements.getQuantity();
-        materials.setStock(minusStock);
-    } else if (movements.getMoveType() == MoveType.ADDJUST) {
-        materials.setStock(movements.getQuantity());
+        // Asignar la fecha actual al movimientFo
+        movementsDTO.setDate(new Date());
+
+        // Convertir DTO a entidad
+        Movements movements = convertToEntity(movementsDTO);
+
+        // Obtener el material correspondiente antes de ajustar el stock
+        Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
+                .orElseThrow(
+                        () -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
+
+        adjustMaterialStock(materials, movements);
+        materialsRepository.save(materials);
+
+        movements = movementsRepository.save(movements);
+        return convertToDTO(movements);
     }
 
-    materialsRepository.save(materials);
-    
-    // Guardar en el repositorio
-    movements = movementsRepository.save(movements);
-    // Convertir de nuevo a DTO para devolverlo
-    return convertToDTO(movements);
-}
+    // Ajustar stock de material
+    private void adjustMaterialStock(Materials materials, Movements movements) {
 
+        switch (movements.getMoveType()) {
+            case IN:
+                // Incrementar el stock total y el borrowable_stock cuando entra material
+                materials.setBorrowable_stock(materials.getBorrowable_stock() + movements.getQuantity());
+                materials.setStock(materials.getStock() + movements.getQuantity());
+                break;
+            case OUT:
+                // Verificar si el stock total es suficiente
+                if (materials.getStock() < movements.getQuantity()) {
+                    throw new IllegalArgumentException(
+                            "Stock insuficiente para el material con ID: " + materials.getMaterialsId());
+                }
+                // Reducir el borrowable_stock y el stock total cuando sale material
+                materials.setBorrowable_stock(materials.getBorrowable_stock() - movements.getQuantity());
+                materials.setStock(materials.getStock() - movements.getQuantity());
+                break;
+            case ADDJUST:
+                // En el caso de ajustes, se ajusta tanto el borrowable_stock como el stock total
+                int difference = movements.getQuantity() - materials.getStock();
+                materials.setBorrowable_stock(materials.getBorrowable_stock() + difference);
+                materials.setStock(movements.getQuantity());
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de movimiento inválido");
+        }
+    }
+    
 
     @Override
     public MovementsDTO getMovementsByID(Integer movementsId) {
@@ -114,4 +146,38 @@ public MovementsDTO createMovementsDTO(MovementsDTO movementsDTO) {
                 .orElseThrow(() -> new RuntimeException("Movimiento no encontrado con ID: " + movementsId));
         return convertToDTO(movements);
     }
+
+    @Override
+    public List<MovementsDTO> getAllMovementsDTO() {
+        // Recuperar todos los movimientos y convertirlos a DTO
+        return movementsRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovementsDTO> getMovementsByType(String type) {
+        MoveType moveType;
+
+        // Convertir la cadena de texto a enum MoveType usando un switch-case
+        switch (type.toUpperCase()) {
+            case "IN":
+                moveType = MoveType.IN;
+                break;
+            case "OUT":
+                moveType = MoveType.OUT;
+                break;
+            case "ADDJUST":
+                moveType = MoveType.ADDJUST;
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de movimiento inválido: " + type);
+        }
+
+        // Filtrar y convertir los movimientos a DTOs en una sola operación
+        return movementsRepository.findByMoveType(moveType).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
 }

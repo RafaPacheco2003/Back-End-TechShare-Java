@@ -25,16 +25,19 @@ public class BorrowController {
     @PostMapping("/create")
     public BorrowDTO createBorrow(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
-            @RequestParam("status") Status status,
-            @RequestParam("details") String detailsJson // Pasamos los detalles como un String JSON
+            @RequestParam("details") String detailsJson,
+            @RequestParam("usuario_id") Integer usuario_id // Pasamos los detalles como un String JSON
     ) throws Exception {
+        
         BorrowDTO borrowDTO = new BorrowDTO();
         borrowDTO.setDate(date);
-        borrowDTO.setStatus(status);
+
+        borrowDTO.setUsuarioId(usuario_id);
 
         // Convertir el JSON de detalles en una lista de objetos DetailsBorrowDTO
         List<DetailsBorrowDTO> details = convertJsonToDetailsList(detailsJson);
         borrowDTO.setDetails(details);
+       
 
         return borrowService.createBorrowDTO(borrowDTO);
     }
@@ -48,5 +51,13 @@ public class BorrowController {
         } catch (Exception e) {
             throw new RuntimeException("Error al convertir el JSON a la lista de detalles.", e);
         }
+    }
+
+    // Actualizar el estado de un préstamo
+    @PutMapping("/update/{borrowId}")
+    public void updateBorrowStatus(
+            @PathVariable Integer borrowId,
+            @RequestParam("status") Status newStatus) throws Exception {
+        borrowService.updateBorrowStatus(borrowId, newStatus);
     }
 }

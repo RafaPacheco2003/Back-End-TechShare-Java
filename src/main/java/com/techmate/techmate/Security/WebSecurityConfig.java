@@ -13,9 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import lombok.AllArgsConstructor;
-
+@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
 @Configuration
 @AllArgsConstructor
 public class WebSecurityConfig {

@@ -20,7 +20,9 @@ public class Borrow {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+
     private double amount;
+
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
