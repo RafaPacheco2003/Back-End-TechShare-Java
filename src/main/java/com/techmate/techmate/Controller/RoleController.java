@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.techmate.techmate.DTO.RoleDTO;
 import com.techmate.techmate.Service.RoleService;
-@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("admin/role")
 public class RoleController {

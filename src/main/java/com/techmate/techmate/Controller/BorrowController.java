@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("/admin/borrow")
 public class BorrowController {
 
@@ -59,5 +60,12 @@ public class BorrowController {
             @PathVariable Integer borrowId,
             @RequestParam("status") Status newStatus) throws Exception {
         borrowService.updateBorrowStatus(borrowId, newStatus);
+
+
+
+        /*
+         * Realizar analisis de borrow, con filktrado de fecha de star fecha end, 
+         * status, y hacer busquedas de id
+         */
     }
 }

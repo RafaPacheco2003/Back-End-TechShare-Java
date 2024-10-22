@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.techmate.techmate.DTO.MovementsDTO;
 import com.techmate.techmate.Entity.MoveType;
 import com.techmate.techmate.Service.MovementsService;
-@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/movement")
 public class MovementsController {

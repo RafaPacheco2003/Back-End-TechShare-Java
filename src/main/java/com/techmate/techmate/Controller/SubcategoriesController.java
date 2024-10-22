@@ -22,7 +22,7 @@ import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("/subcategories")
 public class SubcategoriesController {
 

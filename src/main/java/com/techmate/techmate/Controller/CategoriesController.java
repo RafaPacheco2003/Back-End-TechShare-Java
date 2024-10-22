@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
  * con las categorías en el sistema.
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("/categories")
 @Validated
 public class CategoriesController {

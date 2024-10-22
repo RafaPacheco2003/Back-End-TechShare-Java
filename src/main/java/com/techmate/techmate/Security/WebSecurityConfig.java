@@ -15,8 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import lombok.AllArgsConstructor;
-@CrossOrigin(origins = "http://localhost:5173") // Permitir solicitudes desde tu frontend
+import lombok.AllArgsConstructor;import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
 @Configuration
 @AllArgsConstructor
 public class WebSecurityConfig {
@@ -31,23 +33,23 @@ public class WebSecurityConfig {
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
     
         return http
+                .cors()  // Habilitar CORS
+                .and()
                 .csrf().disable()
-                .authorizeHttpRequests()  // Cambia authorizeRequests() a authorizeHttpRequests()
-                    .requestMatchers("/register").permitAll()  // Cambia antMatchers() a requestMatchers()
-                    .anyRequest().authenticated()  // Cualquier otra ruta requiere autenticación
+                .authorizeHttpRequests()
+                    .requestMatchers("/register").permitAll()
+                    .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless, adecuado para JWT
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(jWTAuthorizationFIlter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-    
-    
-    // Registrar AuthenticationManager como un bean
+
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
@@ -62,8 +64,15 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-    /*public static void main(String [] args){
-        System.out.println("pass " + new BCryptPasswordEncoder().encode("12345"));
-    }*/
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true); // Permitir credenciales
+        config.addAllowedOrigin("http://localhost:3000"); // Permitir solicitudes desde el frontend
+        config.addAllowedHeader("*"); // Permitir cualquier header
+        config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 }
