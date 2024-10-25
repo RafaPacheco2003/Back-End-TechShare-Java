@@ -15,7 +15,10 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
+<<<<<<< HEAD
 @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+=======
+>>>>>>> dev
 @RequestMapping("/admin/borrow")
 public class BorrowController {
 
@@ -26,6 +29,7 @@ public class BorrowController {
     @PostMapping("/create")
     public BorrowDTO createBorrow(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+<<<<<<< HEAD
             @RequestParam("details") String detailsJson,
             @RequestParam("usuario_id") Integer usuario_id // Pasamos los detalles como un String JSON
     ) throws Exception {
@@ -34,11 +38,22 @@ public class BorrowController {
         borrowDTO.setDate(date);
 
         borrowDTO.setUsuarioId(usuario_id);
+=======
+            @RequestParam("status") Status status,
+            @RequestParam("details") String detailsJson // Pasamos los detalles como un String JSON
+    ) throws Exception {
+        BorrowDTO borrowDTO = new BorrowDTO();
+        borrowDTO.setDate(date);
+        borrowDTO.setStatus(status);
+>>>>>>> dev
 
         // Convertir el JSON de detalles en una lista de objetos DetailsBorrowDTO
         List<DetailsBorrowDTO> details = convertJsonToDetailsList(detailsJson);
         borrowDTO.setDetails(details);
+<<<<<<< HEAD
        
+=======
+>>>>>>> dev
 
         return borrowService.createBorrowDTO(borrowDTO);
     }
@@ -53,6 +68,7 @@ public class BorrowController {
             throw new RuntimeException("Error al convertir el JSON a la lista de detalles.", e);
         }
     }
+<<<<<<< HEAD
 
     // Actualizar el estado de un préstamo
     @PutMapping("/update/{borrowId}")
@@ -68,4 +84,6 @@ public class BorrowController {
          * status, y hacer busquedas de id
          */
     }
+=======
+>>>>>>> dev
 }
