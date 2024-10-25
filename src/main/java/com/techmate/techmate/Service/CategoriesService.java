@@ -2,6 +2,8 @@ package com.techmate.techmate.Service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.techmate.techmate.DTO.CategoriesDTO;
 
 /**
@@ -19,7 +21,7 @@ public interface CategoriesService {
      * @param categoryDTO El objeto que contiene la información de la categoría a crear.
      * @return El objeto {@code CategoriesDTO} creado.
      */
-    CategoriesDTO createCategory(CategoriesDTO categoryDTO);
+    CategoriesDTO createCategory(CategoriesDTO categoryDTO, MultipartFile image);
 
     /**
      * Obtiene una categoría por su identificador único.
@@ -36,7 +38,7 @@ public interface CategoriesService {
      * @param categoryDTO El objeto que contiene la nueva información de la categoría.
      * @return El objeto {@code CategoriesDTO} actualizado.
      */
-    CategoriesDTO updateCategory(int categoryID, CategoriesDTO categoryDTO);
+    CategoriesDTO updateCategory(int categoryID, CategoriesDTO categoryDTO, MultipartFile image);
 
     /**
      * Elimina una categoría por su identificador único.

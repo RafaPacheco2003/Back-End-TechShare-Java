@@ -34,4 +34,9 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Borrow> borrows;
 
+    public Object getUsuarioId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getUsuarioId'");
+    }
+
 }

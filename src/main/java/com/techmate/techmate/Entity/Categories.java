@@ -1,7 +1,10 @@
 package com.techmate.techmate.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
@@ -20,6 +23,8 @@ import java.util.List;
  * <p>Además, la clase utiliza Lombok para reducir el código boilerplate mediante
  * las anotaciones {@code @AllArgsConstructor} y {@code @NoArgsConstructor}.</p>
  */
+
+ @Data
 @Entity
 @Table(name = "categories")
 @AllArgsConstructor
@@ -31,9 +36,12 @@ public class Categories {
     @Column(name = "category_id")
     private int categoryId;
 
-    @Column(name = "name")
+    @NotBlank(message = "El nombre de la categoría no puede estar vacío.")
+    @Size(min = 3, max = 100, message = "El nombre de la categoría debe tener entre 3 y 100 caracteres.")
+    @Column(name = "name", unique = true)
     private String name;
 
+    
     @Column(name = "imagePath") 
     private String imagePath;
 
@@ -41,78 +49,4 @@ public class Categories {
     private List<SubCategories> subCategories;
 
     
-
-    // Getters y Setters
-
-    /**
-     * Obtiene el identificador de la categoría.
-     * 
-     * @return El identificador de la categoría.
-     */
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    /**
-     * Establece el identificador de la categoría.
-     * 
-     * @param categoryId El nuevo identificador de la categoría.
-     */
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    /**
-     * Obtiene el nombre de la categoría.
-     * 
-     * @return El nombre de la categoría.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Establece el nombre de la categoría.
-     * 
-     * @param name El nuevo nombre de la categoría.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Obtiene la ruta de la imagen de la categoría.
-     * 
-     * @return La ruta de la imagen.
-     */
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    /**
-     * Establece la ruta de la imagen de la categoría.
-     * 
-     * @param imagePath La nueva ruta de la imagen.
-     */
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    /**
-     * Obtiene la lista de subcategorías asociadas a esta categoría.
-     * 
-     * @return La lista de subcategorías.
-     */
-    public List<SubCategories> getSubCategories() {
-        return subCategories;
-    }
-
-    /**
-     * Establece la lista de subcategorías asociadas a esta categoría.
-     * 
-     * @param subCategories La nueva lista de subcategorías.
-     */
-    public void setSubCategories(List<SubCategories> subCategories) {
-        this.subCategories = subCategories;
-    }
 }
