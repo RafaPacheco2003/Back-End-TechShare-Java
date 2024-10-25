@@ -15,9 +15,10 @@ public class MovementsDTO {
     
     private int movementsId;
     private MoveType moveType;
-    private String comment;
+   
     private int quantity;
     private Date date;
+    private String comment;
 
     private int usuarioId;       // Referencia al ID del usuario relacionado
     private String usuarioName;
