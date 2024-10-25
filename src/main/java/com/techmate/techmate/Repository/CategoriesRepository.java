@@ -19,6 +19,15 @@ import com.techmate.techmate.Entity.Categories;
 public interface CategoriesRepository extends JpaRepository<Categories, Integer> {
 
     /**
+ * Busca una categoría por su nombre.
+ *
+ * @param name El nombre de la categoría.
+ * @return La categoría correspondiente al nombre proporcionado.
+ */
+Categories findByName(String name);
+
+
+    /**
      * Busca el nombre de la categoría a partir de su identificador único.
      *
      * @param categoryId El identificador único de la categoría.

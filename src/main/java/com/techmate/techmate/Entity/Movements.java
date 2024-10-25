@@ -32,9 +32,11 @@ public class Movements {
 
     private MoveType moveType;
 
-    private String comment;
+   
 
     private int quantity;
+
+    private String comment;
 
     @Temporal(TemporalType.DATE)
     private Date date;

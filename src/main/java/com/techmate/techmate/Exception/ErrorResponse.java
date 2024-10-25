@@ -1,5 +1,7 @@
 package com.techmate.techmate.Exception;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 
 public class ErrorResponse {
@@ -9,6 +11,10 @@ public class ErrorResponse {
     public ErrorResponse(String message, HttpStatus status) {
         this.message = message;
         this.status = status;
+    }
+
+    public ErrorResponse(List<String> errorMessages) {
+        //TODO Auto-generated constructor stub
     }
 
     // Getters y setters

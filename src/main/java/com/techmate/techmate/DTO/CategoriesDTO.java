@@ -1,5 +1,8 @@
 package com.techmate.techmate.DTO;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * La clase {@code CategoriesDTO} es un objeto de transferencia de datos (DTO)
  * que representa una categoría. Se utiliza para encapsular los datos de la
@@ -16,7 +19,12 @@ package com.techmate.techmate.DTO;
 public class CategoriesDTO {
     
     private int categoryId;
+    
+    @NotBlank(message = "El nombre de la categoría no puede estar vacío.")
+    @Size(min = 3, max = 100, message = "El nombre de la categoría debe tener entre 3 y 100 caracteres.")
     private String name;
+    
+    
     private String imagePath;
 
     // Getters y Setters
