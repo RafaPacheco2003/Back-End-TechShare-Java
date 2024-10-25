@@ -67,4 +67,7 @@ public class Materials {
 
     @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movements> movements;
+
+    @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetailsBorrow> detailsBorrow; // Relación con los detalles de préstamo
 }

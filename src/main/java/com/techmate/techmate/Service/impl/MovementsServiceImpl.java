@@ -37,7 +37,7 @@ public class MovementsServiceImpl implements MovementsService {
     private Movements convertToEntity(MovementsDTO movementsDTO) {
         Movements movements = new Movements();
     
-        movements.setMovements_id(movementsDTO.getMovementsId());
+        movements.setMovementsId(movementsDTO.getMovementsId());
         // Asignar MoveType directamente desde el DTO
         movements.setMoveType(movementsDTO.getMoveType());
     
