@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.techmate.techmate.DTO.RoleDTO;
+import com.techmate.techmate.Entity.Materials;
 import com.techmate.techmate.Service.RoleService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -71,17 +72,7 @@ public class RoleController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable("id") Integer id) {
-        try {
-            roleService.deleteRole(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
-        }
-    }
+    
 
     @GetMapping("/all")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
@@ -92,4 +83,11 @@ public class RoleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
         }
     }
+    @DeleteMapping("/delete/{roleId}")
+    public ResponseEntity<String> cleanupRoleAssociations(@PathVariable int roleId) {
+        roleService.cleanupRoleAssociations(roleId);
+        return ResponseEntity.ok("Las asociaciones para el rol con ID " + roleId + " fueron eliminadas correctamente.");
+    }
+    
+
 }
