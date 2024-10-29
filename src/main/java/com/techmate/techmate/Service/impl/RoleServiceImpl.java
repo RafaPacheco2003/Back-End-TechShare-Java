@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import com.techmate.techmate.DTO.RoleDTO;
 import com.techmate.techmate.Entity.Materials;
 import com.techmate.techmate.Entity.Role;
+import com.techmate.techmate.Entity.RoleMaterials;
+import com.techmate.techmate.Entity.Usuario;
 import com.techmate.techmate.Entity.UsuarioRole;
 import com.techmate.techmate.Repository.MaterialsRepository;
+import com.techmate.techmate.Repository.RoleMaterialsRepository;
 import com.techmate.techmate.Repository.RoleRepository;
 import com.techmate.techmate.Repository.UsuarioRoleRepository;
 import com.techmate.techmate.Service.RoleService;
@@ -26,6 +29,8 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private MaterialsRepository materialsRepository;
 
+    @Autowired
+    RoleMaterialsRepository roleMaterialsRepository;
     @Autowired
     private RoleRepository roleRepository;
 
@@ -77,8 +82,6 @@ public class RoleServiceImpl implements RoleService {
         return convertToDTO(updatedRole);
     }
 
-
-
     @Override
     public List<RoleDTO> getAllRole() {
         return roleRepository.findAll().stream()
@@ -93,31 +96,41 @@ public class RoleServiceImpl implements RoleService {
 
         return rol != null ? rol.getNombre() : null;
     }
-
     @Override
     @Transactional
     public void cleanupRoleAssociations(int roleId) {
         // Verifica si el rol existe en la base de datos
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new IllegalArgumentException("Role no encontrado con id: " + roleId));
-
+    
+        // Obtener las asociaciones de RoleMaterials relacionadas con el rol
+        List<RoleMaterials> roleMaterialsList = roleMaterialsRepository.findByRole(role);
+    
+        // Desasociar materiales y eliminar las referencias al rol
+        for (RoleMaterials roleMaterials : roleMaterialsList) {
+            Materials material = roleMaterials.getMaterials();
+            material.getRoleMaterials().remove(roleMaterials); // Eliminar la relación en el Material
+            roleMaterials.setRole(null); // Eliminar la relación en RoleMaterials
+        }
+    
+        // Eliminar las asociaciones de RoleMaterials
+        roleMaterialsRepository.deleteAll(roleMaterialsList);
+    
         // Eliminar las asociaciones de usuarios en UsuarioRole
         List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByRole(role);
-        usuarioRoleRepository.deleteAll(usuarioRoles);
-
-        // Eliminar las asociaciones de materiales en Materials
-        List<Materials> materials = materialsRepository.findByRole(role);
-        for (Materials material : materials) {
-            material.setRole(null); // Desasociar el rol
+        for (UsuarioRole usuarioRole : usuarioRoles) {
+            Usuario usuario = usuarioRole.getUsuario();
+            usuario.getRoles().remove(role); // Desasociar el rol del usuario
         }
-        materialsRepository.saveAll(materials);
-
-        // Eliminar todos los materiales que tienen el rol desasociado (role == null)
-        List<Materials> materialsWithoutRole = materialsRepository.findByRoleIsNull();
-        materialsRepository.deleteAll(materialsWithoutRole);
-
+    
+        // Eliminar las relaciones en la tabla UsuarioRole
+        usuarioRoleRepository.deleteAll(usuarioRoles);
+    
         // Finalmente, eliminar el rol
         roleRepository.delete(role);
     }
+    
+    
+
 
 }

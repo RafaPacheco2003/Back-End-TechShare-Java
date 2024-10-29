@@ -25,5 +25,9 @@ public class Role {
     private Set<Usuario> usuarios = new HashSet<>();
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Materials> materials;
+    private List<RoleMaterials> roleMaterials;
+
+
+    // Método para agregar materiales a un rol
+   
 }
