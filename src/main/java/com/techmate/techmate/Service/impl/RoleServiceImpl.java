@@ -55,6 +55,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO createRole(RoleDTO roleDTO) {
 
+        if(roleRepository.findByName(roleDTO.getName()) != null){
+            throw new IllegalArgumentException("Ya existe una role con el nombre: " + roleDTO.getName());
+        }
+
         Role rol = convertToEntity(roleDTO);
         rol = roleRepository.save(rol);
         return convertToDTO(rol);
