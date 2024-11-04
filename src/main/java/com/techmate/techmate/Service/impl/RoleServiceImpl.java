@@ -55,9 +55,12 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO createRole(RoleDTO roleDTO) {
 
-        if(roleRepository.findByName(roleDTO.getName()) != null){
-            throw new IllegalArgumentException("Ya existe una role con el nombre: " + roleDTO.getName());
-        }
+         // Verificar si ya existe un rol con el mismo nombre
+         String nombre = roleDTO.getName();
+         if (roleRepository.findByNombre(nombre).isPresent()) {
+             throw new RuntimeException("Ya existe un rol con el nombre: " + nombre);
+         }
+        
 
         Role rol = convertToEntity(roleDTO);
         rol = roleRepository.save(rol);
@@ -77,6 +80,11 @@ public class RoleServiceImpl implements RoleService {
         Role rol = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found with ID: " + roleId));
 
+                 // Verificar si ya existe un rol con el mismo nombre
+        String nombre = roleDTO.getName();
+        if (roleRepository.findByNombre(nombre).isPresent()) {
+            throw new RuntimeException("Ya existe un rol con el nombre: " + nombre);
+        }
         // Actualizar los valores del rol existente con los del DTO
         rol.setNombre(roleDTO.getName());
 

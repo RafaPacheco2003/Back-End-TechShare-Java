@@ -19,6 +19,7 @@ public class Role {
 
     @NotBlank(message = "El nombre no puede estar en blanco")
     @Size(max = 50, message = "El nombre no puede tener más de 50 caracteres")
+    @Column(unique = true, nullable = false)
     private String nombre;
 
     @ManyToMany(mappedBy = "roles")
