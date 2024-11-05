@@ -72,6 +72,7 @@ public class WebSecurityConfig {
         config.addAllowedOrigin("http://localhost:3000"); // Permitir solicitudes desde el frontend
         config.addAllowedHeader("*"); // Permitir cualquier header
         config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
+        config.addExposedHeader("Authorization");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
