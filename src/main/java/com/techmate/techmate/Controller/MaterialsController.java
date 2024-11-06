@@ -2,7 +2,10 @@ package com.techmate.techmate.Controller;
 
 import com.techmate.techmate.DTO.MaterialsDTO;
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
+import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,12 +22,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/materials")
 public class MaterialsController {
 
     @Autowired
     private MaterialsService materialsService;
+
+    @Autowired
+private EmailService emailService;
+
 
     @Value("${storage.location}")
     private String storageLocation; // Directorio para almacenar imágenes
@@ -44,22 +52,32 @@ public class MaterialsController {
             @RequestParam("subCategoryId") int subCategoryId,
             @RequestParam("roleId") int roleId) {
 
-        // Guardamos la imagen usando la estrategia de almacenamiento
-        String imagePath = imageStorageStrategy.saveImage(image);
+        try {
+            // Crear un nuevo DTO de Materials
+            MaterialsDTO materialsDTO = new MaterialsDTO();
+            materialsDTO.setImagePath(image.getOriginalFilename()); // Obtener el nombre original de la imagen
+            materialsDTO.setName(name);
+            materialsDTO.setDescription(description);
+            materialsDTO.setPrice(price);
+            materialsDTO.setSubCategoryId(subCategoryId);
+            materialsDTO.setRolId(roleId);
 
-        // Crear un nuevo DTO de Materials
-        MaterialsDTO materialsDTO = new MaterialsDTO();
-        materialsDTO.setImagePath(imagePath);
-        materialsDTO.setName(name);
-        materialsDTO.setDescription(description);
-        materialsDTO.setPrice(price);
-        materialsDTO.setSubCategoryId(subCategoryId);
-        materialsDTO.setRolId(roleId);
+            // Llamar al servicio para guardar el material
+            MaterialsDTO createdMaterial = materialsService.createMaterials(materialsDTO, image);
 
-        // Llamar al servicio para guardar el material
-        MaterialsDTO createdMaterial = materialsService.createMaterials(materialsDTO);
+            
 
-        return new ResponseEntity<>(createdMaterial, HttpStatus.CREATED);
+            return new ResponseEntity<>(createdMaterial, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // Manejar errores de validación
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            // Manejar errores de ejecución, como problemas al guardar el material
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            // Manejar cualquier otro error general
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
@@ -85,52 +103,71 @@ public class MaterialsController {
 
         MaterialsDTO materialsDTO = new MaterialsDTO();
 
-        if (name != null) materialsDTO.setName(name);
-        if (description != null) materialsDTO.setDescription(description);
-        if (price != null && price > 0) materialsDTO.setPrice(price);
-        if (subCategoryId != null && subCategoryId > 0) materialsDTO.setSubCategoryId(subCategoryId);
-        if (roleId != null && roleId > 0) materialsDTO.setRolId(roleId);
+        materialsDTO.setName(name);
+        materialsDTO.setDescription(description);
+        materialsDTO.setPrice(price);
+        materialsDTO.setSubCategoryId(subCategoryId);
+        materialsDTO.setRolId(roleId);
 
-        if (image != null && !image.isEmpty()) {
-            String imagePath = imageStorageStrategy.saveImage(image);
-            materialsDTO.setImagePath(imagePath);
+        MaterialsDTO updatedMaterial = materialsService.updateMaterials(id, materialsDTO, image);
+
+        if (updatedMaterial == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        MaterialsDTO updatedMaterial = materialsService.updateMaterials(id, materialsDTO);
-
-        if (updatedMaterial.getImagePath() != null) {
-            updatedMaterial.setImagePath(serverUrl + "/admin/materials/images/" + updatedMaterial.getImagePath());
-        }
+        updatedMaterial.setImagePath(serverUrl + "/admin/materials/images/" + updatedMaterial.getImagePath());
 
         return new ResponseEntity<>(updatedMaterial, HttpStatus.OK);
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<MaterialsDTO>> getAllMaterials() {
-        List<MaterialsDTO> materialsDTO = materialsService.getAllMaterials();
+        try {
+            List<MaterialsDTO> materialsDTO = materialsService.getAllMaterials();
 
-        if (materialsDTO.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        materialsDTO.forEach(material -> {
-            if (material.getImagePath() != null) {
-                material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
+            if (materialsDTO.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-        });
 
-        return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+            materialsDTO.forEach(material -> {
+                if (material.getImagePath() != null) {
+                    material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
+                }
+            });
+
+            return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener materiales
+        }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteMaterials(@PathVariable("id") Integer id) {
         try {
+            MaterialsDTO material = materialsService.getMaterialsById(id); // Verifica si el material existe
+
+            if (material == null) {
+                return new ResponseEntity<>("Material no encontrado", HttpStatus.NOT_FOUND);
+            }
+
             materialsService.deleteMaterials(id);
             return new ResponseEntity<>("Material eliminado con éxito", HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // Error al eliminar el
+                                                                                           // material
         }
     }
+
+    @PostMapping("/test-email")
+public ResponseEntity<String> testEmail() {
+    try {
+        emailService.sendEmail("rodrigorafaelchipacheco@gmail.com", "Test", "Este es un mensaje de prueba.");
+        return new ResponseEntity<>("Correo enviado", HttpStatus.OK);
+    } catch (Exception e) {
+        return new ResponseEntity<>("Error enviando correo: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+
 
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
@@ -147,4 +184,6 @@ public class MaterialsController {
                 .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(imagePath))
                 .body(imageBytes);
     }
+
+     
 }

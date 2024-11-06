@@ -1,6 +1,8 @@
 package com.techmate.techmate.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.HashSet;
@@ -15,6 +17,8 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer roleId;
 
+    @NotBlank(message = "El nombre no puede estar en blanco")
+    @Size(max = 50, message = "El nombre no puede tener más de 50 caracteres")
     private String nombre;
 
     @ManyToMany(mappedBy = "roles")

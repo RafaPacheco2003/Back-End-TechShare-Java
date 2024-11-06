@@ -38,6 +38,7 @@ public class TokenUtils {
         extra.put("id", id);   // Aquí se añade el id del usuario
         extra.put("roles", roles); // Aquí se añaden los roles del usuario
         extra.put("idRoles", idRoles);
+        System.out.println("Creando token para ID: " + id); // Verifica el ID antes de crear el token
 
         SecretKey secretKey = Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
 
@@ -87,4 +88,71 @@ public class TokenUtils {
         }
         return null;
     }
+    
+
+    public static Integer getUserIdFromToken(String token) {
+        Claims claims = decodeToken(token); // Decodificar el token
+        if (claims != null) {
+            System.out.println("Claims: " + claims); // Imprime los reclamos
+            
+            // Recuperar el id de los claims
+            Object idClaim = claims.get("id");
+            System.out.println("ID claim desde claims: " + idClaim); // Imprime el claim del ID
+    
+            // Si el idClaim no es nulo, intenta convertirlo a Integer
+            if (idClaim != null) {
+                Integer userId;
+                try {
+                    userId = (Integer) idClaim; // Intenta obtener el ID como Integer
+                } catch (ClassCastException e) {
+                    // Si el id está almacenado como String, conviértelo a Integer
+                    userId = Integer.parseInt(idClaim.toString());
+                }
+                System.out.println("ID de usuario extraído del token: " + userId); // Imprime el ID del usuario
+                return userId; // Retorna el ID del usuario
+            }
+        }
+        throw new RuntimeException("Token no válido o ID no encontrado");
+    }
+    
+    
+    
+    
+    /*public static Integer getUserIdFromToken(String token) {
+        Claims claims = decodeToken(token);
+        if (claims != null) {
+            System.out.println("Claims: " + claims); // Imprime los reclamos
+            Integer userId;
+            try {
+                userId = claims.get("id", Integer.class); // Intenta obtener el ID como Integer
+            } catch (ClassCastException e) {
+                // Si el id está almacenado como String, conviértelo a Integer
+                userId = Integer.parseInt(claims.get("id").toString());
+            }
+            System.out.println("ID de usuario extraído del token: " + userId); // Imprime el ID del usuario
+            return userId;
+        }
+        throw new RuntimeException("Token no válido");
+    }*/
+    
+    
+    
+
+    public static Claims decodeToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            System.out.println("Claims decodificados: " + claims); // Verifica los claims decodificados
+            return claims;
+        } catch (JwtException e) {
+            // Manejo de excepción si el token no es válido
+            System.out.println("Error al decodificar el token: " + e.getMessage());
+            return null;
+        }
+    }
+    
 }

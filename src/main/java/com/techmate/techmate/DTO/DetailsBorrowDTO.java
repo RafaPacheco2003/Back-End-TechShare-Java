@@ -1,5 +1,4 @@
 package com.techmate.techmate.DTO;
-
 import lombok.Data;
 
 @Data
