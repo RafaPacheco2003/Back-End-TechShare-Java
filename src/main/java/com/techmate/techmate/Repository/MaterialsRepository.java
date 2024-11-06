@@ -14,22 +14,14 @@ import java.util.*;
 
 @Repository
 public interface MaterialsRepository extends JpaRepository<Materials, Integer> {
-    
+    //Sirve para buscar material por name
     Materials findByName(String name);
-    
-    
-    // Método para encontrar materiales por nombre del rol
-    List<Materials> findByRoleNombre(String roleName);
 
+    List<Materials> findAllByOrderByPriceAsc(); // Para obtener materiales ordenados por precio ascendente
+    List<Materials> findAllByOrderByPriceDesc(); // Para obtener materiales ordenados por precio descendente
+    
    
 
-    List<Materials> findByRoleNombreIn(List<String> roleNames);
-
-
-
-    //Para buscar relacion
-    List<Materials> findByRole(Role role);
-    List<Materials> findByRoleIsNull(); // Método para encontrar materiales sin rol
 
     
 

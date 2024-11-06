@@ -60,9 +60,8 @@ public class Materials {
     @JoinColumn(name = "subCategory_id")
     private SubCategories subCategory;
 
-    @ManyToOne
-    @JoinColumn(name = "rol_id")
-    private Role role;
+    @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoleMaterials> roleMaterials;
 
 
     @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)

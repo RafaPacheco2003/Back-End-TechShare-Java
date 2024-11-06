@@ -19,11 +19,16 @@ public class Role {
 
     @NotBlank(message = "El nombre no puede estar en blanco")
     @Size(max = 50, message = "El nombre no puede tener más de 50 caracteres")
+    @Column(unique = true, nullable = false)
     private String nombre;
 
     @ManyToMany(mappedBy = "roles")
     private Set<Usuario> usuarios = new HashSet<>();
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Materials> materials;
+    private List<RoleMaterials> roleMaterials;
+
+
+    // Método para agregar materiales a un rol
+   
 }
