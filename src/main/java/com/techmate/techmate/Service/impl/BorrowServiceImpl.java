@@ -1,11 +1,11 @@
 package com.techmate.techmate.Service.impl;
 
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import com.techmate.techmate.DTO.BorrowDTO;
 import com.techmate.techmate.DTO.DetailsBorrowDTO;
 import com.techmate.techmate.Entity.Borrow;
@@ -17,10 +17,12 @@ import com.techmate.techmate.Repository.BorrowRepository;
 import com.techmate.techmate.Repository.DetailsBorrowRepository;
 import com.techmate.techmate.Repository.MaterialsRepository;
 import com.techmate.techmate.Repository.UsuarioRepository;
+import com.techmate.techmate.Security.TokenUtils;
 import com.techmate.techmate.Service.BorrowService;
+import com.techmate.techmate.Service.User.BorrowUserService;
 
 @Service
-public class BorrowServiceImp implements BorrowService {
+public class BorrowServiceImpl implements BorrowService {
 
     @Autowired
     private BorrowRepository borrowRepository;
@@ -44,9 +46,10 @@ public class BorrowServiceImp implements BorrowService {
                 .map(detailDTO -> convertDetailsBorrowToEntity(detailDTO, borrow))
                 .collect(Collectors.toList()));
 
-        Usuario user = usuarioRepository.findById(borrowDTO.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getUsuarioId()));
-        borrow.setUsuario(user);
+        Usuario adminId = usuarioRepository.findById(borrowDTO.getAdminId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
+        borrow.setUsuario(adminId);
+        System.out.println("Id de admin " + adminId);
 
         return borrow;
     }
@@ -62,7 +65,9 @@ public class BorrowServiceImp implements BorrowService {
                 .map(this::convertDetailsBorrowToDTO)
                 .collect(Collectors.toList()));
 
-        dto.setUsuarioId(borrow.getUsuario().getId());
+        dto.setAdminId(borrow.getAdmin().getId());
+        // Obtener el nombre de usuario
+        dto.setAdminName(borrow.getAdmin().getUser_name()); // Asume que el campo se llama 'nombre'
 
         return dto;
     }
@@ -111,71 +116,7 @@ public class BorrowServiceImp implements BorrowService {
 
     @Override
     @Transactional
-    public BorrowDTO createBorrowDTO(BorrowDTO borrowDTO) throws Exception {
-        // Primero convierte el DTO de préstamo (BorrowDTO) en una entidad (Borrow) sin
-        // detalles todavía
-        Borrow borrow = convertToEntity(borrowDTO);
-
-        // Inicializa el monto total del préstamo en 0 ya que aún no se han agregado los
-        // detalles
-        borrow.setAmount(0);
-
-        // Guarda el objeto Borrow en la base de datos, generando así el borrow_id (es
-        // necesario persistir primero el Borrow
-        // para poder relacionar los detalles luego)
-        borrow = borrowRepository.save(borrow);
-
-        // Inicializa una variable para calcular el monto total del préstamo (sumará el
-        // total de los detalles)
-        double totalAmount = 0;
-
-        // Iterar sobre la lista de detalles (DetailsBorrowDTO) contenida en el
-        // BorrowDTO
-        for (DetailsBorrowDTO detailDTO : borrowDTO.getDetails()) {
-            // Buscar el material asociado a este detalle mediante el ID del material
-            Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
-                    .orElseThrow(() -> new Exception("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
-
-            // Verificar si el stock del material es suficiente para la cantidad que se
-            // quiere prestar
-            if (material.getStock() < detailDTO.getQuantity()) {
-                throw new Exception("Stock insuficiente para el material con ID: " + material.getMaterialsId());
-            }
-
-            // Convertir el DetailsBorrowDTO en la entidad DetailsBorrow, asociándola al
-            // borrow ya creado
-            DetailsBorrow detailsBorrow = convertDetailsBorrowToEntity(detailDTO, borrow);
-
-            // Sumar el precio total de este detalle (cantidad x precio unitario) al monto
-            // total del borrow
-            totalAmount += detailsBorrow.getTotalPrice();
-
-            // Actualizar el stock del material restando la cantidad solicitada en este
-            // detalle
-            // ----material.setStock(material.getStock() - detailDTO.getQuantity());
-
-            // Guardar el material actualizado con el nuevo stock en la base de datos
-            materialsRepository.save(material);
-
-            // Guardar el detalle del préstamo en la base de datos, ahora asociado al borrow
-            // ya persistido
-            detailsBorrowRepository.save(detailsBorrow);
-        }
-
-        // Una vez procesados todos los detalles, se actualiza el monto total del
-        // préstamo con la suma de todos los detalles
-        borrow.setAmount(totalAmount);
-
-        // Guardar el préstamo actualizado (con el monto total) en la base de datos
-        borrow = borrowRepository.save(borrow);
-
-        // Convertir el préstamo actualizado (Borrow) en un DTO (BorrowDTO) y devolverlo
-        return convertToDTO(borrow);
-    }
-
-    @Override
-    @Transactional
-    public void updateBorrowStatus(Integer borrowId, Status newStatus) throws Exception {
+    public void updateBorrowStatus(Integer borrowId, Status newStatus, Integer adminId) throws Exception {
         // Buscar el préstamo por ID
         Borrow borrow = borrowRepository.findById(borrowId)
                 .orElseThrow(() -> new Exception("Préstamo no encontrado con ID: " + borrowId));
@@ -185,51 +126,98 @@ public class BorrowServiceImp implements BorrowService {
             throw new Exception("Solo se puede modificar el estado de un préstamo en estado PROCESS o BORROWED");
         }
 
+        // Establecer el adminId en el préstamo
+        Usuario admin = usuarioRepository.findById(adminId)
+                .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + adminId));
+        borrow.setAdmin(admin); // Asignar el admin al préstamo
+
         switch (newStatus) {
             case REJECETD:
-                // Eliminar el préstamo si el estado es REJECTED
-                borrowRepository.delete(borrow);
+                borrow.setStatus(Status.REJECETD);
                 break;
 
             case BORROWED:
-                // Si el estado actual es PROCESS, procesar el préstamo
                 if (borrow.getStatus() == Status.PROCCES) {
-                    // Restar el borrowed_stock de los materiales asociados
                     for (DetailsBorrow detail : borrow.getDetails()) {
                         Materials material = detail.getMaterials();
-                        if (material.getStock() < detail.getQuantity()) {
+                        if (material.getBorrowable_stock() < detail.getQuantity()) {
                             throw new Exception(
                                     "Stock insuficiente para el material con ID: " + material.getMaterialsId());
                         }
-                        material.setBorrowable_stock(material.getBorrowable_stock() - detail.getQuantity()); // Decrementar
-                        materialsRepository.save(material); // Guardar el material actualizado
+                        material.setBorrowable_stock(material.getBorrowable_stock() - detail.getQuantity());
+                        materialsRepository.save(material);
                     }
                 }
-                // Actualizar el estado del préstamo a BORROWED
                 borrow.setStatus(Status.BORROWED);
-                borrowRepository.save(borrow); // Guardar el préstamo actualizado
                 break;
 
             case RETURNED:
-                // Verificar que el estado actual sea BORROWED antes de actualizar
                 if (borrow.getStatus() != Status.BORROWED) {
                     throw new Exception("El préstamo debe estar en estado BORROWED para ser devuelto");
                 }
-
-                // Sumar el borrowed_stock de los materiales asociados
                 for (DetailsBorrow detail : borrow.getDetails()) {
                     Materials material = detail.getMaterials();
-                    material.setBorrowable_stock(material.getBorrowable_stock() + detail.getQuantity()); // Aumentar
-                    materialsRepository.save(material); // Guardar el material actualizado
+                    material.setBorrowable_stock(material.getBorrowable_stock() + detail.getQuantity());
+                    materialsRepository.save(material);
                 }
-                // Actualizar el estado del préstamo a RETURNED
                 borrow.setStatus(Status.RETURNED);
-                borrowRepository.save(borrow); // Guardar el préstamo actualizado
                 break;
 
             default:
                 throw new Exception("Estado no válido para modificar el préstamo");
         }
+
+        borrowRepository.save(borrow); // Guardar el préstamo actualizado
+    }
+
+    @Override
+    public List<BorrowDTO> getAllBorrowDTO() {
+        return borrowRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BorrowDTO> getBorrowByStatus(String status) {
+        Status statusBorrow;
+
+        switch (status.toUpperCase()) {
+            case "PROCCES":
+                statusBorrow = Status.PROCCES;
+                break;
+            case "REJECETD":
+                statusBorrow = Status.REJECETD;
+                break;
+            case "BORROWED":
+                statusBorrow = Status.BORROWED;
+                break;
+            case "RETURNED":
+                statusBorrow = Status.RETURNED;
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de estado inválido: " + status);
+        }
+
+        // Cambiar a List<Borrow> y luego mapear a List<BorrowDTO>
+        return borrowRepository.findByStatus(statusBorrow).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BorrowDTO> getBorrowByDate(Date startDate, Date endDate) {
+        //
+        return borrowRepository.findByDateBetween(startDate, endDate).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+   
+
+    @Override
+    public Integer getUserIdFromToken(String token) {
+        return TokenUtils.getUserIdFromToken(token);
     }
 
 }

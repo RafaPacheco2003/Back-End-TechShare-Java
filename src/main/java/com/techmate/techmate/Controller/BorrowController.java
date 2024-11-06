@@ -2,70 +2,110 @@ package com.techmate.techmate.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.DTO.DetailsBorrowDTO;
-import com.techmate.techmate.Service.BorrowService;
 import com.techmate.techmate.Entity.Status;
+import com.techmate.techmate.Exception.ResourceNotFoundException;
+import com.techmate.techmate.Service.BorrowService;
 
-import java.util.Date;
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
-@RequestMapping("/admin/borrow")
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("admin/borrow")
 public class BorrowController {
 
     @Autowired
     private BorrowService borrowService;
 
-    // Crear un nuevo préstamo
-    @PostMapping("/create")
-    public BorrowDTO createBorrow(
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
-            @RequestParam("details") String detailsJson,
-            @RequestParam("usuario_id") Integer usuario_id // Pasamos los detalles como un String JSON
-    ) throws Exception {
+    // Actualizar el estado de un préstamo
+    @PutMapping("/update/{borrowId}")
+    public ResponseEntity<?> updateBorrowStatus(
+            @PathVariable Integer borrowId,
+            @RequestParam("status") Status newStatus,
+            HttpServletRequest request) {
+
+                BorrowDTO borrowDTO = new BorrowDTO();
+                
+
+                String token= request.getHeader("Authorization");
+                Integer adminId = null;
+
+                if (token != null && token.startsWith("Bearer ")) {
+                    token = token.substring(7);
         
-        BorrowDTO borrowDTO = new BorrowDTO();
-        borrowDTO.setDate(date);
+                    try {
+        
+                        adminId = borrowService.getUserIdFromToken(token);
+                        System.out.println("Id de usuario extraido del token:  " + adminId);
+                        
+        
+                    } catch (RuntimeException e) {
+                        // TODO: handle exception
+                        System.out.println("Error al extraer el ID del token: " + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                    }
+                }
 
-        borrowDTO.setUsuarioId(usuario_id);
 
-        // Convertir el JSON de detalles en una lista de objetos DetailsBorrowDTO
-        List<DetailsBorrowDTO> details = convertJsonToDetailsList(detailsJson);
-        borrowDTO.setDetails(details);
-       
-
-        return borrowService.createBorrowDTO(borrowDTO);
-    }
-
-    // Método para convertir el JSON en una lista de detalles
-    private List<DetailsBorrowDTO> convertJsonToDetailsList(String detailsJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            // Conversion de JSON a lista de DetailsBorrowDTO
-            return objectMapper.readValue(detailsJson, new TypeReference<List<DetailsBorrowDTO>>() {});
+            borrowService.updateBorrowStatus(borrowId, newStatus, adminId);
+            return ResponseEntity.ok("Borrow status updated successfully.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Borrow record not found.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid status value.");
         } catch (Exception e) {
-            throw new RuntimeException("Error al convertir el JSON a la lista de detalles.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating the status.");
         }
     }
 
-    // Actualizar el estado de un préstamo
-    @PutMapping("/update/{borrowId}")
-    public void updateBorrowStatus(
-            @PathVariable Integer borrowId,
-            @RequestParam("status") Status newStatus) throws Exception {
-        borrowService.updateBorrowStatus(borrowId, newStatus);
+    @GetMapping("/all")
+    public ResponseEntity<List<BorrowDTO>> getAllBorrow() {
+        try {
 
+            List<BorrowDTO> borrowsList = borrowService.getAllBorrowDTO();
 
+            if (borrowsList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
 
-        /*
-         * Realizar analisis de borrow, con filktrado de fecha de star fecha end, 
-         * status, y hacer busquedas de id
-         */
+            return ResponseEntity.ok(borrowsList);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<BorrowDTO>> getBorrowByStatus(
+            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy- MM-dd") Date startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+
+        try {
+
+            List<BorrowDTO> borrowList= borrowService.getBorrowByDate(startDate, endDate);
+
+            if (borrowList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

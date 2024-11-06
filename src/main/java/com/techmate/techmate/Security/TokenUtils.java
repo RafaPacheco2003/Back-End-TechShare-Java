@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.jsonwebtoken.Claims;
@@ -13,6 +14,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -116,25 +118,30 @@ public class TokenUtils {
     }
     
     
-    
-    
-    /*public static Integer getUserIdFromToken(String token) {
-        Claims claims = decodeToken(token);
+
+    public static Optional<List<Integer>> getRolesFromToken(String token) {
+        Claims claims = decodeToken(token); // Decodificar el token
         if (claims != null) {
             System.out.println("Claims: " + claims); // Imprime los reclamos
-            Integer userId;
-            try {
-                userId = claims.get("id", Integer.class); // Intenta obtener el ID como Integer
-            } catch (ClassCastException e) {
-                // Si el id está almacenado como String, conviértelo a Integer
-                userId = Integer.parseInt(claims.get("id").toString());
+            
+            // Recuperar los roles de los claims
+            Object rolesClaim = claims.get("idRoles");
+            System.out.println("Roles claim desde claims: " + rolesClaim); // Imprime el claim de roles
+
+            // Si rolesClaim no es nulo, intenta convertirlo a una lista de enteros
+            if (rolesClaim != null) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<Integer> roles = (List<Integer>) rolesClaim; // Cast a List<Integer>
+                    return Optional.of(roles); // Retorna la lista de roles
+                } catch (ClassCastException e) {
+                    // Manejo de error si no se puede convertir
+                    System.out.println("Error al convertir roles: " + e.getMessage());
+                }
             }
-            System.out.println("ID de usuario extraído del token: " + userId); // Imprime el ID del usuario
-            return userId;
         }
-        throw new RuntimeException("Token no válido");
-    }*/
-    
+        return Optional.empty(); // Devuelve un Optional vacío si no se encuentra
+    }
     
     
 
@@ -146,7 +153,7 @@ public class TokenUtils {
                     .parseClaimsJws(token)
                     .getBody();
             
-            System.out.println("Claims decodificados: " + claims); // Verifica los claims decodificados
+            System.out.println("Claims decodificados en tokensUtils: " + claims); // Verifica los claims decodificados
             return claims;
         } catch (JwtException e) {
             // Manejo de excepción si el token no es válido

@@ -17,6 +17,8 @@ public interface MaterialsService {
     MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile iMultipartFile);
     void deleteMaterials(int materialsId);
     List<MaterialsDTO> getAllMaterials();
+    List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending);
+
     
    String getMaterialsNameById(int materialId);
 

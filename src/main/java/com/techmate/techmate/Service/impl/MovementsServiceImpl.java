@@ -1,11 +1,13 @@
 package com.techmate.techmate.Service.impl;
 
-import java.util.Date;
-import java.util.List;
+
 import java.util.stream.Collectors;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.*;
+
 
 import com.techmate.techmate.DTO.MovementsDTO;
 import com.techmate.techmate.Entity.Materials;
@@ -49,7 +51,6 @@ public class MovementsServiceImpl implements MovementsService {
         // Asignar MoveType directamente desde el DTO
         movements.setMoveType(movementsDTO.getMoveType());
         String comment = movementsDTO.getComment();
-        System.out.println(comment + "A la hora de convertir a a entity");
 
         movements.setQuantity(movementsDTO.getQuantity());
         movements.setDate(movementsDTO.getDate());
@@ -101,7 +102,6 @@ public class MovementsServiceImpl implements MovementsService {
         }
 
         String comment = movementsDTO.getComment() + "sevice create";
-        System.out.println(comment);
         movementsDTO.setComment(comment);
         // Asignar la fecha actual al movimientFo
         movementsDTO.setDate(new Date());
@@ -199,6 +199,18 @@ public class MovementsServiceImpl implements MovementsService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteMovementById(Integer movementsId) {
+        if (movementsRepository.existsById(movementsId)) {
+            
+            movementsRepository.deleteById(movementsId);
+        } else {
+            throw new EntityNotFoundException("Movement not found with id: " + movementsId);
+        }
+    }
+
+
+
     public void decodeToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
 
@@ -209,12 +221,12 @@ public class MovementsServiceImpl implements MovementsService {
             if (claims != null) {
                 String email = claims.getSubject(); // Obtener el email del token
                 Integer userId = (Integer) claims.get("id"); // Obtener el ID del usuario
-                List<String> roles = (List<String>) claims.get("roles"); // Obtener roles del token
+                
 
                 // Aquí puedes utilizar la información decodificada
                 System.out.println("Email: " + email);
                 System.out.println("User ID: " + userId);
-                System.out.println("Roles: " + roles);
+                
             } else {
                 throw new RuntimeException("Token no válido");
             }
@@ -222,15 +234,10 @@ public class MovementsServiceImpl implements MovementsService {
             throw new RuntimeException("No se proporcionó un token");
         }
     }
-
+    
     @Override
-    public void deleteMovementById(Integer movementsId) {
-        if (movementsRepository.existsById(movementsId)) {
-            
-            movementsRepository.deleteById(movementsId);
-        } else {
-            throw new EntityNotFoundException("Movement not found with id: " + movementsId);
-        }
+    public Optional<List<Integer>> getRolesFromToken(String token) {
+        return TokenUtils.getRolesFromToken(token);
     }
 
     @Override

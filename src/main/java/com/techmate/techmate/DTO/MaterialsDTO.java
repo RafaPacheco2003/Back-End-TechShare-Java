@@ -1,5 +1,7 @@
 package com.techmate.techmate.DTO;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,8 +22,9 @@ public class MaterialsDTO {
     private int subCategoryId;
     private String subCategoryName;
 
-    private int rolId;
-    private String rolName;
+       // Nueva lista para roles
+       private List<Integer> roleIds; 
+       private List<String> roleNames;
 
 
 
