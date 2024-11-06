@@ -47,7 +47,7 @@ public class BorrowController {
                     try {
         
                         adminId = borrowService.getUserIdFromToken(token);
-                        System.out.println("Id de usuario extraido del token: " + adminId);
+                        System.out.println("Id de usuario extraido del token:  " + adminId);
                         
         
                     } catch (RuntimeException e) {
