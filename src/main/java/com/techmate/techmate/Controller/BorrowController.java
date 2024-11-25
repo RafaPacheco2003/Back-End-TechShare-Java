@@ -54,7 +54,7 @@ public class BorrowController {
                         // TODO: handle exception
                         System.out.println("Error al extraer el ID del token: " + e.getMessage());
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                    }
+                    }  
                 }
 
 
@@ -87,25 +87,8 @@ public class BorrowController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<BorrowDTO>> getBorrowByStatus(
-            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy- MM-dd") Date startDate,
-            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
-
-        try {
-
-            List<BorrowDTO> borrowList= borrowService.getBorrowByDate(startDate, endDate);
-
-            if (borrowList.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 
 }

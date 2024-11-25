@@ -85,6 +85,8 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toList());
     }
 
+
+
     /**
      * Obtiene la contraseña del usuario.
      *

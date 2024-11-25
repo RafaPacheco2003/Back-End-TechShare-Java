@@ -1,14 +1,11 @@
 package com.techmate.techmate.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import com.techmate.techmate.DTO.MaterialsDTO;
-import com.techmate.techmate.Entity.Materials;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 public interface MaterialsService {
 

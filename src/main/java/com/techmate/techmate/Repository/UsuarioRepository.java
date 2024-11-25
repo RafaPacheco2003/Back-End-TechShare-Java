@@ -10,6 +10,8 @@ import com.techmate.techmate.Entity.Usuario;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer>{
     
+
+    
     Optional <Usuario> getUsuarioUsernamById(int usernameId);
     Optional<Usuario> findOneByEmail(String email);
 

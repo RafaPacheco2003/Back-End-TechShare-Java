@@ -115,42 +115,40 @@ public class CategoriesServiceImp implements CategoriesService {
         Categories categories = categoriesRepository.findById(categoryID)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
 
-        // Verificar si ya existe otra categoría con el mismo nombre
+        // Verificar si ya existe otra categoría con el mismo nombre y el nombre ha
+        // cambiado
         if (categoriesDTO.getName() != null &&
+                !categoriesDTO.getName().equals(categories.getName()) &&
                 categoriesRepository.findByName(categoriesDTO.getName()) != null) {
             throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + categoriesDTO.getName());
         }
 
-        if (categories != null) {
-            // Si hay un nuevo nombre, actualizarlo
-            
-                categories.setName(categoriesDTO.getName());
-            
-
-            // Si se proporciona una imagen, validar y guardar la nueva imagen
-            if (image != null && !image.isEmpty()) {
-                String oldImagePath = categories.getImagePath();
-
-                // Eliminar la imagen antigua si existe
-                if (oldImagePath != null && !oldImagePath.isEmpty()) {
-                    imageStorageStrategy.deleteImage(oldImagePath);
-                }
-
-                // Validar la nueva imagen usando la estrategia de validación
-                String newImagePath = image.getOriginalFilename();
-                imageValidationStrategy.validate(newImagePath); // Validar extensión o formato
-
-                // Guardar la nueva imagen y establecer su ruta en la entidad
-                newImagePath = imageStorageStrategy.saveImage(image);
-                categories.setImagePath(newImagePath); // Actualizar la ruta de la imagen
-            }
-
-            // Guardar la entidad actualizada en la base de datos
-            categories = categoriesRepository.save(categories);
-            return convertToDTO(categories); // Devolver la categoría actualizada
+        // Actualizar el nombre solo si es diferente y no es nulo
+        if (categoriesDTO.getName() != null && !categoriesDTO.getName().isEmpty()) {
+            categories.setName(categoriesDTO.getName());
         }
 
-        return null;
+        // Si se proporciona una imagen, validar y guardar la nueva imagen
+        if (image != null && !image.isEmpty()) {
+            String oldImagePath = categories.getImagePath();
+
+            // Eliminar la imagen antigua si existe
+            if (oldImagePath != null && !oldImagePath.isEmpty()) {
+                imageStorageStrategy.deleteImage(oldImagePath);
+            }
+
+            // Validar la nueva imagen usando la estrategia de validación
+            String newImagePath = image.getOriginalFilename();
+            imageValidationStrategy.validate(newImagePath); // Validar extensión o formato
+
+            // Guardar la nueva imagen y establecer su ruta en la entidad
+            newImagePath = imageStorageStrategy.saveImage(image);
+            categories.setImagePath(newImagePath); // Actualizar la ruta de la imagen
+        }
+
+        // Guardar la entidad actualizada en la base de datos
+        categories = categoriesRepository.save(categories);
+        return convertToDTO(categories); // Devolver la categoría actualizada
     }
 
     @Override

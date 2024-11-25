@@ -28,234 +28,260 @@ import com.techmate.techmate.Validation.ImageValidationStrategy;
 @Service
 public class MaterialsServiceImpl implements MaterialsService {
 
-        /*
-         * Repository
-         */
-        @Autowired
-        private MaterialsRepository materialsRepository;
+    /*
+     * Repository
+     */
+    @Autowired
+    private MaterialsRepository materialsRepository;
 
-        @Autowired
-        private SubCategoriesService subCategoriesService;
+    @Autowired
+    private SubCategoriesService subCategoriesService;
 
-        @Autowired
-        private SubCategoriesRepository subCategoriesRepository;
+    @Autowired
+    private SubCategoriesRepository subCategoriesRepository;
 
-        /*
-         * Services
-         */
-        @Autowired
-        private RoleService roleService;
+    /*
+     * Services
+     */
+    @Autowired
+    private RoleService roleService;
 
-        @Autowired
-        private RoleRepository roleRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-        /*
-         * Validations
-         */
+    /*
+     * Validations
+     */
 
-        @Autowired
-        ImageValidationStrategy imageValidationStrategy;
+    @Autowired
+    ImageValidationStrategy imageValidationStrategy;
 
-        @Autowired
-        ImageStorageStrategy imageStorageStrategy;
+    @Autowired
+    ImageStorageStrategy imageStorageStrategy;
 
-        // Método para convertir de entidad a DTO
-        private MaterialsDTO convertToDTO(Materials materials) {
-                MaterialsDTO dto = new MaterialsDTO();
-                dto.setMaterialsId(materials.getMaterialsId());
-                dto.setImagePath(materials.getImagePath());
-                dto.setName(materials.getName());
-                dto.setDescription(materials.getDescription());
-                dto.setPrice(materials.getPrice());
+    // Método para convertir de entidad a DTO
+    private MaterialsDTO convertToDTO(Materials materials) {
+        MaterialsDTO dto = new MaterialsDTO();
+        dto.setMaterialsId(materials.getMaterialsId());
+        dto.setImagePath(materials.getImagePath());
+        dto.setName(materials.getName());
+        dto.setDescription(materials.getDescription());
+        dto.setPrice(materials.getPrice());
 
-                // Asignar valores directamente, ya que son int (no pueden ser null)
-                dto.setStock(materials.getStock());
-                dto.setBorrowable_stock(materials.getBorrowable_stock());
+        // Asignar valores directamente, ya que son int (no pueden ser null)
+        dto.setStock(materials.getStock());
+        dto.setBorrowable_stock(materials.getBorrowable_stock());
 
-                dto.setSubCategoryId(materials.getSubCategory().getSubCategoryId());
-                dto.setSubCategoryName(
-                                subCategoriesService
-                                                .getSubCategoryNameById(materials.getSubCategory().getSubCategoryId()));
+        dto.setSubCategoryId(materials.getSubCategory().getSubCategoryId());
+        dto.setSubCategoryName(
+                subCategoriesService
+                        .getSubCategoryNameById(materials.getSubCategory().getSubCategoryId()));
 
-                // Obtener los roles asociados
-                List<Integer> roleIds = materials.getRoleMaterials().stream()
-                                .map(roleMaterial -> roleMaterial.getRole().getRoleId())
-                                .collect(Collectors.toList());
+        // Obtener los roles asociados
+        List<Integer> roleIds = materials.getRoleMaterials().stream()
+                .map(roleMaterial -> roleMaterial.getRole().getRoleId())
+                .collect(Collectors.toList());
 
-                List<String> roleNames = materials.getRoleMaterials().stream()
-                                .map(roleMaterial -> roleService.getRoleNameById(roleMaterial.getRole().getRoleId()))
-                                .collect(Collectors.toList());
+        List<String> roleNames = materials.getRoleMaterials().stream()
+                .map(roleMaterial -> roleService.getRoleNameById(roleMaterial.getRole().getRoleId()))
+                .collect(Collectors.toList());
 
-                dto.setRoleIds(roleIds);
-                dto.setRoleNames(roleNames);
+        dto.setRoleIds(roleIds);
+        dto.setRoleNames(roleNames);
 
-                return dto;
+        return dto;
+    }
+
+    private Materials convertToEntity(MaterialsDTO materialsDTO) {
+        System.out.println("Convirtiendo MaterialsDTO a Materials: " + materialsDTO);
+
+        Materials materials = new Materials();
+        materials.setImagePath(materialsDTO.getImagePath());
+        materials.setName(materialsDTO.getName());
+        materials.setDescription(materialsDTO.getDescription());
+        materials.setPrice(materialsDTO.getPrice());
+
+        // Asignar valores predeterminados
+        materials.setStock(0);
+        materials.setBorrowable_stock(0);
+
+        // Verificar subcategoría
+        SubCategories subCategories = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
+                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: "
+                        + materialsDTO.getSubCategoryId()));
+        materials.setSubCategory(subCategories);
+
+        // Convertir roles
+        List<RoleMaterials> roleMaterialsList = new ArrayList<>();
+        for (Integer roleId : materialsDTO.getRoleIds()) {
+            Role role = roleRepository.findById(roleId)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
+
+            // Solo añadir a la lista si el rol existe
+            RoleMaterials roleMaterials = new RoleMaterials();
+            roleMaterials.setRole(role);
+            roleMaterials.setMaterials(materials);
+            roleMaterialsList.add(roleMaterials);
         }
 
-        private Materials convertToEntity(MaterialsDTO materialsDTO) {
-                System.out.println("Convirtiendo MaterialsDTO a Materials: " + materialsDTO);
+        materials.setRoleMaterials(roleMaterialsList);
+        return materials;
+    }
 
-                Materials materials = new Materials();
-                materials.setImagePath(materialsDTO.getImagePath());
-                materials.setName(materialsDTO.getName());
-                materials.setDescription(materialsDTO.getDescription());
-                materials.setPrice(materialsDTO.getPrice());
+    @Override
+public MaterialsDTO createMaterials(MaterialsDTO materialsDTO, MultipartFile image) {
+    List<Integer> listRole = materialsDTO.getRoleIds();
+    materialsDTO.setRoleIds(listRole);
 
-                // Asignar valores predeterminados
-                materials.setStock(0);
-                materials.setBorrowable_stock(0);
+    // Verificar si ya existe otro material con el mismo nombre
+    if (materialsDTO.getName() != null && materialsRepository.findByName(materialsDTO.getName()) != null) {
+        throw new IllegalArgumentException("Ya existe un material con el nombre: " + materialsDTO.getName());
+    }
 
-                // Verificar subcategoría
-                SubCategories subCategories = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
-                                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: "
-                                                + materialsDTO.getSubCategoryId()));
-                materials.setSubCategory(subCategories);
+    // Si la imagen no es nula ni vacía, proceder con su validación y almacenamiento
+    if (image != null && !image.isEmpty()) {
+        String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
+        imageValidationStrategy.validate(imagePath); // Validación de la extensión
 
-                // Convertir roles
-                List<RoleMaterials> roleMaterialsList = new ArrayList<>();
-                for (Integer roleId : materialsDTO.getRoleIds()) {
-                        Role role = roleRepository.findById(roleId)
-                                        .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
+        // Guardar la imagen y obtener la ruta
+        String savedImagePath = imageStorageStrategy.saveImage(image);
+        materialsDTO.setImagePath(savedImagePath);
+    }
 
-                        // Solo añadir a la lista si el rol existe
-                        RoleMaterials roleMaterials = new RoleMaterials();
-                        roleMaterials.setRole(role);
-                        roleMaterials.setMaterials(materials);
-                        roleMaterialsList.add(roleMaterials);
-                }
+    // Convertir el DTO a entidad y guardar
+    Materials materials = convertToEntity(materialsDTO);
+    materials = materialsRepository.save(materials);
 
-                materials.setRoleMaterials(roleMaterialsList);
-                return materials;
+    return convertToDTO(materials);
+}
+
+
+    @Override
+    public MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile image) {
+        // Buscar el material por ID
+        Materials materials = materialsRepository.findById(materialsId)
+                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
+
+        // Actualizar los campos básicos
+        materials.setName(materialsDTO.getName());
+        materials.setDescription(materialsDTO.getDescription());
+        materials.setPrice(materialsDTO.getPrice());
+
+        // Manejar la actualización de la imagen
+        if (image != null && !image.isEmpty()) {
+            String oldImagePath = materials.getImagePath();
+            if (oldImagePath != null && !oldImagePath.isEmpty()) {
+                imageStorageStrategy.deleteImage(oldImagePath);
+            }
+            String newImagePath = imageStorageStrategy.saveImage(image);
+            materials.setImagePath(newImagePath);
         }
 
-        @Override
-        public MaterialsDTO createMaterials(MaterialsDTO materialsDTO, MultipartFile image) {
-                List<Integer> listRole = materialsDTO.getRoleIds();
-                materialsDTO.setRoleIds(listRole);
-
-                // Verificar si ya existe otro material con el mismo nombre (opcional)
-                if (materialsDTO.getName() != null &&
-                                materialsRepository.findByName(materialsDTO.getName()) != null) {
-                        throw new IllegalArgumentException(
-                                        "Ya existe un material con el nombre: " + materialsDTO.getName());
-                }
-
-                String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
-                imageValidationStrategy.validate(imagePath); // Validación de la extensión
-
-                // Guardar la imagen y obtener la ruta
-                String savedImagePath = imageStorageStrategy.saveImage(image);
-
-                materialsDTO.setImagePath(savedImagePath);
-
-                Materials materials = convertToEntity(materialsDTO);
-                materials = materialsRepository.save(materials);
-
-                return convertToDTO(materials);
+        // Validar que el ID de la subcategoría no sea nulo
+        Integer subCategoryId = materialsDTO.getSubCategoryId();
+        if (subCategoryId == null) {
+            throw new IllegalArgumentException("El ID de la subcategoría no puede ser nulo");
         }
 
-        @Override
-        public MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile image) {
-                Materials materials = materialsRepository.findById(materialsId)
-                                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
+        // Manejar subcategoría
+        SubCategories subCategories = subCategoriesRepository.findById(subCategoryId)
+                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: " + subCategoryId));
+        materials.setSubCategory(subCategories);
 
-                materials.setName(materialsDTO.getName());
-                materials.setDescription(materialsDTO.getDescription());
-                materials.setPrice(materialsDTO.getPrice());
+        // Actualizar la relación RoleMaterials
+        materials.getRoleMaterials().clear(); // Eliminar las relaciones antiguas
 
-                // Manejar la actualización de la imagen
-                if (image != null && !image.isEmpty()) {
-                        String oldImagePath = materials.getImagePath();
-                        if (oldImagePath != null && !oldImagePath.isEmpty()) {
-                                imageStorageStrategy.deleteImage(oldImagePath);
-                        }
-                        String newImagePath = imageStorageStrategy.saveImage(image);
-                        materials.setImagePath(newImagePath);
-                }
-
-                // Manejar subcategoría
-                SubCategories subCategories = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
-                                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: "
-                                                + materialsDTO.getSubCategoryId()));
-                materials.setSubCategory(subCategories);
-
-                // Actualizar la relación RoleMaterials
-                materials.getRoleMaterials().clear(); // Eliminar las relaciones antiguas
-
-                final Materials finalMaterials = materials; // Crear una referencia final a materials
-
-                List<RoleMaterials> newRoleMaterials = materialsDTO.getRoleIds().stream()
-                                .map(roleId -> {
-                                        Role role = roleRepository.findById(roleId)
-                                                        .orElseThrow(() -> new RuntimeException(
-                                                                        "Rol no encontrado con ID: " + roleId));
-                                        return new RoleMaterials(null, role, finalMaterials); // Usar la referencia
-                                                                                              // final
-                                })
-                                .collect(Collectors.toList());
-
-                materials.setRoleMaterials(newRoleMaterials);
-
-                materials = materialsRepository.save(materials);
-                return convertToDTO(materials);
+        // Validar que la lista de IDs de roles no sea nula ni vacía
+        if (materialsDTO.getRoleIds() == null || materialsDTO.getRoleIds().isEmpty()) {
+            throw new IllegalArgumentException("La lista de roles no puede ser nula o vacía");
         }
 
-        @Override
-        public void deleteMaterials(int materialsId) {
-                // Buscar el material por ID
-                Materials materials = materialsRepository.findById(materialsId)
-                                .orElseThrow(() -> new RuntimeException(
-                                                "Material no encontrado con ID: " + materialsId));
+        // Crear una referencia final a materials
+        final Materials finalMaterials = materials;
 
-                // Si se encuentra el material, eliminar la imagen si existe
-                String imagePath = materials.getImagePath();
-                if (imagePath != null && !imagePath.isEmpty()) {
-                        imageStorageStrategy.deleteImage(imagePath); // Utilizar la estrategia para eliminar la imagen
-                }
+        // Mapear los IDs de roles a nuevas instancias de RoleMaterials
+        List<RoleMaterials> newRoleMaterials = materialsDTO.getRoleIds().stream()
+                .map(roleId -> {
+                    // Validar que el ID del rol no sea nulo
+                    if (roleId == null) {
+                        throw new IllegalArgumentException("El ID del rol no puede ser nulo");
+                    }
 
-                // Eliminar el material de la base de datos
-                materialsRepository.deleteById(materialsId);
+                    // Buscar el rol por ID
+                    Role role = roleRepository.findById(roleId)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
+
+                    // Retornar una nueva instancia de RoleMaterials
+                    return new RoleMaterials(null, role, finalMaterials);
+                })
+                .collect(Collectors.toList());
+
+        // Asignar los nuevos roles al material
+        materials.setRoleMaterials(newRoleMaterials);
+
+        // Guardar el material actualizado
+        materials = materialsRepository.save(materials);
+
+        // Retornar el DTO actualizado
+        return convertToDTO(materials);
+    }
+
+    @Override
+    public void deleteMaterials(int materialsId) {
+        // Buscar el material por ID
+        Materials materials = materialsRepository.findById(materialsId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Material no encontrado con ID: " + materialsId));
+
+        // Si se encuentra el material, eliminar la imagen si existe
+        String imagePath = materials.getImagePath();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            imageStorageStrategy.deleteImage(imagePath); // Utilizar la estrategia para eliminar la imagen
         }
 
-        @Override
-        public List<MaterialsDTO> getAllMaterials() {
-                return materialsRepository.findAll().stream()
-                                .map(this::convertToDTO)
-                                .collect(Collectors.toList());
+        // Eliminar el material de la base de datos
+        materialsRepository.deleteById(materialsId);
+    }
+
+    @Override
+    public List<MaterialsDTO> getAllMaterials() {
+        return materialsRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MaterialsDTO getMaterialsById(int materialsId) {
+        Materials materials = materialsRepository.findById(materialsId)
+                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
+
+        return convertToDTO(materials);
+    }
+
+    @Override
+    public String getMaterialsNameById(int materialId) {
+        // Busca el material por su ID en el repositorio y obtiene el nombre si se
+        // encuentra
+        return materialsRepository.findById(materialId)
+                .map(Materials::getName) // Obtiene el nombre del material si se encuentra
+                .orElse(null); // Devuelve null si no se encuentra el material
+    }
+
+    @Override
+    public List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending) {
+        List<Materials> materials;
+
+        if (ascending) {
+            materials = materialsRepository.findAllByOrderByPriceAsc(); // Obtiene materiales en orden
+                                                                        // ascendente
+        } else {
+            materials = materialsRepository.findAllByOrderByPriceDesc(); // Obtiene materiales en orden
+                                                                         // descendente
         }
 
-        @Override
-        public MaterialsDTO getMaterialsById(int materialsId) {
-                Materials materials = materialsRepository.findById(materialsId)
-                                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
-
-                return convertToDTO(materials);
-        }
-
-        @Override
-        public String getMaterialsNameById(int materialId) {
-                // Busca el material por su ID en el repositorio y obtiene el nombre si se
-                // encuentra
-                return materialsRepository.findById(materialId)
-                                .map(Materials::getName) // Obtiene el nombre del material si se encuentra
-                                .orElse(null); // Devuelve null si no se encuentra el material
-        }
-
-        @Override
-        public List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending) {
-                List<Materials> materials;
-
-                if (ascending) {
-                        materials = materialsRepository.findAllByOrderByPriceAsc(); // Obtiene materiales en orden
-                                                                                    // ascendente
-                } else {
-                        materials = materialsRepository.findAllByOrderByPriceDesc(); // Obtiene materiales en orden
-                                                                                     // descendente
-                }
-
-                return materials.stream()
-                                .map(this::convertToDTO)
-                                .collect(Collectors.toList());
-        }
+        return materials.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
 }

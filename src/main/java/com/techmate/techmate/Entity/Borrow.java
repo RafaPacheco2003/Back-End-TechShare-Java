@@ -17,12 +17,21 @@ public class Borrow {
     @Column(name = "fecha")
     private Date date;
 
+    @Temporal(TemporalType.DATE)
+    private Date startDate;
+
+    @Temporal(TemporalType.DATE)
+    private Date endDate;
+
+    @Temporal(TemporalType.DATE)
+    private Date returnDate;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 
-
     private double amount;
 
+   
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
