@@ -23,6 +23,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    
+
     // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Integer id) {
