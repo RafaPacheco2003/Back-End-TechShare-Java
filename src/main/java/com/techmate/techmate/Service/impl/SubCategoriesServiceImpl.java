@@ -105,7 +105,10 @@ public class SubCategoriesServiceImpl implements SubCategoriesService {
     public SubCategoriesDTO updateSubCategory(int subCategoryID, SubCategoriesDTO subCategoryDTO, MultipartFile image) {
         SubCategories subCategory = subCategoriesRepository.findById(subCategoryID)
                 .orElseThrow(() -> new EntityNotFoundException("Subcategory not found with id: " + subCategoryID));
-         if (subCategoriesRepository.findByName(subCategoryDTO.getName()) != null) {
+        
+                if (subCategoryDTO.getName() != null &&
+                    !subCategoryDTO.getName().equals(subCategory.getName()) &&
+                    subCategoriesRepository.findByName(subCategoryDTO.getName()) != null) {
             throw new IllegalArgumentException("Ya existe una subCategoria con el nombre: " + subCategoryDTO.getName());
             
         }

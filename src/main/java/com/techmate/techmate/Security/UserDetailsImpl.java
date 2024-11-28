@@ -85,6 +85,8 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toList());
     }
 
+
+
     /**
      * Obtiene la contraseña del usuario.
      *
@@ -104,6 +106,8 @@ public class UserDetailsImpl implements UserDetails {
     public String getUsername() {
         return usuario.getEmail();
     }
+
+    
 
     /**
      * Método adicional para obtener el nombre completo del usuario.

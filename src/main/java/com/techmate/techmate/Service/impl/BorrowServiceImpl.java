@@ -36,41 +36,57 @@ public class BorrowServiceImpl implements BorrowService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    private Borrow convertToEntity(BorrowDTO borrowDTO) {
-        Borrow borrow = new Borrow();
-        borrow.setBorrowId(borrowDTO.getBorrowId());
-        borrow.setDate(borrowDTO.getDate());
-        borrow.setStatus(Status.PROCCES);
-        borrow.setAmount(borrowDTO.getAmount());
-        borrow.setDetails(borrowDTO.getDetails().stream()
-                .map(detailDTO -> convertDetailsBorrowToEntity(detailDTO, borrow))
-                .collect(Collectors.toList()));
-
-        Usuario adminId = usuarioRepository.findById(borrowDTO.getAdminId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
-        borrow.setUsuario(adminId);
-        System.out.println("Id de admin " + adminId);
-
-        return borrow;
-    }
-
     private BorrowDTO convertToDTO(Borrow borrow) {
         BorrowDTO dto = new BorrowDTO();
         dto.setBorrowId(borrow.getBorrowId());
         dto.setDate(borrow.getDate());
         dto.setStatus(borrow.getStatus());
         dto.setAmount(borrow.getAmount());
-
+    
+        // Asegúrate de que el usuario y admin se asignen correctamente
+        if (borrow.getUsuario() != null) {
+            dto.setUsuarioId(borrow.getUsuario().getId());
+            dto.setUsuarioName(borrow.getUsuario().getUser_name());
+        }
+    
+        if (borrow.getAdmin() != null) {
+            dto.setAdminId(borrow.getAdmin().getId());
+            dto.setAdminName(borrow.getAdmin().getUser_name());
+        }
+    
+        // Mapear los detalles del préstamo
         dto.setDetails(borrow.getDetails().stream()
                 .map(this::convertDetailsBorrowToDTO)
                 .collect(Collectors.toList()));
-
-        dto.setAdminId(borrow.getAdmin().getId());
-        // Obtener el nombre de usuario
-        dto.setAdminName(borrow.getAdmin().getUser_name()); // Asume que el campo se llama 'nombre'
-
+    
         return dto;
     }
+    
+    private Borrow convertToEntity(BorrowDTO borrowDTO) {
+        Borrow borrow = new Borrow();
+        borrow.setBorrowId(borrowDTO.getBorrowId());
+        borrow.setDate(borrowDTO.getDate());
+        borrow.setStatus(Status.PROCCES);  // Asignar un estado inicial adecuado
+        borrow.setAmount(borrowDTO.getAmount());
+    
+        // Asignación de detalles
+        borrow.setDetails(borrowDTO.getDetails().stream()
+                .map(detailDTO -> convertDetailsBorrowToEntity(detailDTO, borrow))
+                .collect(Collectors.toList()));
+    
+        // Obtener el usuario adminId
+        Usuario admin = usuarioRepository.findById(borrowDTO.getAdminId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
+        borrow.setAdmin(admin);  // Asignamos el admin
+    
+        // Asignar el usuario (en este caso adminId también puede referirse a un usuario)
+        Usuario usuario = usuarioRepository.findById(borrowDTO.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getUsuarioId()));
+        borrow.setUsuario(usuario);  // Asignamos el usuario
+    
+        return borrow;
+    }
+    
 
     private DetailsBorrow convertDetailsBorrowToEntity(DetailsBorrowDTO detailDTO, Borrow borrow) {
         // Crear una nueva instancia de DetailsBorrow
@@ -121,6 +137,7 @@ public class BorrowServiceImpl implements BorrowService {
         Borrow borrow = borrowRepository.findById(borrowId)
                 .orElseThrow(() -> new Exception("Préstamo no encontrado con ID: " + borrowId));
 
+        
         // Verificar el estado actual del préstamo
         if (borrow.getStatus() != Status.PROCCES && borrow.getStatus() != Status.BORROWED) {
             throw new Exception("Solo se puede modificar el estado de un préstamo en estado PROCESS o BORROWED");
@@ -128,12 +145,13 @@ public class BorrowServiceImpl implements BorrowService {
 
         // Establecer el adminId en el préstamo
         Usuario admin = usuarioRepository.findById(adminId)
-                .orElseThrow(() -> new Exception("Usuario no encontrado con ID: " + adminId));
+                .orElseThrow(() -> new Exception("Administrador no encontrado con ID: " + adminId));
         borrow.setAdmin(admin); // Asignar el admin al préstamo
 
         switch (newStatus) {
             case REJECETD:
                 borrow.setStatus(Status.REJECETD);
+                borrow.setEndDate(new Date());
                 break;
 
             case BORROWED:
@@ -149,6 +167,7 @@ public class BorrowServiceImpl implements BorrowService {
                     }
                 }
                 borrow.setStatus(Status.BORROWED);
+                borrow.setStartDate(new Date());
                 break;
 
             case RETURNED:
@@ -161,6 +180,8 @@ public class BorrowServiceImpl implements BorrowService {
                     materialsRepository.save(material);
                 }
                 borrow.setStatus(Status.RETURNED);
+                borrow.setReturnDate(new Date());
+                borrow.setEndDate(new Date());
                 break;
 
             default:
@@ -211,9 +232,6 @@ public class BorrowServiceImpl implements BorrowService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
-
-   
 
     @Override
     public Integer getUserIdFromToken(String token) {

@@ -15,4 +15,8 @@ public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
     List<Borrow> findByStatus(Status status); // Asegúrate de que sea tu Status
 
     List<Borrow> findByDateBetween(Date startDate, Date endDate); // Corregido aquí
+
+
+      //  filtrar por estado y rango de fechas
+      List<Borrow> findByStatusAndDateBetween(Status status, Date startDate, Date endDate);
 }
