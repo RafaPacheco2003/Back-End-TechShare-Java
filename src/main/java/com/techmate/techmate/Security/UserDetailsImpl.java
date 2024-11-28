@@ -107,6 +107,8 @@ public class UserDetailsImpl implements UserDetails {
         return usuario.getEmail();
     }
 
+    
+
     /**
      * Método adicional para obtener el nombre completo del usuario.
      *

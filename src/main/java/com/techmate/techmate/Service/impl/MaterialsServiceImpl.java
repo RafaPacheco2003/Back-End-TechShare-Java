@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.techmate.techmate.DTO.MaterialsDTO;
 import com.techmate.techmate.Entity.Materials;
 import com.techmate.techmate.Entity.Role;
@@ -19,7 +16,6 @@ import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Repository.MaterialsRepository;
 import com.techmate.techmate.Repository.RoleRepository;
 import com.techmate.techmate.Repository.SubCategoriesRepository;
-
 import com.techmate.techmate.Service.MaterialsService;
 import com.techmate.techmate.Service.RoleService;
 import com.techmate.techmate.Service.SubCategoriesService;
@@ -129,101 +125,86 @@ public class MaterialsServiceImpl implements MaterialsService {
     }
 
     @Override
-public MaterialsDTO createMaterials(MaterialsDTO materialsDTO, MultipartFile image) {
-    List<Integer> listRole = materialsDTO.getRoleIds();
-    materialsDTO.setRoleIds(listRole);
+    public MaterialsDTO createMaterials(MaterialsDTO materialsDTO, MultipartFile image) {
+        List<Integer> listRole = materialsDTO.getRoleIds();
+        materialsDTO.setRoleIds(listRole);
 
-    // Verificar si ya existe otro material con el mismo nombre
-    if (materialsDTO.getName() != null && materialsRepository.findByName(materialsDTO.getName()) != null) {
-        throw new IllegalArgumentException("Ya existe un material con el nombre: " + materialsDTO.getName());
+        // Verificar si ya existe otro material con el mismo nombre
+        if (materialsDTO.getName() != null && materialsRepository.findByName(materialsDTO.getName()) != null) {
+            throw new IllegalArgumentException("Ya existe un material con el nombre: " + materialsDTO.getName());
+        }
+
+        // Si la imagen no es nula ni vacía, proceder con su validación y almacenamiento
+        if (image != null && !image.isEmpty()) {
+            String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
+            imageValidationStrategy.validate(imagePath); // Validación de la extensión
+
+            // Guardar la imagen y obtener la ruta
+            String savedImagePath = imageStorageStrategy.saveImage(image);
+            materialsDTO.setImagePath(savedImagePath);
+        }
+
+        // Convertir el DTO a entidad y guardar
+        Materials materials = convertToEntity(materialsDTO);
+        materials = materialsRepository.save(materials);
+
+        return convertToDTO(materials);
     }
-
-    // Si la imagen no es nula ni vacía, proceder con su validación y almacenamiento
-    if (image != null && !image.isEmpty()) {
-        String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
-        imageValidationStrategy.validate(imagePath); // Validación de la extensión
-
-        // Guardar la imagen y obtener la ruta
-        String savedImagePath = imageStorageStrategy.saveImage(image);
-        materialsDTO.setImagePath(savedImagePath);
-    }
-
-    // Convertir el DTO a entidad y guardar
-    Materials materials = convertToEntity(materialsDTO);
-    materials = materialsRepository.save(materials);
-
-    return convertToDTO(materials);
-}
-
 
     @Override
     public MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile image) {
-        // Buscar el material por ID
-        Materials materials = materialsRepository.findById(materialsId)
-                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
+        // Buscar el material existente por su ID
+        Materials existingMaterial = materialsRepository.findById(materialsId)
+                .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + materialsId));
 
-        // Actualizar los campos básicos
-        materials.setName(materialsDTO.getName());
-        materials.setDescription(materialsDTO.getDescription());
-        materials.setPrice(materialsDTO.getPrice());
+        // Actualizar el nombre si es proporcionado (sin verificación de duplicado)
+        if (materialsDTO.getName() != null) {
+            existingMaterial.setName(materialsDTO.getName());
+        }
 
-        // Manejar la actualización de la imagen
+        // Actualizar los demás valores del material
+        existingMaterial.setDescription(materialsDTO.getDescription());
+        existingMaterial.setPrice(materialsDTO.getPrice());
+        existingMaterial.setStock(materialsDTO.getStock());
+        existingMaterial.setBorrowable_stock(materialsDTO.getBorrowable_stock());
+
+        // Manejo de subcategoría
+        SubCategories subCategory = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Subcategoría no encontrada con ID: " + materialsDTO.getSubCategoryId()));
+        existingMaterial.setSubCategory(subCategory);
+
+        // Manejo de la imagen (si se proporciona una nueva)
         if (image != null && !image.isEmpty()) {
-            String oldImagePath = materials.getImagePath();
-            if (oldImagePath != null && !oldImagePath.isEmpty()) {
-                imageStorageStrategy.deleteImage(oldImagePath);
-            }
-            String newImagePath = imageStorageStrategy.saveImage(image);
-            materials.setImagePath(newImagePath);
+            String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
+            imageValidationStrategy.validate(imagePath); // Validar la extensión
+
+            // Guardar la imagen y actualizar la ruta
+            String savedImagePath = imageStorageStrategy.saveImage(image);
+            existingMaterial.setImagePath(savedImagePath);
         }
 
-        // Validar que el ID de la subcategoría no sea nulo
-        Integer subCategoryId = materialsDTO.getSubCategoryId();
-        if (subCategoryId == null) {
-            throw new IllegalArgumentException("El ID de la subcategoría no puede ser nulo");
+        // Actualizar roles asociados al material
+        List<RoleMaterials> updatedRoleMaterials = new ArrayList<>();
+        for (Integer roleId : materialsDTO.getRoleIds()) {
+            Role role = roleRepository.findById(roleId)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
+
+            RoleMaterials roleMaterials = new RoleMaterials();
+            roleMaterials.setRole(role);
+            roleMaterials.setMaterials(existingMaterial);
+            updatedRoleMaterials.add(roleMaterials);
         }
 
-        // Manejar subcategoría
-        SubCategories subCategories = subCategoriesRepository.findById(subCategoryId)
-                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: " + subCategoryId));
-        materials.setSubCategory(subCategories);
+        // Limpiar la lista de roles actuales y agregar los actualizados
+        existingMaterial.getRoleMaterials().clear();
+        existingMaterial.getRoleMaterials().addAll(updatedRoleMaterials);
 
-        // Actualizar la relación RoleMaterials
-        materials.getRoleMaterials().clear(); // Eliminar las relaciones antiguas
+        // Guardar el material actualizado en el repositorio
+        Materials updatedMaterial = materialsRepository.save(existingMaterial);
 
-        // Validar que la lista de IDs de roles no sea nula ni vacía
-        if (materialsDTO.getRoleIds() == null || materialsDTO.getRoleIds().isEmpty()) {
-            throw new IllegalArgumentException("La lista de roles no puede ser nula o vacía");
-        }
-
-        // Crear una referencia final a materials
-        final Materials finalMaterials = materials;
-
-        // Mapear los IDs de roles a nuevas instancias de RoleMaterials
-        List<RoleMaterials> newRoleMaterials = materialsDTO.getRoleIds().stream()
-                .map(roleId -> {
-                    // Validar que el ID del rol no sea nulo
-                    if (roleId == null) {
-                        throw new IllegalArgumentException("El ID del rol no puede ser nulo");
-                    }
-
-                    // Buscar el rol por ID
-                    Role role = roleRepository.findById(roleId)
-                            .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
-
-                    // Retornar una nueva instancia de RoleMaterials
-                    return new RoleMaterials(null, role, finalMaterials);
-                })
-                .collect(Collectors.toList());
-
-        // Asignar los nuevos roles al material
-        materials.setRoleMaterials(newRoleMaterials);
-
-        // Guardar el material actualizado
-        materials = materialsRepository.save(materials);
-
-        // Retornar el DTO actualizado
-        return convertToDTO(materials);
+        // Convertir el material actualizado a DTO y devolverlo
+        return convertToDTO(updatedMaterial);
     }
 
     @Override

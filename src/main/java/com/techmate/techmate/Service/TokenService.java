@@ -7,4 +7,7 @@ public interface TokenService {
     Optional<List<Integer>> getRolesFromToken(String token);
 
     String getUserEmailFromToken(String token);
+
+    String getUserNameFromToken(String token);
+    
 }
