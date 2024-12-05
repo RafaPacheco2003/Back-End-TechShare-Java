@@ -42,6 +42,9 @@ public class BorrowServiceImpl implements BorrowService {
         dto.setDate(borrow.getDate());
         dto.setStatus(borrow.getStatus());
         dto.setAmount(borrow.getAmount());
+        dto.setStartDate(borrow.getStartDate());
+        dto.setEndDate(borrow.getEndDate());
+        dto.setReturnDate(borrow.getReturnDate());;
     
         // Asegúrate de que el usuario y admin se asignen correctamente
         if (borrow.getUsuario() != null) {
@@ -136,40 +139,39 @@ public class BorrowServiceImpl implements BorrowService {
         // Buscar el préstamo por ID
         Borrow borrow = borrowRepository.findById(borrowId)
                 .orElseThrow(() -> new Exception("Préstamo no encontrado con ID: " + borrowId));
-
-        
+    
         // Verificar el estado actual del préstamo
         if (borrow.getStatus() != Status.PROCCES && borrow.getStatus() != Status.BORROWED) {
             throw new Exception("Solo se puede modificar el estado de un préstamo en estado PROCESS o BORROWED");
         }
-
+    
         // Establecer el adminId en el préstamo
         Usuario admin = usuarioRepository.findById(adminId)
                 .orElseThrow(() -> new Exception("Administrador no encontrado con ID: " + adminId));
         borrow.setAdmin(admin); // Asignar el admin al préstamo
-
+    
         switch (newStatus) {
             case REJECETD:
                 borrow.setStatus(Status.REJECETD);
                 borrow.setEndDate(new Date());
                 break;
-
+    
             case BORROWED:
                 if (borrow.getStatus() == Status.PROCCES) {
                     for (DetailsBorrow detail : borrow.getDetails()) {
                         Materials material = detail.getMaterials();
                         if (material.getBorrowable_stock() < detail.getQuantity()) {
-                            throw new Exception(
+                            throw new RuntimeException(
                                     "Stock insuficiente para el material con ID: " + material.getMaterialsId());
                         }
                         material.setBorrowable_stock(material.getBorrowable_stock() - detail.getQuantity());
                         materialsRepository.save(material);
                     }
+                    borrow.setStartDate(new Date()); // Actualizar la fecha de inicio
+                    borrow.setStatus(Status.BORROWED);
                 }
-                borrow.setStatus(Status.BORROWED);
-                borrow.setStartDate(new Date());
                 break;
-
+    
             case RETURNED:
                 if (borrow.getStatus() != Status.BORROWED) {
                     throw new Exception("El préstamo debe estar en estado BORROWED para ser devuelto");
@@ -183,14 +185,14 @@ public class BorrowServiceImpl implements BorrowService {
                 borrow.setReturnDate(new Date());
                 borrow.setEndDate(new Date());
                 break;
-
+    
             default:
                 throw new Exception("Estado no válido para modificar el préstamo");
         }
 
         borrowRepository.save(borrow); // Guardar el préstamo actualizado
     }
-
+    
     @Override
     public List<BorrowDTO> getAllBorrowDTO() {
         return borrowRepository.findAll().stream()
