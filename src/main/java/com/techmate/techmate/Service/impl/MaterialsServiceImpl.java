@@ -157,6 +157,9 @@ public class MaterialsServiceImpl implements MaterialsService {
         Materials existingMaterial = materialsRepository.findById(materialsId)
                 .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + materialsId));
 
+        Integer stockMaterials= existingMaterial.getStock();
+        Integer stockBorrow= existingMaterial.getBorrowable_stock();
+
         // Actualizar el nombre si es proporcionado (sin verificación de duplicado)
         if (materialsDTO.getName() != null) {
             existingMaterial.setName(materialsDTO.getName());
@@ -165,8 +168,8 @@ public class MaterialsServiceImpl implements MaterialsService {
         // Actualizar los demás valores del material
         existingMaterial.setDescription(materialsDTO.getDescription());
         existingMaterial.setPrice(materialsDTO.getPrice());
-        existingMaterial.setStock(materialsDTO.getStock());
-        existingMaterial.setBorrowable_stock(materialsDTO.getBorrowable_stock());
+        existingMaterial.setStock(stockMaterials);
+        existingMaterial.setBorrowable_stock(stockBorrow);
 
         // Manejo de subcategoría
         SubCategories subCategory = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())

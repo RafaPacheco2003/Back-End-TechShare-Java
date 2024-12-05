@@ -75,7 +75,8 @@ public class BorrowUserServiceImp implements BorrowUserService {
         detailsBorrow.setQuantity(detailDTO.getQuantity());
 
         Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
-                .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
+                .orElseThrow(
+                        () -> new RuntimeException("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
         detailsBorrow.setMaterials(material);
         detailsBorrow.setUnitPrice(material.getPrice());
         detailsBorrow.setTotalPrice(material.getPrice() * detailDTO.getQuantity());
@@ -102,25 +103,57 @@ public class BorrowUserServiceImp implements BorrowUserService {
             throw new Exception("El usuario no tiene roles asignados. No se puede crear el préstamo.");
         }
 
-        Borrow borrow = convertToEntity(borrowDTO);
-        borrow.setAmount(0);
-
-        borrow = borrowRepository.save(borrow);
-        double totalAmount = 0;
-
+        // Verificar primero si todos los materiales en los detalles tienen roles
+        // asignados
         for (DetailsBorrowDTO detailDTO : borrowDTO.getDetails()) {
+            // Buscar el material por su ID
             Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
                     .orElseThrow(() -> new Exception("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
 
-            if (material.getStock() < detailDTO.getQuantity()) {
+            // Obtener la lista de roles permitidos para ese material
+            List<RoleMaterials> roleMaterialsList = roleMaterialsRepository.findByMaterials(material);
+
+            // Verificar si el material tiene roles asignados
+            if (roleMaterialsList.isEmpty()) {
+                throw new Exception("El material " + material.getName() + " (ID: " + material.getMaterialsId()
+                        + ") no tiene roles permitidos asignados.");
+            }
+        }
+
+        // Convertir el DTO a entidad Borrow
+        Borrow borrow = convertToEntity(borrowDTO);
+        borrow.setAmount(0); // Inicializar el monto total en 0
+
+        // Guardar el préstamo en la base de datos
+        borrow = borrowRepository.save(borrow);
+        double totalAmount = 0; // Inicializar el monto total
+
+        // Iterar sobre los detalles del préstamo
+        for (DetailsBorrowDTO detailDTO : borrowDTO.getDetails()) {
+            // Buscar el material por su ID
+            Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
+                    .orElseThrow(() -> new Exception("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
+
+            // Verificar si hay suficiente stock del material
+            if (material.getBorrowable_stock() < detailDTO.getQuantity()) {
                 throw new Exception("Stock insuficiente para el material con ID: " + material.getMaterialsId());
             }
 
+            // Obtener la lista de roles permitidos para ese material
             List<RoleMaterials> roleMaterialsList = roleMaterialsRepository.findByMaterials(material);
+
+            // Verificar si el material tiene roles asignados
+            if (roleMaterialsList.isEmpty()) {
+                throw new Exception("El material " + material.getName() + " (ID: " + material.getMaterialsId()
+                        + ") no tiene roles permitidos asignados.");
+            }
+
+            // Obtener los IDs de los roles permitidos
             List<Integer> rolesPermitidos = roleMaterialsList.stream()
                     .map(roleMaterials -> roleMaterials.getRole().getRoleId())
                     .collect(Collectors.toList());
 
+            // Verificar si el usuario tiene al menos un rol permitido para este material
             boolean tieneRolPermitido = roles.stream().anyMatch(rolesPermitidos::contains);
             if (!tieneRolPermitido) {
                 throw new Exception(
@@ -128,15 +161,30 @@ public class BorrowUserServiceImp implements BorrowUserService {
                                 " (ID: " + material.getMaterialsId() + ")");
             }
 
+            // Crear la entidad DetailsBorrow para el detalle del préstamo
             DetailsBorrow detailsBorrow = convertDetailsBorrowToEntity(detailDTO, borrow);
-            totalAmount += detailsBorrow.getTotalPrice();
 
+            // Calcular el monto total para este material (precio unitario * cantidad)
+            double detalleTotalPrice = material.getPrice() * detailDTO.getQuantity();
+            detailsBorrow.setTotalPrice(detalleTotalPrice); // Asegúrate de que este campo exista en la entidad
+
+            // Acumular el monto total en la variable totalAmount
+            totalAmount += detalleTotalPrice;
+
+            // Guardar el detalle del préstamo en la base de datos
             detailsBorrowRepository.save(detailsBorrow);
+
+            // Actualizar el stock del material
+            materialsRepository.save(material);
         }
 
+        // Actualizar el monto total del préstamo
         borrow.setAmount(totalAmount);
+
+        // Guardar nuevamente el préstamo actualizado con el monto total
         borrow = borrowRepository.save(borrow);
 
+        // Convertir la entidad Borrow a DTO y devolverla
         return convertToDTO(borrow);
     }
 

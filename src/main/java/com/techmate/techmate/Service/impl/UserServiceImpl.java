@@ -26,8 +26,7 @@ public class UserServiceImpl implements UserService {
     private UsuarioRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository;  // Asegúrate de que este es el repositorio correcto
-    
+    private RoleRepository roleRepository; // Asegúrate de que este es el repositorio correcto
 
     @Autowired
     private UsuarioRoleRepository usuarioRoleRepository;
@@ -82,56 +81,65 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUsuser(Integer id) {
         Optional<Usuario> usuarioOpt = userRepository.findById(id);
-        
+
         if (usuarioOpt.isEmpty()) {
             throw new UserNotFoundException("El usuario con ID " + id + " no fue encontrado.");
         }
-        
+
         userRepository.deleteById(id);
     }
-   
+
     @Override
-public Optional<UsuarioDTO> updateUser(Integer id, UsuarioDTO usuarioDTO) {
-    // Buscar el usuario existente
-    Optional<Usuario> usuarioOpt = userRepository.findById(id);
-    
-    if (usuarioOpt.isEmpty()) {
-        // Lanza una excepción si no se encuentra el usuario
-        throw new UserNotFoundException("El usuario con ID " + id + " no fue encontrado.");
-    }
+    public Optional<UsuarioDTO> updateUser(Integer id, UsuarioDTO usuarioDTO) {
+        // Buscar el usuario existente
+        Optional<Usuario> usuarioOpt = userRepository.findById(id);
 
-    // Obtener el usuario actual
-    Usuario usuario = usuarioOpt.get();
-
-    // Actualizar los campos del usuario con los nuevos valores de usuarioDTO
-    usuario.setUser_name(usuarioDTO.getUserName());
-    usuario.setFirst_name(usuarioDTO.getFirstName());
-    usuario.setLast_name(usuarioDTO.getLastName());
-    usuario.setEmail(usuarioDTO.getEmail());
-
-    // Actualizar roles
-    Set<Role> roles = new HashSet<>();
-    for (String roleName : usuarioDTO.getRoles()) {
-        Optional<Role> roleOpt = roleRepository.findByNombre(roleName); // Cambié usuarioRoleRepository por roleRepository
-        if (roleOpt.isEmpty()) {
-            // Lanza una excepción si el rol no se encuentra
-            throw new UserNotFoundException("El rol '" + roleName + "' no existe.");
+        if (usuarioOpt.isEmpty()) {
+            // Lanza una excepción si no se encuentra el usuario
+            throw new UserNotFoundException("El usuario con ID " + id + " no fue encontrado.");
         }
-        roles.add(roleOpt.get());
+
+        // Obtener el usuario actual
+        Usuario usuario = usuarioOpt.get();
+
+        // Actualizar los campos del usuario con los nuevos valores de usuarioDTO solo
+        // si no son null
+        if (usuarioDTO.getUserName() != null) {
+            usuario.setUser_name(usuarioDTO.getUserName());
+        }
+        if (usuarioDTO.getFirstName() != null) {
+            usuario.setFirst_name(usuarioDTO.getFirstName());
+        }
+        if (usuarioDTO.getLastName() != null) {
+            usuario.setLast_name(usuarioDTO.getLastName());
+        }
+        if (usuarioDTO.getEmail() != null) {
+            usuario.setEmail(usuarioDTO.getEmail());
+        }
+
+        // Actualizar roles solo si se proporcionaron nuevos roles
+        if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
+            Set<Role> roles = new HashSet<>();
+            for (String roleName : usuarioDTO.getRoles()) {
+                Optional<Role> roleOpt = roleRepository.findByNombre(roleName);
+                if (roleOpt.isEmpty()) {
+                    throw new UserNotFoundException("El rol '" + roleName + "' no existe.");
+                }
+                roles.add(roleOpt.get());
+            }
+            usuario.setRoles(roles); // Asignar los nuevos roles solo si se proporcionaron
+        }
+
+        // Guardar el usuario actualizado
+        Usuario updatedUsuario = userRepository.save(usuario);
+
+        // Convertir el usuario actualizado a DTO
+        Set<String> updatedRoles = updatedUsuario.getRoles().stream()
+                .map(Role::getNombre)
+                .collect(Collectors.toSet());
+
+        // Retornar el UsuarioDTO actualizado
+        return Optional.of(convertToDTO(updatedUsuario, updatedRoles));
     }
-    
-    // Asignar los roles al usuario
-    usuario.setRoles(roles);
 
-    // Guardar el usuario actualizado
-    Usuario updatedUsuario = userRepository.save(usuario);
-
-    // Convertir el usuario actualizado a DTO
-    Set<String> updatedRoles = updatedUsuario.getRoles().stream()
-            .map(Role::getNombre)
-            .collect(Collectors.toSet());
-
-    // Retornar el UsuarioDTO actualizado
-    return Optional.of(convertToDTO(updatedUsuario, updatedRoles));
-}
 }
