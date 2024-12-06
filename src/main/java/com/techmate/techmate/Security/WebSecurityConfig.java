@@ -14,6 +14,10 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 
 import lombok.AllArgsConstructor;import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,7 +41,8 @@ public class WebSecurityConfig {
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
 
         return http
-                .cors().and() // Aplicar configuración de CORS
+                .cors().configurationSource(corsConfigurationSource()) // Enlazar CORS correctamente
+                .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
@@ -73,16 +78,16 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
         // Configuración para permitir cualquier origen
-        config.setAllowCredentials(true); // Permitir credenciales
+        config.setAllowCredentials(true);
         config.addAllowedOriginPattern("*"); // Permitir cualquier origen
-        config.addAllowedHeader("*"); // Permitir todos los headers
-        config.addAllowedMethod("*"); // Permitir todos los métodos HTTP
-        config.addExposedHeader("Authorization"); // Exponer encabezado Authorization
+        config.setAllowedHeaders(List.of("*")); // Permitir cualquier header
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos HTTP permitidos
+        config.setExposedHeaders(List.of("Authorization")); // Exponer encabezados
 
         source.registerCorsConfiguration("/**", config);
         return source;
