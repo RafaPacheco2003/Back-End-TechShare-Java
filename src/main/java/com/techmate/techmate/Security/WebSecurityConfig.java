@@ -69,7 +69,7 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // Permitir credenciales
-        config.addAllowedOrigin("https://tech-share-pyyg73oaq-raul-becerras-projects-82dc889d.vercel.app"); // Permitir solicitudes desde el frontend
+        config.addAllowedOrigin("*"); // Permitir solicitudes desde el frontend
         config.addAllowedHeader("*"); // Permitir cualquier header
         config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
         config.addExposedHeader("Authorization");
