@@ -31,14 +31,19 @@ public class WebSecurityConfig {
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter();
         jwtAuthenticationFilter.setAuthenticationManager(authnManager);
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
-    
+
         return http
-                .cors()  // Habilitar CORS
+                .cors() // Habilitar CORS
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register", "/categories/images/**", "/admin/materials/images/**", "/subcategories/images/**").permitAll() 
-                    .anyRequest().authenticated()
+                .requestMatchers(
+                        "/register",
+                        "/categories/images/**",
+                        "/admin/materials/images/**",
+                        "/subcategories/images/**")
+                .permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
@@ -68,11 +73,12 @@ public class WebSecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowCredentials(true); // Permitir credenciales
-        config.addAllowedOrigin("http://localhost:3000"); // Permitir solicitudes desde el frontend
+        config.addAllowedOrigin("https://tech-share.vercel.app"); // Permitir solicitudes desde Vercel
         config.addAllowedHeader("*"); // Permitir cualquier header
-        config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
-        config.addExposedHeader("Authorization");
+        config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, PUT, DELETE, etc.)
+        config.addExposedHeader("Authorization"); // Exponer el header Authorization
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
