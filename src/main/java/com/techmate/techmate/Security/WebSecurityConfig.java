@@ -37,9 +37,7 @@ public class WebSecurityConfig {
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
 
         return http
-                .cors() // Aplicar configuración de CORS
-                .configurationSource(corsConfigurationSource()) // Enlazar configuración de CORS
-                .and()
+                .cors().and() // Aplicar configuración de CORS
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
@@ -79,9 +77,9 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
+        // Configuración para permitir cualquier origen
         config.setAllowCredentials(true); // Permitir credenciales
-        config.addAllowedOrigin("https://tech-share.vercel.app"); // Permitir el origen de producción
-        config.addAllowedOrigin("http://localhost:3000"); // Permitir localhost para pruebas locales
+        config.addAllowedOriginPattern("*"); // Permitir cualquier origen
         config.addAllowedHeader("*"); // Permitir todos los headers
         config.addAllowedMethod("*"); // Permitir todos los métodos HTTP
         config.addExposedHeader("Authorization"); // Exponer encabezado Authorization

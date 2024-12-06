@@ -16,8 +16,6 @@ import com.techmate.techmate.Entity.Usuario;
 import com.techmate.techmate.Repository.RoleRepository;
 import com.techmate.techmate.Repository.UsuarioRepository;
 @RestController
-@CrossOrigin(origins = { "https://tech-share.vercel.app", "http://localhost:3000" }) // Agregar todos los dominios
-                                                                                     // necesarios
 public class AuthController {
 
     @Autowired
