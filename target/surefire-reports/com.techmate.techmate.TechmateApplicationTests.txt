@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.techmate.techmate.TechmateApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.147 s -- in com.techmate.techmate.TechmateApplicationTests
