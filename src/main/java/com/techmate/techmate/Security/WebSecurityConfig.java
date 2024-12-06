@@ -68,12 +68,16 @@ public class WebSecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+
+        // Permitir cualquier origen, header y método
         config.setAllowCredentials(true); // Permitir credenciales
-        config.addAllowedOrigin("https://tech-share.vercel.app"); // Permitir solicitudes desde el frontend
+        config.addAllowedOriginPattern("*"); // Permitir cualquier origen
         config.addAllowedHeader("*"); // Permitir cualquier header
-        config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
-        config.addExposedHeader("Authorization");
+        config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, PUT, DELETE, etc.)
+        config.addExposedHeader("Authorization"); // Exponer el header Authorization
+
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
 }
