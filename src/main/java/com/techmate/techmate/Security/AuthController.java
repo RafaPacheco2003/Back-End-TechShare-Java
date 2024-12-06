@@ -16,6 +16,7 @@ import com.techmate.techmate.Entity.Usuario;
 import com.techmate.techmate.Repository.RoleRepository;
 import com.techmate.techmate.Repository.UsuarioRepository;
 @RestController
+@CrossOrigin(origins = { "*" }) // Agregar todos los dominios                                              // necesarios
 public class AuthController {
 
     @Autowired
