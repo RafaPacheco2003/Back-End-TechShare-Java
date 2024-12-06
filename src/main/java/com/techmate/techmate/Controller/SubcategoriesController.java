@@ -27,7 +27,7 @@
     import com.techmate.techmate.Validation.ImageValidationStrategy;
 
     @RestController
-    @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+    @CrossOrigin(origins = "https://tech-share.vercel.app") // Permitir solicitudes desde tu frontend
     @RequestMapping("/subcategories")
     public class SubcategoriesController {
 

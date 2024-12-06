@@ -20,7 +20,7 @@ import com.techmate.techmate.Service.RoleService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "https://tech-share.vercel.app") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("admin/role")
 public class RoleController {

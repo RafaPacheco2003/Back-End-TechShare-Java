@@ -14,7 +14,7 @@ import com.techmate.techmate.Service.MovementsService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "https://tech-share.vercel.app") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/movement")
 public class MovementsController {

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "https://tech-share.vercel.app") // Permitir solicitudes desde tu frontend
 @RequestMapping("/borrow")
 public class BorrowUserController {
 

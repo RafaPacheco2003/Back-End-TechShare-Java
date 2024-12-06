@@ -21,7 +21,7 @@ import com.techmate.techmate.Service.BorrowService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://tech-share.vercel.app")
 @RequestMapping("admin/borrow")
 public class BorrowController {
 
