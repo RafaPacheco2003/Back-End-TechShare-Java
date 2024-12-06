@@ -20,25 +20,35 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@AllArgsConstructor
 public class WebSecurityConfig {
 
     private final JWTAuthorizationFIlter jWTAuthorizationFIlter;
     private final UserDetailsService userDetailsService;
+
+    public WebSecurityConfig(JWTAuthorizationFIlter jWTAuthorizationFIlter, UserDetailsService userDetailsService) {
+        this.jWTAuthorizationFIlter = jWTAuthorizationFIlter;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authnManager) throws Exception {
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter();
         jwtAuthenticationFilter.setAuthenticationManager(authnManager);
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
-    
+
         return http
-                .cors()  // Habilitar CORS
+                .cors() // Aplicar configuración de CORS
+                .configurationSource(corsConfigurationSource()) // Enlazar configuración de CORS
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register", "/categories/images/**", "/admin/materials/images/**", "/subcategories/images/**").permitAll() 
-                    .anyRequest().authenticated()
+                .requestMatchers(
+                        "/register",
+                        "/categories/images/**",
+                        "/admin/materials/images/**",
+                        "/subcategories/images/**")
+                .permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
@@ -65,19 +75,18 @@ public class WebSecurityConfig {
     }
 
     @Bean
-public CorsFilter corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration config = new CorsConfiguration();
-    
-    // Permitir cualquier origen, header y método
-    config.setAllowCredentials(true); // Permitir credenciales
-    config.addAllowedOriginPattern("*"); // Permitir cualquier origen
-    config.addAllowedHeader("*"); // Permitir cualquier header
-    config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, PUT, DELETE, etc.)
-    config.addExposedHeader("Authorization"); // Exponer el header Authorization
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
 
-    source.registerCorsConfiguration("/**", config);
-    return new CorsFilter(source);
-}
+        config.setAllowCredentials(true); // Permitir credenciales
+        config.addAllowedOrigin("https://tech-share.vercel.app"); // Permitir el origen de producción
+        config.addAllowedOrigin("http://localhost:3000"); // Permitir localhost para pruebas locales
+        config.addAllowedHeader("*"); // Permitir todos los headers
+        config.addAllowedMethod("*"); // Permitir todos los métodos HTTP
+        config.addExposedHeader("Authorization"); // Exponer encabezado Authorization
 
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
