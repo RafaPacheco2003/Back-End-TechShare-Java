@@ -97,8 +97,14 @@ public class MaterialsServiceImpl implements MaterialsService {
         materials.setDescription(materialsDTO.getDescription());
         materials.setPrice(materialsDTO.getPrice());
 
-        // Asignar valores predeterminados
-        materials.setStock(0);
+        if (materialsDTO.getStock() == 0) {
+            materials.setStock(0);
+        } else {
+            materials.setStock(materialsDTO.getStock());
+        }
+        
+        
+       
         materials.setBorrowable_stock(0);
 
         // Verificar subcategoría

@@ -20,8 +20,8 @@ public class MovementsDTO {
     private Date date;
     private String comment;
 
-    private int usuarioId;       // Referencia al ID del usuario relacionado
-    private String usuarioName;
+    private int adminId;       // Referencia al ID del usuario relacionado
+    private String adminName;
 
     private int materialsId;     // Referencia al ID del material relacionado
     private String materialsName;

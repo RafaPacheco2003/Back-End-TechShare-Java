@@ -83,11 +83,11 @@ public class MovementsServiceImpl implements MovementsService {
         dto.setComment(comment);
 
         // Obtener y asignar IDs y nombres
-        dto.setUsuarioId(movements.getUsuario().getId());
+        dto.setAdminId(movements.getUsuario().getId());
         dto.setMaterialsId(movements.getMaterials().getMaterialsId());
 
         // Obtener y asignar nombres de Usuario y Materials mediante los servicios
-        dto.setUsuarioName(userService.getUsuarioUsernamById(movements.getUsuario().getId()));
+        dto.setAdminName(userService.getUsuarioUsernamById(movements.getUsuario().getId()));
         dto.setMaterialsName(materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId()));
 
         return dto;
@@ -139,7 +139,7 @@ public class MovementsServiceImpl implements MovementsService {
                 materials.setBorrowable_stock(materials.getBorrowable_stock() - movements.getQuantity());
                 materials.setStock(materials.getStock() - movements.getQuantity());
                 break;
-            case ADDJUST:
+            case ADJUST:
                 // En el caso de ajustes, se ajusta tanto el borrowable_stock como el stock
                 // total
                 int difference = movements.getQuantity() - materials.getStock();
@@ -179,7 +179,7 @@ public class MovementsServiceImpl implements MovementsService {
                 moveType = MoveType.OUT;
                 break;
             case "ADDJUST":
-                moveType = MoveType.ADDJUST;
+                moveType = MoveType.ADJUST;
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de movimiento inválido: " + type);

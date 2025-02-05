@@ -47,6 +47,7 @@ public class MaterialsController {
             @RequestParam("image") MultipartFile image,
             @RequestParam("name") String name,
             @RequestParam("description") String description,
+            @RequestParam("stock") int stock,
             @RequestParam("price") double price,
             @RequestParam("subCategoryId") int subCategoryId,
             @RequestParam("roleIds") List<Integer> roleIds) { // Cambiado a roleIds como lista
@@ -56,6 +57,7 @@ public class MaterialsController {
             MaterialsDTO materialsDTO = new MaterialsDTO();
             materialsDTO.setImagePath(image.getOriginalFilename()); // Obtener el nombre original de la imagen
             materialsDTO.setName(name);
+            materialsDTO.setStock(stock);
             materialsDTO.setDescription(description);
             materialsDTO.setPrice(price);
             materialsDTO.setSubCategoryId(subCategoryId);
@@ -93,6 +95,7 @@ public class MaterialsController {
             @PathVariable("id") Integer id,
             @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam(value = "name", required = false) String name,
+            @RequestParam("stock") int stock,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "price", required = false) Double price,
             @RequestParam(value = "subCategoryId", required = false) Integer subCategoryId,
@@ -102,6 +105,7 @@ public class MaterialsController {
 
         materialsDTO.setName(name);
         materialsDTO.setDescription(description);
+        materialsDTO.setStock(stock);
         materialsDTO.setPrice(price);
         materialsDTO.setSubCategoryId(subCategoryId);
         materialsDTO.setRoleIds(roleIds); // Asignar la lista de roleIds
