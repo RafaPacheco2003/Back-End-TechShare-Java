@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Actualizar roles solo si se proporcionaron nuevos roles
-        if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
+       // if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
             for (String roleName : usuarioDTO.getRoles()) {
                 Optional<Role> roleOpt = roleRepository.findByNombre(roleName);
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
                 roles.add(roleOpt.get());
             }
             usuario.setRoles(roles); // Asignar los nuevos roles solo si se proporcionaron
-        }
+        //}
 
         // Guardar el usuario actualizado
         Usuario updatedUsuario = userRepository.save(usuario);
