@@ -37,7 +37,8 @@ public class WebSecurityConfig {
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register", "/categories/images/**", "/admin/materials/images/**", "/subcategories/images/**").permitAll() 
+                .requestMatchers("/register").permitAll() //"/admin/categories/images/**", "/admin/materials/images/**", "admin/subcategories/images/**
+                .requestMatchers("/admin/**").hasRole("ROOT") 
                     .anyRequest().authenticated()
                 .and()
                 .httpBasic()

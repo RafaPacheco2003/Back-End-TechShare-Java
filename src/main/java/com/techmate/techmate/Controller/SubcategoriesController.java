@@ -28,7 +28,7 @@
 
     @RestController
     @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
-    @RequestMapping("/subcategories")
+    @RequestMapping("admin/subcategories")
     public class SubcategoriesController {
 
         @Autowired
