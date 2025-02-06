@@ -39,19 +39,7 @@ public class AuthController {
         usuario.setFirst_name(registerRequest.getFirst_name()); // Usando el nuevo campo
         usuario.setLast_name(registerRequest.getLast_name()); // Usando el nuevo campo
         usuario.setEmail(registerRequest.getEmail());
-        usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-
-        // Asignar roles al usuario
-        if (registerRequest.getRoles() != null) {
-            Set<Role> roles = new HashSet<>();
-            for (Integer roleId : registerRequest.getRoles()) {
-                Role role = roleRepository.findById(roleId).orElse(null);
-                if (role != null) {
-                    roles.add(role);
-                }
-            }
-            usuario.setRoles(roles);
-        }
+        usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword())); 
 
         // Guardar el usuario en la base de datos
         usuarioRepository.save(usuario);
