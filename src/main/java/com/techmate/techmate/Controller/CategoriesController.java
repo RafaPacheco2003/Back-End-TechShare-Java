@@ -97,7 +97,7 @@ public class CategoriesController {
             if (category == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            category.setImagePath(serverUrl + "/categories/images/" + category.getImagePath());
+            category.setImagePath(serverUrl + "/admin/categories/images/" + category.getImagePath());
             return new ResponseEntity<>(category, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener la categoría
@@ -138,7 +138,7 @@ public class CategoriesController {
             }
 
             // Actualizar el path de la imagen con la URL completa del servidor
-            updatedCategory.setImagePath(serverUrl + "/categories/images/" + updatedCategory.getImagePath());
+            updatedCategory.setImagePath(serverUrl + "/admin/categories/images/" + updatedCategory.getImagePath());
             return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error en la actualización
@@ -152,7 +152,7 @@ public class CategoriesController {
         try {
             List<CategoriesDTO> categories = categoriesService.getAllCategories().stream()
                     .map(category -> {
-                        String imagePath = serverUrl + "/categories/images/" + category.getImagePath();
+                        String imagePath = serverUrl + "/admin/categories/images/" + category.getImagePath();
                         category.setImagePath(imagePath);
                         return category;
                     })

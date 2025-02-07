@@ -5,7 +5,6 @@ import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
@@ -75,9 +73,8 @@ public class MaterialsController {
             e.printStackTrace(); // Esto te dará la traza del error en la consola
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-    }
 
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<MaterialsDTO> getMaterialById(@PathVariable("id") Integer id) {
@@ -143,26 +140,26 @@ public class MaterialsController {
     }
 
     @GetMapping("/sorted-by-price")
-    public ResponseEntity<List<MaterialsDTO>> getAllMaterialsSortedByPrice(@RequestParam(value = "asc", defaultValue = "false") boolean ascending) {
+    public ResponseEntity<List<MaterialsDTO>> getAllMaterialsSortedByPrice(
+            @RequestParam(value = "asc", defaultValue = "false") boolean ascending) {
         try {
             List<MaterialsDTO> materialsDTO = materialsService.getAllMaterialsSortedByPrice(ascending);
-    
+
             if (materialsDTO.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-    
+
             materialsDTO.forEach(material -> {
                 if (material.getImagePath() != null) {
                     material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
                 }
             });
-    
+
             return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener materiales
         }
     }
-    
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteMaterials(@PathVariable("id") Integer id) {
