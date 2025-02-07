@@ -80,7 +80,7 @@ public class CategoriesController {
             // Delegar la validación y almacenamiento de la imagen al servicio
             CategoriesDTO savedCategory = categoriesService.createCategory(categoriesDTO, image);
 
-            savedCategory.setImagePath(serverUrl + "/categories/images/" + savedCategory.getImagePath());
+            savedCategory.setImagePath(serverUrl + "/admin/categories/images/" + savedCategory.getImagePath());
 
             return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
         } catch (RuntimeException e) {

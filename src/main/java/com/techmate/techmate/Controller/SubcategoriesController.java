@@ -54,7 +54,7 @@
                 subcategoryDTO.setCategoryId(idCategoria); // Asocia la subcategoría a una categoría
 
                 SubCategoriesDTO savedSubcategory = subcategoriesService.createSubCategory(subcategoryDTO, image);
-                savedSubcategory.setImagePath(serverUrl + "/subcategories/images/" + savedSubcategory.getImagePath());
+                savedSubcategory.setImagePath(serverUrl + "/admin/subcategories/images/" + savedSubcategory.getImagePath());
 
                 return new ResponseEntity<>(savedSubcategory, HttpStatus.CREATED);
             } catch (IllegalArgumentException e) {
