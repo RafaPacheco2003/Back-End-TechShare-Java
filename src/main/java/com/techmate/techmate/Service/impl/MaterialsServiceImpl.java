@@ -99,13 +99,14 @@ public class MaterialsServiceImpl implements MaterialsService {
 
         if (materialsDTO.getStock() == 0) {
             materials.setStock(0);
+            materials.setBorrowable_stock(0);
         } else {
             materials.setStock(materialsDTO.getStock());
+            materials.setBorrowable_stock(materialsDTO.getStock());
         }
         
         
        
-        materials.setBorrowable_stock(0);
 
         // Verificar subcategoría
         SubCategories subCategories = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
