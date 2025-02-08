@@ -21,6 +21,8 @@ public class Usuario {
     private String email;
     private String password;
 
+    private boolean isEnabled = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "usuario_role", // Nombre de la tabla intermedia
             joinColumns = @JoinColumn(name = "usuario_id"), // Columna que se refiere a Usuario
