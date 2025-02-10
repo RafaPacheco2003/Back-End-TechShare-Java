@@ -15,7 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import lombok.AllArgsConstructor;import org.springframework.web.cors.CorsConfiguration;
+import lombok.AllArgsConstructor;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -31,15 +32,17 @@ public class WebSecurityConfig {
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter();
         jwtAuthenticationFilter.setAuthenticationManager(authnManager);
         jwtAuthenticationFilter.setFilterProcessesUrl("/login");
-    
+
         return http
-                .cors()  // Habilitar CORS
+                .cors() // Habilitar CORS
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register").permitAll() //"/admin/categories/images/**", "/admin/materials/images/**", "admin/subcategories/images/**
+                .requestMatchers("/register", "/admin/categories/images/**", "/admin/materials/images/**",
+                        "/admin/subcategories/images/**")
+                .permitAll()
                 .requestMatchers("/admin/**").authenticated()
-                    .anyRequest().authenticated()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
