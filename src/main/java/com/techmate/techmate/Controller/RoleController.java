@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.techmate.techmate.DTO.RoleDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 import com.techmate.techmate.Entity.Materials;
 import com.techmate.techmate.Service.RoleService;
 
@@ -22,23 +28,27 @@ import jakarta.persistence.EntityNotFoundException;
 
 @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
-@RequestMapping("admin/role")
+@RequestMapping("/admin/role")
 public class RoleController {
 
     @Autowired
     private RoleService roleService;
 
     @PostMapping("/create")
-    public ResponseEntity<RoleDTO> createRol(@RequestBody RoleDTO roleDTO) {
+    public ResponseEntity<?> createRol(@RequestBody RoleDTO roleDTO) {
         try {
             // Guardar el rol usando el servicio
             RoleDTO createdRole = roleService.createRole(roleDTO);
             return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
+        } catch (AccessDeniedException e) {
+            // Manejar el error de acceso denegado (403)
+            return new ResponseEntity<>("No tienes permisos suficientes para realizar esta operación.", HttpStatus.FORBIDDEN); // 403 Forbidden
         } catch (Exception e) {
-            // Manejar excepciones y devolver respuesta de error
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+            // Devolver el mensaje de error general
+            return new ResponseEntity<>("Error al crear el rol: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
         }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getRoleByID(@PathVariable("id") Integer id) {

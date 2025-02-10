@@ -97,6 +97,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<RoleDTO> getAllRole() {
         return roleRepository.findAll().stream()
+                .filter(role -> role.getRoleId() != 1)
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
