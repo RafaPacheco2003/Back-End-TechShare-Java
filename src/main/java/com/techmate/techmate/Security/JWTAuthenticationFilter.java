@@ -51,12 +51,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Integer userId = userDetails.getUsuario().getId();
 
          // Verificar si el usuario está verificado
-         if (!userDetails.getUsuario().isEnabled()) {
+         /*if (!userDetails.getUsuario().isEnabled()) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // O el código de estado que prefieras
             response.getWriter().write("Cuenta no verificada. Por favor verifica tu cuenta.");
-            return; // No continúa con la autenticación
+            return; 
         }
-
+*/
         List<Integer> roleIdList = userDetails.getIdRoles();
 
         // Obtén los roles del usuario
