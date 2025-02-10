@@ -50,12 +50,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
         Integer userId = userDetails.getUsuario().getId();
 
-         // Verificar si el usuario está verificado
-         if (!userDetails.getUsuario().isEnabled()) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // O el código de estado que prefieras
-            response.getWriter().write("Cuenta no verificada. Por favor verifica tu cuenta.");
-            return; // No continúa con la autenticación
-        }
+        // Verificar si el usuario está verificado
+        /*
+         * if (!userDetails.getUsuario().isEnabled()) {
+         * response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // O el código de
+         * estado que prefieras
+         * response.getWriter().
+         * write("Cuenta no verificada. Por favor verifica tu cuenta.");
+         * return; // No continúa con la autenticación
+         * }
+         */
 
         List<Integer> roleIdList = userDetails.getIdRoles();
 
@@ -67,9 +71,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Aquí pasamos el username también al token, ahora que el método createToken lo acepta
-        String userName = userDetails.getNombre();  // Obtener el nombre de usuario
-        
+        // Aquí pasamos el username también al token, ahora que el método createToken lo
+        // acepta
+        String userName = userDetails.getNombre(); // Obtener el nombre de usuario
+
         // Genera el token JWT usando el id, username (email), userName, roles y idRoles
         String token = TokenUtils.createToken(userId, userDetails.getUsername(), userName, roleList, roleIdList);
 
