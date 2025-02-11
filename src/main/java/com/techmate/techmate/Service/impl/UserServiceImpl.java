@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
                     }
                     return convertToDTO(usuario, roles);
                 })
+                //
 
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -110,20 +111,7 @@ public class UserServiceImpl implements UserService {
         // Obtener el usuario actual
         Usuario usuario = usuarioOpt.get();
 
-        // Actualizar los campos del usuario con los nuevos valores de usuarioDTO solo
-        // si no son null
-        if (usuarioDTO.getUserName() != null) {
-            usuario.setUser_name(usuarioDTO.getUserName());
-        }
-        if (usuarioDTO.getFirstName() != null) {
-            usuario.setFirst_name(usuarioDTO.getFirstName());
-        }
-        if (usuarioDTO.getLastName() != null) {
-            usuario.setLast_name(usuarioDTO.getLastName());
-        }
-        if (usuarioDTO.getEmail() != null) {
-            usuario.setEmail(usuarioDTO.getEmail());
-        }
+    
 
         // Actualizar roles solo si se proporcionaron nuevos roles
         // if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
