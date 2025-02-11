@@ -60,6 +60,7 @@ public class UserServiceImpl implements UserService {
                 .map(usuario -> {
                     Set<String> roles = usuarioRoles.stream()
                             .filter(usuarioRole -> usuarioRole.getUsuario().getId().equals(usuario.getId()))
+                            .filter(user -> user.getId() != 1)
                             .map(usuarioRole -> usuarioRole.getRole().getNombre())
                             .collect(Collectors.toSet());
                     return convertToDTO(usuario, roles);
