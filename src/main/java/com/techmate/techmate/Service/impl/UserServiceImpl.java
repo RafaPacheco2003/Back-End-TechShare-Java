@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,13 +59,19 @@ public class UserServiceImpl implements UserService {
 
         return usuarios.stream()
                 .map(usuario -> {
+                    // Obtener los roles del usuario
                     Set<String> roles = usuarioRoles.stream()
                             .filter(usuarioRole -> usuarioRole.getUsuario().getId().equals(usuario.getId()))
-                            .filter(user -> user.getId() != 1)
                             .map(usuarioRole -> usuarioRole.getRole().getNombre())
                             .collect(Collectors.toSet());
+
+                    if (roles.stream().anyMatch(role -> role.equalsIgnoreCase("root"))) {
+                        return null;
+                    }
                     return convertToDTO(usuario, roles);
                 })
+
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -119,17 +126,17 @@ public class UserServiceImpl implements UserService {
         }
 
         // Actualizar roles solo si se proporcionaron nuevos roles
-       // if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
-            Set<Role> roles = new HashSet<>();
-            for (String roleName : usuarioDTO.getRoles()) {
-                Optional<Role> roleOpt = roleRepository.findByNombre(roleName);
-                if (roleOpt.isEmpty()) {
-                    throw new UserNotFoundException("El rol '" + roleName + "' no existe.");
-                }
-                roles.add(roleOpt.get());
+        // if (usuarioDTO.getRoles() != null && !usuarioDTO.getRoles().isEmpty()) {
+        Set<Role> roles = new HashSet<>();
+        for (String roleName : usuarioDTO.getRoles()) {
+            Optional<Role> roleOpt = roleRepository.findByNombre(roleName);
+            if (roleOpt.isEmpty()) {
+                throw new UserNotFoundException("El rol '" + roleName + "' no existe.");
             }
-            usuario.setRoles(roles); // Asignar los nuevos roles solo si se proporcionaron
-        //}
+            roles.add(roleOpt.get());
+        }
+        usuario.setRoles(roles); // Asignar los nuevos roles solo si se proporcionaron
+        // }
 
         // Guardar el usuario actualizado
         Usuario updatedUsuario = userRepository.save(usuario);
