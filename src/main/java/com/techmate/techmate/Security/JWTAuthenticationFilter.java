@@ -67,9 +67,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Aquí pasamos el username también al token, ahora que el método createToken lo acepta
-        String userName = userDetails.getNombre();  // Obtener el nombre de usuario
-        
+        // Aquí pasamos el username también al token, ahora que el método createToken lo
+        // acepta
+        String userName = userDetails.getNombre(); // Obtener el nombre de usuario
+
         // Genera el token JWT usando el id, username (email), userName, roles y idRoles
         String token = TokenUtils.createToken(userId, userDetails.getUsername(), userName, roleList, roleIdList);
 
