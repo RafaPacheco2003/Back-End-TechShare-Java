@@ -58,12 +58,12 @@ public class MovementsServiceImpl implements MovementsService {
 
         // Aquí asignamos el ID de usuario obtenido del token
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         movements.setUsuario(usuario);
 
         Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
                 .orElseThrow(
-                        () -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
+                        () -> new RuntimeException("Material no encontrado"));
         movements.setMaterials(materials);
 
         return movements;
@@ -101,7 +101,7 @@ public class MovementsServiceImpl implements MovementsService {
             throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
         }
 
-        String comment = movementsDTO.getComment() + "sevice create";
+        String comment = movementsDTO.getComment();
         movementsDTO.setComment(comment);
         // Asignar la fecha actual al movimientFo
         movementsDTO.setDate(new Date());
@@ -111,7 +111,7 @@ public class MovementsServiceImpl implements MovementsService {
         // Obtener el material correspondiente antes de ajustar el stock
         Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
                 .orElseThrow(
-                        () -> new RuntimeException("Material no encontrado con ID: " + movementsDTO.getMaterialsId()));
+                        () -> new RuntimeException("Material no encontrado"));
 
         adjustMaterialStock(materials, movements);
         materialsRepository.save(materials);
@@ -133,7 +133,7 @@ public class MovementsServiceImpl implements MovementsService {
                 // Verificar si el stock total es suficiente
                 if (materials.getStock() < movements.getQuantity()) {
                     throw new IllegalArgumentException(
-                            "Stock insuficiente para el material con ID: " + materials.getMaterialsId());
+                            "Stock insuficiente para el material");
                 }
                 // Reducir el borrowable_stock y el stock total cuando sale material
                 materials.setBorrowable_stock(materials.getBorrowable_stock() - movements.getQuantity());
@@ -154,7 +154,7 @@ public class MovementsServiceImpl implements MovementsService {
     @Override
     public MovementsDTO getMovementsByID(Integer movementsId) {
         Movements movements = movementsRepository.findById(movementsId)
-                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado con ID: " + movementsId));
+                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
         return convertToDTO(movements);
     }
 
@@ -178,7 +178,7 @@ public class MovementsServiceImpl implements MovementsService {
             case "OUT":
                 moveType = MoveType.OUT;
                 break;
-            case "ADDJUST":
+            case "ADJUST":
                 moveType = MoveType.ADJUST;
                 break;
             default:
@@ -205,7 +205,7 @@ public class MovementsServiceImpl implements MovementsService {
             
             movementsRepository.deleteById(movementsId);
         } else {
-            throw new EntityNotFoundException("Movement not found with id: " + movementsId);
+            throw new EntityNotFoundException("Movement not found");
         }
     }
 
