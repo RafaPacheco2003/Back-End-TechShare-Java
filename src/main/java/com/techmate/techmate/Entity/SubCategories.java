@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -24,9 +26,9 @@ public class SubCategories {
     @Column(name = "imagePath")
     private String imagePath;
 
-    @NotNull(message = "La categoría no puede ser nula") // Valida que la categoría no sea nula
-    @ManyToOne
-    @JoinColumn(name = "category_id")  // Clave foránea que apunta a la categoría
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Categories category;
 
     @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
