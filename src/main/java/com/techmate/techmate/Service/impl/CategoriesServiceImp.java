@@ -87,7 +87,7 @@ public class CategoriesServiceImp implements CategoriesService {
                 Categories defaultCategory = new Categories();
                 defaultCategory.setCategoryId(DEFAULT_CATEGORY_ID);
                 defaultCategory.setName(DEFAULT_CATEGORY_NAME);
-                defaultCategory.setImagePath("cropped-image-mu48c8gfkugii8zy77hm.jpg");
+                defaultCategory.setImagePath("default.jpg");
                 categoriesRepository.save(defaultCategory);
             }
         }
