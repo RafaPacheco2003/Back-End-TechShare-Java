@@ -16,6 +16,7 @@ import com.techmate.techmate.Service.CategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.annotation.PostConstruct;
 
 /**
  * La clase {@code CategoriesServiceImp} es la implementación de la interfaz
@@ -31,6 +32,9 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @Service
 public class CategoriesServiceImp implements CategoriesService {
+
+    private static final String DEFAULT_CATEGORY_NAME = "Sin categoría";
+    private static final int DEFAULT_CATEGORY_ID = 1; // ID reservado para la categoría por defecto
 
     @Autowired
     CategoriesRepository categoriesRepository;
@@ -76,6 +80,19 @@ public class CategoriesServiceImp implements CategoriesService {
         return categories;
     }
 
+    @PostConstruct
+    public void initializeDefaultCategory() {
+        if (categoriesRepository.findById(DEFAULT_CATEGORY_ID).isEmpty()) {
+            if (categoriesRepository.findByName(DEFAULT_CATEGORY_NAME) == null) {
+                Categories defaultCategory = new Categories();
+                defaultCategory.setCategoryId(DEFAULT_CATEGORY_ID);
+                defaultCategory.setName(DEFAULT_CATEGORY_NAME);
+                defaultCategory.setImagePath("cropped-image-mu48c8gfkugii8zy77hm.jpg");
+                categoriesRepository.save(defaultCategory);
+            }
+        }
+    }
+
     @Override
     public CategoriesDTO createCategory(CategoriesDTO categoriesDTO, MultipartFile image) {
         // Verificar si ya existe una categoría con el mismo nombre
@@ -111,9 +128,21 @@ public class CategoriesServiceImp implements CategoriesService {
 
     @Override
     public CategoriesDTO updateCategory(int categoryID, CategoriesDTO categoriesDTO, MultipartFile image) {
+        // Prevenir la edición de la categoría por defecto
+        if (categoryID == DEFAULT_CATEGORY_ID) {
+            throw new IllegalArgumentException("No se puede modificar la categoría por defecto");
+        }
+
         // Buscar la categoría por ID y lanzar excepción si no se encuentra
         Categories categories = categoriesRepository.findById(categoryID)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
+
+        // Verificar que no se está intentando usar el nombre de la categoría por
+        // defecto
+        if (categoriesDTO.getName() != null &&
+                categoriesDTO.getName().equals(DEFAULT_CATEGORY_NAME)) {
+            throw new IllegalArgumentException("No se puede usar el nombre de la categoría por defecto");
+        }
 
         // Verificar si ya existe otra categoría con el mismo nombre y el nombre ha
         // cambiado
@@ -153,6 +182,11 @@ public class CategoriesServiceImp implements CategoriesService {
 
     @Override
     public void deleteCategory(int categoryID) {
+        // Prevenir la eliminación de la categoría por defecto
+        if (categoryID == DEFAULT_CATEGORY_ID) {
+            throw new IllegalArgumentException("No se puede eliminar la categoría por defecto");
+        }
+
         // Buscar la categoría por ID
         Categories category = categoriesRepository.findById(categoryID)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
