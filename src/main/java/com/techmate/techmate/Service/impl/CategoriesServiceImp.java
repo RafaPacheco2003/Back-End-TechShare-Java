@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.techmate.techmate.DTO.CategoriesDTO;
 import com.techmate.techmate.Entity.Categories;
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Repository.CategoriesRepository;
+import com.techmate.techmate.Repository.SubCategoriesRepository;
 import com.techmate.techmate.Service.CategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
 
@@ -38,6 +40,9 @@ public class CategoriesServiceImp implements CategoriesService {
 
     @Autowired
     CategoriesRepository categoriesRepository;
+
+    @Autowired
+    private SubCategoriesRepository subCategoriesRepository;
 
     @Autowired
     private ImageStorageStrategy imageStorageStrategy;
@@ -180,25 +185,24 @@ public class CategoriesServiceImp implements CategoriesService {
         return convertToDTO(categories); // Devolver la categoría actualizada
     }
 
+    @Transactional
     @Override
-    public void deleteCategory(int categoryID) {
-        // Prevenir la eliminación de la categoría por defecto
-        if (categoryID == DEFAULT_CATEGORY_ID) {
-            throw new IllegalArgumentException("No se puede eliminar la categoría por defecto");
-        }
-
-        // Buscar la categoría por ID
-        Categories category = categoriesRepository.findById(categoryID)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
-
-        // Si se encuentra la categoría, eliminar la imagen si existe
-        String imagePath = category.getImagePath();
-        if (imagePath != null && !imagePath.isEmpty()) {
-            imageStorageStrategy.deleteImage(imagePath); // Utilizar la estrategia para eliminar la imagen
-        }
-
-        // Eliminar la categoría de la base de datos
-        categoriesRepository.deleteById(categoryID);
+    public void deleteCategory(int categoryId) {
+        Categories categoryToDelete = categoriesRepository.findById(categoryId)
+            .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+        
+        // Obtener la categoría por defecto (ID 1)
+        Categories defaultCategory = categoriesRepository.findById(1)
+            .orElseThrow(() -> new RuntimeException("Categoría por defecto no encontrada"));
+        
+        // Actualizar todas las subcategorías a la categoría por defecto
+        categoryToDelete.getSubCategories().forEach(subCategory -> {
+            subCategory.setCategory(defaultCategory);
+            subCategoriesRepository.save(subCategory);
+        });
+        
+        // Eliminar la categoría
+        categoriesRepository.delete(categoryToDelete);
     }
 
     @Override

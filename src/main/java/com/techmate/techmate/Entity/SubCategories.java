@@ -28,7 +28,6 @@ public class SubCategories {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Categories category;
 
     @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
