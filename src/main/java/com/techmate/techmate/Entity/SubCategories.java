@@ -30,7 +30,7 @@ public class SubCategories {
     @JoinColumn(name = "category_id", nullable = true)
     private Categories category;
 
-    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "subCategory", fetch = FetchType.LAZY)
     private List<Materials> materials;
 
 }

@@ -31,7 +31,7 @@ public class Materials {
     @Column(name = "materials_id")
     private int materialsId;
 
-    @Column(name = "imagePath") 
+    @Column(name = "imagePath")
     private String imagePath;
 
     @NotBlank(message = "El nombre no puede estar vacío")
@@ -57,12 +57,11 @@ public class Materials {
     private int borrowable_stock;
 
     @ManyToOne
-    @JoinColumn(name = "subCategory_id")
+    @JoinColumn(name = "subCategory_id", nullable = true) // Permitimos null
     private SubCategories subCategory;
 
     @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoleMaterials> roleMaterials;
-
 
     @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movements> movements;
