@@ -73,7 +73,7 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // Permitir credenciales
-        config.addAllowedOrigin("http://localhost:3000"); // Permitir solicitudes desde el frontend
+        config.addAllowedOrigin("*"); // Permitir solicitudes desde el frontend
         config.addAllowedHeader("*"); // Permitir cualquier header
         config.addAllowedMethod("*"); // Permitir cualquier método (GET, POST, etc.)
         config.addExposedHeader("Authorization");
