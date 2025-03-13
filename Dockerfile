@@ -1,17 +1,22 @@
-# Usar una imagen base con Java 17
-FROM eclipse-temurin:17-jdk-alpine as builder
+# Usar una imagen base con Java 17 y Maven
+FROM maven:3.8.6-eclipse-temurin-17-alpine as builder
 
 # Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar los archivos de la aplicación (incluyendo el pom.xml)
-COPY . .
+# Copiar el archivo pom.xml primero para aprovechar la caché de dependencias
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
 
-# Dar permisos de ejecución al archivo mvnw
-RUN chmod +x mvnw
+# Descargar todas las dependencias para aprovechar la caché de Docker
+RUN mvn dependency:go-offline -B
+
+# Copiar el resto del código fuente
+COPY src ./src
 
 # Compilar la aplicación y generar el .jar
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Segunda etapa: imagen ligera para ejecutar la aplicación
 FROM eclipse-temurin:17-jre-alpine
@@ -26,4 +31,4 @@ COPY --from=builder /app/target/techmate-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
