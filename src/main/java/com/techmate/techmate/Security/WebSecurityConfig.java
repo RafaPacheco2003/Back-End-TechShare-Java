@@ -45,8 +45,6 @@ public class WebSecurityConfig {
                 .requestMatchers("/admin/**").authenticated()
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

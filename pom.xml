@@ -99,6 +99,17 @@
         <version>0.11.5</version>
         <scope>runtime</scope>
     </dependency>
+    <!-- Flyway for DB migrations -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
+    <!-- Flyway MySQL support (required by Flyway 10+ modular distribution) -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-mysql</artifactId>
+        <version>10.10.0</version>
+    </dependency>
 </dependencies>
 
     <build>
