@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/register", "/admin/categories/images/**", "/admin/materials/images/**",
                         "/admin/subcategories/images/**")
                 .permitAll()
+                .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").authenticated()
                 .anyRequest().authenticated()
                 .and()
