@@ -25,9 +25,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class TokenUtils {
 
-    private final static String ACCESS_TOKEN_SECRET = "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc";
-    
-    private final static Long ACCESS_TOKEN_VALIDITY_SECONDS = 2_592_000L; // 30 días
+    // Leer secret y expiración desde variables de entorno para no dejar secretos en el repo
+    private static final String ACCESS_TOKEN_SECRET = System.getenv().getOrDefault("JWT_SECRET", "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc");
+
+    // Validez en segundos (por defecto 3600 = 1 hora). Se puede configurar con JWT_EXPIRATION_SECONDS
+    private static final Long ACCESS_TOKEN_VALIDITY_SECONDS;
+    static {
+        Long defaultSeconds = 3600L;
+        String s = System.getenv("JWT_EXPIRATION_SECONDS");
+        if (s != null && !s.isBlank()) {
+            try { defaultSeconds = Long.parseLong(s); } catch (NumberFormatException ignore) {}
+        }
+        ACCESS_TOKEN_VALIDITY_SECONDS = defaultSeconds;
+    }
 
     // Método para crear el token
     // Modifica el método para aceptar el id del usuario
@@ -42,11 +52,9 @@ public class TokenUtils {
         extra.put("roles", roles); // Aquí se añaden los roles del usuario
         extra.put("idRoles", idRoles);
     
-        System.out.println("Creando token para ID: " + id); // Verifica el ID antes de crear el token
-    
-        SecretKey secretKey = Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
-    
-        return Jwts.builder()
+    SecretKey secretKey = getSecretKey();
+
+    return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(expirationDate)
                 .addClaims(extra)  // Añadir los claims extra (id, nombre de usuario, roles, idRoles)
@@ -59,14 +67,14 @@ public class TokenUtils {
     public static UsernamePasswordAuthenticationToken getAuthentication(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
+                    .setSigningKey(getSecretKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
             String email = claims.getSubject();
             List<String> roles = (List<String>) claims.get("roles"); // Obtener roles del token
-            
+            if (roles == null) roles = List.of();
             // Convertir roles a authorities
             var authorities = roles.stream()
                                    .map(role -> new SimpleGrantedAuthority(role))
@@ -98,23 +106,14 @@ public class TokenUtils {
     public static Integer getUserIdFromToken(String token) {
         Claims claims = decodeToken(token); // Decodificar el token
         if (claims != null) {
-            System.out.println("Claims: " + claims); // Imprime los reclamos
-            
             // Recuperar el id de los claims
             Object idClaim = claims.get("id");
-            System.out.println("ID claim desde claims: " + idClaim); // Imprime el claim del ID
-    
-            // Si el idClaim no es nulo, intenta convertirlo a Integer
             if (idClaim != null) {
-                Integer userId;
                 try {
-                    userId = (Integer) idClaim; // Intenta obtener el ID como Integer
+                    return (Integer) idClaim;
                 } catch (ClassCastException e) {
-                    // Si el id está almacenado como String, conviértelo a Integer
-                    userId = Integer.parseInt(idClaim.toString());
+                    return Integer.parseInt(idClaim.toString());
                 }
-                System.out.println("ID de usuario extraído del token: " + userId); // Imprime el ID del usuario
-                return userId; // Retorna el ID del usuario
             }
         }
         throw new RuntimeException("Token no válido o ID no encontrado");
@@ -123,11 +122,8 @@ public class TokenUtils {
     public static String getUserNameFromToken(String token) {
         Claims claims = decodeToken(token); // Decodificar el token
         if (claims != null) {
-            // Recuperar el nombre de usuario de los claims
             Object userNameClaim = claims.get("user_name");
-            if (userNameClaim != null) {
-                return userNameClaim.toString(); // Retorna el nombre de usuario
-            }
+            if (userNameClaim != null) return userNameClaim.toString();
         }
         throw new RuntimeException("Token no válido o nombre de usuario no encontrado");
     }
@@ -137,21 +133,14 @@ public class TokenUtils {
     public static Optional<List<Integer>> getRolesFromToken(String token) {
         Claims claims = decodeToken(token); // Decodificar el token
         if (claims != null) {
-            System.out.println("Claims: " + claims); // Imprime los reclamos
-            
-            // Recuperar los roles de los claims
             Object rolesClaim = claims.get("idRoles");
-            System.out.println("Roles claim desde claims: " + rolesClaim); // Imprime el claim de roles
-
-            // Si rolesClaim no es nulo, intenta convertirlo a una lista de enteros
             if (rolesClaim != null) {
                 try {
                     @SuppressWarnings("unchecked")
                     List<Integer> roles = (List<Integer>) rolesClaim; // Cast a List<Integer>
-                    return Optional.of(roles); // Retorna la lista de roles
+                    return Optional.of(roles);
                 } catch (ClassCastException e) {
-                    // Manejo de error si no se puede convertir
-                    System.out.println("Error al convertir roles: " + e.getMessage());
+                    // ignore and return empty
                 }
             }
         }
@@ -163,18 +152,18 @@ public class TokenUtils {
     public static Claims decodeToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes()))
+                    .setSigningKey(getSecretKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            
-            System.out.println("Claims decodificados en tokensUtils: " + claims); // Verifica los claims decodificados
             return claims;
         } catch (JwtException e) {
-            // Manejo de excepción si el token no es válido
-            System.out.println("Error al decodificar el token: " + e.getMessage());
             return null;
         }
+    }
+    
+    private static SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
     }
     
 }

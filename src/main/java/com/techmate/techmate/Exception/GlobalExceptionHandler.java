@@ -28,6 +28,28 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .reduce((msg1, msg2) -> msg1 + "; " + msg2)
+            .orElse("Error de validación");
+        ErrorResponse errorResponse = new ErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(io.jsonwebtoken.JwtException ex) {
+        ErrorResponse errorResponse = new ErrorResponse("Token JWT inválido o expirado: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+        ErrorResponse errorResponse = new ErrorResponse("Error de integridad de datos. Puede que exista un duplicado o violación de restricción.", HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse("Error interno del servidor: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -26,9 +26,6 @@ public class MaterialsDTO {
        private List<Integer> roleIds; 
        private List<String> roleNames;
 
-
-
-
     public int getMaterialsId() {
         return materialsId;
     }

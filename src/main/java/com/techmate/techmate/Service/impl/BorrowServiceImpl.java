@@ -69,7 +69,7 @@ public class BorrowServiceImpl implements BorrowService {
         Borrow borrow = new Borrow();
         borrow.setBorrowId(borrowDTO.getBorrowId());
         borrow.setDate(borrowDTO.getDate());
-        borrow.setStatus(Status.PROCCES);  // Asignar un estado inicial adecuado
+        borrow.setStatus(Status.PROCESS);  // Asignar un estado inicial adecuado
         borrow.setAmount(borrowDTO.getAmount());
     
         // Asignación de detalles
@@ -141,7 +141,7 @@ public class BorrowServiceImpl implements BorrowService {
                 .orElseThrow(() -> new Exception("Préstamo no encontrado con ID: " + borrowId));
     
         // Verificar el estado actual del préstamo
-        if (borrow.getStatus() != Status.PROCCES && borrow.getStatus() != Status.BORROWED) {
+        if (borrow.getStatus() != Status.PROCESS && borrow.getStatus() != Status.BORROWED) {
             throw new Exception("Solo se puede modificar el estado de un préstamo en estado PROCESS o BORROWED");
         }
     
@@ -151,13 +151,13 @@ public class BorrowServiceImpl implements BorrowService {
         borrow.setAdmin(admin); // Asignar el admin al préstamo
     
         switch (newStatus) {
-            case REJECETD:
-                borrow.setStatus(Status.REJECETD);
+            case REJECTED:
+                borrow.setStatus(Status.REJECTED);
                 borrow.setEndDate(new Date());
                 break;
     
             case BORROWED:
-                if (borrow.getStatus() == Status.PROCCES) {
+                if (borrow.getStatus() == Status.PROCESS) {
                     for (DetailsBorrow detail : borrow.getDetails()) {
                         Materials material = detail.getMaterials();
                         if (material.getBorrowable_stock() < detail.getQuantity()) {
@@ -205,11 +205,11 @@ public class BorrowServiceImpl implements BorrowService {
         Status statusBorrow;
 
         switch (status.toUpperCase()) {
-            case "PROCCES":
-                statusBorrow = Status.PROCCES;
+            case "PROCESS":
+                statusBorrow = Status.PROCESS;
                 break;
-            case "REJECETD":
-                statusBorrow = Status.REJECETD;
+            case "REJECTED":
+                statusBorrow = Status.REJECTED;
                 break;
             case "BORROWED":
                 statusBorrow = Status.BORROWED;
