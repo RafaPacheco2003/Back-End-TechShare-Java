@@ -19,7 +19,7 @@ INSERT IGNORE INTO usuario_role (usuario_id, role_id)
 SELECT u.id, r.role_id
 FROM usuario u
 JOIN role r ON r.nombre = 'user'
-WHERE u.email = 'tester@system.com';
+WHERE u.email = 'tester@system.com'
 	AND NOT EXISTS (
 		SELECT 1 FROM usuario_role ur WHERE ur.usuario_id = u.id AND ur.role_id = r.role_id
 	);

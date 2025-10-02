@@ -1,6 +1,7 @@
 package com.techmate.techmate.ImageStorage.Impl;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,7 @@ import java.util.UUID;
  * @author TechMate Team
  */
 @Component("optimizedImageStorage") // Nombre específico para inyección selectiva
+@Primary // Esta será la implementación por defecto cuando no se especifique @Qualifier
 public class OptimizedImageStorage implements ImageStorageStrategy {
 
     // Ruta base donde se guardarán las imágenes (inyectada desde application.properties)
