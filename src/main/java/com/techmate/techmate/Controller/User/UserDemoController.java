@@ -22,11 +22,14 @@ import com.techmate.techmate.entity.Usuario;
 public class UserDemoController {
     
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    @Autowired
-    private UserDemoService userDemoService;
+    private final UserDemoService userDemoService;
+
+    public UserDemoController(TokenService tokenService, UserDemoService userDemoService) {
+        this.tokenService = tokenService;
+        this.userDemoService = userDemoService;
+    }
 
     // Endpoint para obtener la información del usuario desde el token
     @GetMapping("/info")

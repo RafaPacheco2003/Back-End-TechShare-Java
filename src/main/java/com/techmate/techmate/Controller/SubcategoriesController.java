@@ -30,17 +30,20 @@ import com.techmate.techmate.dto.SubCategoryResponse;
 @RequestMapping("admin/subcategories")
 public class SubcategoriesController {
 
-    @Autowired
-    private SubCategoriesService subcategoriesService;
+    private final SubCategoriesService subcategoriesService;
 
-    @Autowired
-    private SubCategoriesMapper subCategoriesMapper;
+    private final SubCategoriesMapper subCategoriesMapper;
 
     @Value("${storage.location}")
     private String storageLocation; // Directorio para almacenar imágenes
 
     @Value("${server.url}")
     private String serverUrl; // URL base del servidor
+
+    public SubcategoriesController(SubCategoriesService subcategoriesService, SubCategoriesMapper subCategoriesMapper) {
+        this.subcategoriesService = subcategoriesService;
+        this.subCategoriesMapper = subCategoriesMapper;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createSubcategory(

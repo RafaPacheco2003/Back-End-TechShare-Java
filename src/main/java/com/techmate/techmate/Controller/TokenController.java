@@ -3,19 +3,20 @@ package com.techmate.techmate.Controller;
 
 
 import com.techmate.techmate.Service.TokenService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/tokens")
 public class TokenController {
     
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
+
+    public TokenController(TokenService tokenService) {
+        this.tokenService = tokenService;
+    }
 
     // Endpoint para extraer el ID del token
     @GetMapping("/userId")

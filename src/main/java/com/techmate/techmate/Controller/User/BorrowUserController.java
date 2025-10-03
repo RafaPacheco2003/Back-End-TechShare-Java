@@ -1,7 +1,6 @@
 // BorrowUserController.java
 package com.techmate.techmate.Controller.User;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +24,11 @@ import java.util.Optional;
 @RequestMapping("/borrow")
 public class BorrowUserController {
 
-    @Autowired
-    private BorrowUserService borrowUserService;
+    private final BorrowUserService borrowUserService;
+
+    public BorrowUserController(BorrowUserService borrowUserService) {
+        this.borrowUserService = borrowUserService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createBorrow(
