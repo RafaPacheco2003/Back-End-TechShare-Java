@@ -1,7 +1,8 @@
 package com.techmate.techmate.security;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,7 @@ import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
     // Filtro que valida el JWT en cada petición entrante
@@ -32,6 +33,10 @@ public class WebSecurityConfig {
 
     // Servicio para cargar usuarios desde la base de datos (JPA)
     private final UserDetailsService userDetailsService;
+
+    // SEGURIDAD: Leer si Swagger está habilitado desde variables de entorno
+    @Value("${SWAGGER_ENABLED:false}")
+    private boolean swaggerEnabled;
 
     /**
      * SecurityFilterChain principal.
@@ -55,11 +60,28 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Deshabilitado para APIs REST basadas en JWT
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint()))
-                .authorizeHttpRequests(auth -> auth
-            // Allow preflight OPTIONS requests
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Endpoints públicos (login y registro)
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                .authorizeHttpRequests(auth -> {
+                    // Allow preflight OPTIONS requests
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    
+                    // SEGURIDAD: Swagger solo si está habilitado (desarrollo)
+                    if (swaggerEnabled) {
+                        auth.requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/api-docs",
+                                "/api-docs/**",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/configuration/**"
+                        ).permitAll();
+                    }
+                    
+                    // Endpoints públicos (login, registro)
+                    auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/verify").permitAll()
                         // Recursos estáticos y uploads
@@ -69,8 +91,8 @@ public class WebSecurityConfig {
                         // API general requiere autenticación
                         .requestMatchers("/api/**").authenticated()
                         // Cualquier otra petición requiere autenticación
-                        .anyRequest().authenticated()
-                );
+                        .anyRequest().authenticated();
+                });
 
         // Añadimos filtros: autenticación primero, luego autorización (validación JWT)
         http.addFilter(jwtAuthenticationFilter)
