@@ -2,10 +2,12 @@ package com.techmate.techmate.Controller;
 
 import java.util.*;
 
-// ...existing imports...
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.techmate.techmate.Service.MovementsService;
@@ -13,14 +15,16 @@ import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.dto.MovementResponse;
 import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
 import com.techmate.techmate.entity.MoveType;
+import com.techmate.techmate.security.TokenUtils;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 
 @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/movement")
 public class MovementsController {
+
+    private static final Logger log = LoggerFactory.getLogger(MovementsController.class);
 
     private final MovementsService movementsService;
     private final MovementsMapper movementsMapper;
@@ -37,7 +41,7 @@ public ResponseEntity<?> createMovement(
         @RequestParam("moveType") MoveType moveType,
         @RequestParam("id_material") Integer idMaterial,
         @RequestParam(value = "comment", required = false) String comment, // Agregar comentario opcional
-        HttpServletRequest request) {
+        Authentication authentication) {
 
     MovementsDTO movementsDTO = new MovementsDTO();
     movementsDTO.setQuantity(quantity);
@@ -46,33 +50,25 @@ public ResponseEntity<?> createMovement(
     movementsDTO.setDate(new Date());
     movementsDTO.setComment(comment); // Establecer el comentario
 
-    String token = request.getHeader("Authorization");
     Integer userId = null;
 
-    if (token != null && token.startsWith("Bearer ")) {
-        token = token.substring(7);
+    try {
+        // Obtener información del usuario desde el SecurityContext
+        String userEmail = authentication.getName(); // Obtenemos el email del usuario autenticado
+        log.info("Usuario autenticado: {}", userEmail);
 
-        try {
-            // Extraer el ID de usuario del token
-            userId = movementsService.getUserIdFromToken(token);
-            System.out.println("ID de usuario extraído del token: " + userId);
+        // Obtener roles del usuario
+        String userRole = TokenUtils.getAuthenticatedUserRole();
+        log.info("Rol del usuario: {}", userRole);
 
-            // Extraer y mostrar roles desde el token
-            Optional<List<Integer>> rolesOptional = movementsService.getRolesFromToken(token);
-            if (rolesOptional.isPresent()) {
-                List<Integer> roles = rolesOptional.get();
-                System.out.println("Roles extraídos del token: " + roles);
-            } else {
-                System.out.println("No se encontraron roles en el token.");
-            }
+        // TODO: Implementar método en el servicio para obtener userId por email
+        // Por ahora usamos un placeholder - en una implementación real:
+        // userId = userService.getUserIdByEmail(userEmail);
+        userId = extractUserIdFromAuthentication(authentication);
 
-        } catch (RuntimeException e) {
-            System.out.println("Error al extraer el ID del token: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al extraer el ID del token: " + e.getMessage());
-        }
-    } else {
-        System.out.println("Token no proporcionado o formato incorrecto");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token no proporcionado o formato incorrecto");
+    } catch (Exception e) {
+        log.error("Error al obtener información del usuario autenticado: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener información del usuario: " + e.getMessage());
     }
 
     try {
@@ -89,7 +85,7 @@ public ResponseEntity<?> createMovement(
 
     // Obtener un movimiento por ID
     @GetMapping("/{id}")
-    public ResponseEntity<MovementResponse> getMovementById(@RequestParam("id") Integer id) {
+    public ResponseEntity<MovementResponse> getMovementById(@PathVariable("id") Integer id) {
         try {
             MovementsDTO movementsDTO = movementsService.getMovementsByID(id);
             if (movementsDTO == null) {
@@ -167,11 +163,6 @@ public ResponseEntity<?> createMovement(
         }
     }
 
-    @GetMapping("/decode-token")
-    public void decodeToken(HttpServletRequest request) {
-        movementsService.decodeToken(request);
-    }
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMovement(@PathVariable Integer id) {
         try {
@@ -181,6 +172,24 @@ public ResponseEntity<?> createMovement(
             return ResponseEntity.notFound().build(); // 404 Not Found
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
+        }
+    }
+
+    /**
+     * Método helper para extraer userId del Authentication.
+     */
+    private Integer extractUserIdFromAuthentication(Authentication authentication) {
+        try {
+            if (authentication != null && authentication.getCredentials() != null) {
+                // El token JWT debería estar en credentials
+                String token = authentication.getCredentials().toString();
+                return TokenUtils.getUserIdFromToken(token);
+            }
+            log.warn("No se pudo extraer userId del Authentication, usando fallback");
+            return 1; // Fallback temporal
+        } catch (Exception e) {
+            log.error("Error al extraer userId: {}", e.getMessage());
+            return 1; // Fallback en caso de error
         }
     }
 

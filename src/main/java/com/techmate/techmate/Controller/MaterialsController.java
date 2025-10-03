@@ -155,17 +155,18 @@ public class MaterialsController {
             }
 
             materialsService.deleteMaterials(id);
-            return new ResponseEntity<>("Material eliminado con éxito", HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>("Material eliminado con éxito", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/test-email")
-    public ResponseEntity<String> testEmail() {
+    public ResponseEntity<String> testEmail(@RequestParam(value = "email", required = false) String email) {
         try {
-            emailService.sendEmail("rodrigorafaelchipacheco@gmail.com", "Test", "Este es un mensaje de prueba.");
-            return new ResponseEntity<>("Correo enviado", HttpStatus.OK);
+            String targetEmail = email != null ? email : "rodrigorafaelchipacheco@gmail.com";
+            emailService.sendEmail(targetEmail, "Test", "Este es un mensaje de prueba.");
+            return new ResponseEntity<>("Correo enviado a: " + targetEmail, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error enviando correo: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

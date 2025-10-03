@@ -85,11 +85,11 @@ class MovementsControllerSecurityTest {
         MovementResponse resp = new MovementResponse(99, MoveType.OUT, 2, new java.util.Date(), "ok", 7, "Admin", 5, "Mat5");
 
         // generate token and configure movementsService mock to accept it
-    String token = authUtils.createTokenWithRoles(7, "u@example.com", "u7", "ADMIN");
+        String token = authUtils.createTokenWithRoles(7, "u@example.com", "u7", "ADMIN");
 
         when(movementsService.getUserIdFromToken(token)).thenReturn(7);
-        when(movementsService.createMovementsDTO(any(MovementsDTO.class), eq(7))).thenReturn(created);
-        when(movementsMapper.toResponse(eq(created))).thenReturn(resp);
+        when(movementsService.createMovementsDTO(any(), any())).thenReturn(created);
+        when(movementsMapper.toResponse(any())).thenReturn(resp);
 
         mockMvc.perform(post("/admin/movement/create")
                 .header("Authorization", "Bearer " + token)

@@ -28,7 +28,7 @@ import org.springframework.http.HttpMethod;
 public class WebSecurityConfig {
 
     // Filtro que valida el JWT en cada petición entrante
-    private final JWTAuthorizationFIlter jWTAuthorizationFIlter;
+    private final JWTAuthorizationFilter jWTAuthorizationFilter;
 
     // Servicio para cargar usuarios desde la base de datos (JPA)
     private final UserDetailsService userDetailsService;
@@ -74,7 +74,7 @@ public class WebSecurityConfig {
 
         // Añadimos filtros: autenticación primero, luego autorización (validación JWT)
         http.addFilter(jwtAuthenticationFilter)
-                .addFilterBefore(jWTAuthorizationFIlter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jWTAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

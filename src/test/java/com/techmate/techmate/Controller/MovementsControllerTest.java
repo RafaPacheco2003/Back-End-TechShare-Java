@@ -23,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.techmate.techmate.testutils.JWTTestHelper;
+import org.springframework.security.core.Authentication;
 
 @WebMvcTest(controllers = com.techmate.techmate.Controller.MovementsController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -76,18 +77,24 @@ class MovementsControllerTest {
 
         MovementResponse resp = new MovementResponse(10, MoveType.OUT, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
 
-    String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
-    when(movementsService.getUserIdFromToken(token)).thenReturn(5);
+        String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
+        when(movementsService.getUserIdFromToken(token)).thenReturn(5);
         when(movementsService.createMovementsDTO(any(MovementsDTO.class), eq(5))).thenReturn(created);
         when(movementsMapper.toResponse(eq(created))).thenReturn(resp);
 
+        // Mock Authentication object since security filters are disabled
+        Authentication mockAuth = org.mockito.Mockito.mock(Authentication.class);
+        when(mockAuth.getName()).thenReturn("user@example.com");
+        when(mockAuth.getCredentials()).thenReturn(token);
+
         mockMvc.perform(post("/admin/movement/create")
-        .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + token)
                 .param("quantity", "3")
                 .param("moveType", "OUT")
                 .param("id_material", "2")
                 .param("comment", "test")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .principal(mockAuth)) // Add the mocked Authentication
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.movementsId").value(10))
                 .andExpect(jsonPath("$.moveType").value("OUT"));
