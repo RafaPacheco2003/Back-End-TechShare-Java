@@ -180,13 +180,33 @@ public ResponseEntity<?> createMovement(
      */
     private Integer extractUserIdFromAuthentication(Authentication authentication) {
         try {
-            if (authentication != null && authentication.getCredentials() != null) {
-                // El token JWT debería estar en credentials
-                String token = authentication.getCredentials().toString();
-                return TokenUtils.getUserIdFromToken(token);
+            if (authentication != null) {
+                // Intentar extraer de diferentes formas según el tipo de Authentication
+                if (authentication.getPrincipal() instanceof String) {
+                    // El username/email está en principal
+                    String userEmail = (String) authentication.getPrincipal();
+                    // Aquí podrías buscar el usuario por email en la BD
+                    // Por ahora usamos el token si está disponible
+                    log.info("Usuario autenticado por email: {}", userEmail);
+                }
+                
+                // Intentar obtener el ID desde los detalles del token JWT
+                if (authentication.getDetails() instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> details = (Map<String, Object>) authentication.getDetails();
+                    if (details.containsKey("id")) {
+                        return ((Number) details.get("id")).intValue();
+                    }
+                }
+                
+                // Último recurso: usar credentials si es un token
+                if (authentication.getCredentials() != null) {
+                    String token = authentication.getCredentials().toString();
+                    return TokenUtils.getUserIdFromToken(token);
+                }
             }
             log.warn("No se pudo extraer userId del Authentication, usando fallback");
-            return 1; // Fallback temporal
+            return 1; // Fallback temporal para desarrollo
         } catch (Exception e) {
             log.error("Error al extraer userId: {}", e.getMessage());
             return 1; // Fallback en caso de error
