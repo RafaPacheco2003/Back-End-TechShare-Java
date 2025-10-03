@@ -1,8 +1,9 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.techmate.techmate.Entity.MoveType;
-import com.techmate.techmate.Entity.Movements;
+
+import com.techmate.techmate.entity.MoveType;
+import com.techmate.techmate.entity.Movements;
 
 import java.util.Date;
 import java.util.List;

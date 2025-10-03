@@ -1,16 +1,12 @@
 package com.techmate.techmate.Controller;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +15,16 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.CategoriesDTO;
-import com.techmate.techmate.Exception.ErrorResponse;
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.CategoriesService;
-import com.techmate.techmate.Validation.ImageValidationStrategy; // Importa la interfaz de validación
+// ...existing code...
+import com.techmate.techmate.dto.CategoriesDTO;
+import com.techmate.techmate.dto.CategoryRequest;
+import com.techmate.techmate.dto.CategoryResponse;
+import com.techmate.techmate.dto.ErrorResponse;
+import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 /**
  * La clase {@code CategoriesController} maneja las solicitudes HTTP
@@ -40,24 +37,28 @@ import jakarta.validation.constraints.Size;
 @Validated
 public class CategoriesController {
 
-    @Autowired
-    private CategoriesService categoriesService;
+    private final CategoriesService categoriesService;
+    private final ImageStorageStrategy imageStorageStrategy;
+    private final CategoriesMapper categoriesMapper;
+    // ...existing code... (image validation handled elsewhere)
+    private final String storageLocation; // Directorio para almacenar imágenes
+    private final String serverUrl; // URL base del servidor
 
-    @Autowired
-    private ImageStorageStrategy imageStorageStrategy;
-
-    @Autowired
-    private ImageValidationStrategy imageValidationStrategy; // Inyección de la estrategia de validación
-
-    @Value("${storage.location}")
-    private String storageLocation; // Directorio para almacenar imágenes
-
-    @Value("${server.url}")
-    private String serverUrl; // URL base del servidor
+    public CategoriesController(CategoriesService categoriesService,
+            ImageStorageStrategy imageStorageStrategy,
+            CategoriesMapper categoriesMapper,
+            @Value("${storage.location}") String storageLocation,
+            @Value("${server.url}") String serverUrl) {
+        this.categoriesService = categoriesService;
+        this.imageStorageStrategy = imageStorageStrategy;
+        this.categoriesMapper = categoriesMapper;
+        this.storageLocation = storageLocation;
+        this.serverUrl = serverUrl;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createCategory(
-            @Valid @ModelAttribute CategoriesDTO categoriesDTO,
+        @Valid @ModelAttribute CategoryRequest categoriesRequest,
             @RequestParam("image") MultipartFile image,
             BindingResult bindingResult) {
 
@@ -77,28 +78,33 @@ public class CategoriesController {
         }
 
         try {
-            // Delegar la validación y almacenamiento de la imagen al servicio
-            CategoriesDTO savedCategory = categoriesService.createCategory(categoriesDTO, image);
+            // Mapear request -> internal DTO usando mapper
+            CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
+            CategoriesDTO savedCategory = categoriesService.createCategory(dto, image);
 
-            savedCategory.setImagePath(serverUrl + "/admin/categories/images/" + savedCategory.getImagePath());
+            // Mapear a response público usando mapper
+            CategoryResponse response = categoriesMapper.toResponse(savedCategory, serverUrl);
 
-            return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error al guardar la imagen o categoría
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (com.techmate.techmate.exception.BusinessException e) {
+            // Devolver el mensaje de negocio como ErrorResponse para que el cliente lo reciba
+            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriesDTO> getCategoryById(@PathVariable("id") Integer id) {
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable("id") Integer id) {
         try {
             CategoriesDTO category = categoriesService.getCategoryById(id);
             if (category == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            category.setImagePath(serverUrl + "/admin/categories/images/" + category.getImagePath());
-            return new ResponseEntity<>(category, HttpStatus.OK);
+
+            CategoryResponse resp = categoriesMapper.toResponse(category, serverUrl);
+
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener la categoría
         }
@@ -110,7 +116,7 @@ public class CategoriesController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateCategory(
             @PathVariable("id") Integer id,
-            @Valid @ModelAttribute CategoriesDTO categoriesDTO,
+        @Valid @ModelAttribute CategoryRequest categoriesRequest,
             @RequestParam(value = "image", required = false) MultipartFile image,
             BindingResult bindingResult) { // Agregamos BindingResult
 
@@ -130,33 +136,29 @@ public class CategoriesController {
         }
 
         try {
-            // Delegar la actualización de la categoría al servicio
-            CategoriesDTO updatedCategory = categoriesService.updateCategory(id, categoriesDTO, image);
+            // Mapear request -> DTO y delegar la actualización
+            CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
+            CategoriesDTO updatedCategory = categoriesService.updateCategory(id, dto, image);
 
             if (updatedCategory == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            // Actualizar el path de la imagen con la URL completa del servidor
-            updatedCategory.setImagePath(serverUrl + "/admin/categories/images/" + updatedCategory.getImagePath());
-            return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error en la actualización
+            CategoryResponse resp = categoriesMapper.toResponse(updatedCategory, serverUrl);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (com.techmate.techmate.exception.BusinessException e) {
+            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<CategoriesDTO>> getAllCategories() {
+    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
         try {
-            List<CategoriesDTO> categories = categoriesService.getAllCategories().stream()
-                    .map(category -> {
-                        String imagePath = serverUrl + "/admin/categories/images/" + category.getImagePath();
-                        category.setImagePath(imagePath);
-                        return category;
-                    })
-                    .collect(Collectors.toList());
+        List<CategoryResponse> categories = categoriesService.getAllCategories().stream()
+            .map(category -> categoriesMapper.toResponse(category, serverUrl))
+            .collect(Collectors.toList());
 
             if (categories.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
@@ -175,7 +177,7 @@ public class CategoriesController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Categoría eliminada correctamente
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Error si la categoría no se encuentra
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error en la eliminación de la imagen o
                                                                            // categoría
         }
@@ -189,7 +191,7 @@ public class CategoriesController {
                     .header(HttpHeaders.CONTENT_TYPE,
                             Files.probeContentType(Paths.get(storageLocation).resolve(filename)))
                     .body(imageBytes);
-        } catch (RuntimeException e) {
+        } catch (com.techmate.techmate.exception.NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Imagen no encontrada
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import java.util.Date;
 import java.util.Map;

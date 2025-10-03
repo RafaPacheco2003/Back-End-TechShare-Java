@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,9 +8,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Entity.UsuarioRole;
-import com.techmate.techmate.Repository.UsuarioRoleRepository;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.entity.UsuarioRole;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 
 import lombok.AllArgsConstructor;
 

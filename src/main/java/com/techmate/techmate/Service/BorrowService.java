@@ -2,10 +2,8 @@ package com.techmate.techmate.Service;
 
 import java.util.*;
 
-
-
-import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.Entity.Status;
+import com.techmate.techmate.dto.BorrowDTO;
+import com.techmate.techmate.entity.Status;
 
 public interface BorrowService {
     void updateBorrowStatus(Integer borrowId, Status newStatus, Integer adminId) throws Exception;

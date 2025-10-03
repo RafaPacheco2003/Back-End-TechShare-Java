@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.techmate.techmate.DTO.RoleDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
-import com.techmate.techmate.Entity.Materials;
+
 import com.techmate.techmate.Service.RoleService;
+import com.techmate.techmate.dto.RoleDTO;
+import com.techmate.techmate.entity.Materials;
 
 import jakarta.persistence.EntityNotFoundException;
 

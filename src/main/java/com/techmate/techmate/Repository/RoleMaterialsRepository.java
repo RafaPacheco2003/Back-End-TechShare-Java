@@ -1,13 +1,13 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.techmate.techmate.Entity.Materials;
-import com.techmate.techmate.Entity.Role;
-import com.techmate.techmate.Entity.RoleMaterials;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.entity.Role;
+import com.techmate.techmate.entity.RoleMaterials;
 
 @Repository
 public interface RoleMaterialsRepository extends JpaRepository<RoleMaterials, Integer>{

@@ -1,12 +1,12 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.techmate.techmate.Entity.Role;
-import com.techmate.techmate.Entity.UsuarioRole;
+import com.techmate.techmate.entity.Role;
+import com.techmate.techmate.entity.UsuarioRole;
 
 import java.util.List;
 

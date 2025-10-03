@@ -1,9 +1,9 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.techmate.techmate.Entity.Categories;
+import com.techmate.techmate.entity.Categories;
 
 /**
  * La interfaz {@code CategoriesRepository} es un repositorio que proporciona

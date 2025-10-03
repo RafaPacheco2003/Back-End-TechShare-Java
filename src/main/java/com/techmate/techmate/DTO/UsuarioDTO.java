@@ -1,11 +1,11 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.techmate.techmate.Entity.Borrow;
-import com.techmate.techmate.Entity.Movements;
+import com.techmate.techmate.entity.Borrow;
+import com.techmate.techmate.entity.Movements;
 
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

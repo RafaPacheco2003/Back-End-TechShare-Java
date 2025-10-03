@@ -1,40 +1,93 @@
 package com.techmate.techmate.Service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.DTO.DetailsBorrowDTO;
-import com.techmate.techmate.Entity.Borrow;
-import com.techmate.techmate.Entity.DetailsBorrow;
-import com.techmate.techmate.Entity.Materials;
-import com.techmate.techmate.Entity.Status;
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Repository.BorrowRepository;
-import com.techmate.techmate.Repository.DetailsBorrowRepository;
-import com.techmate.techmate.Repository.MaterialsRepository;
-import com.techmate.techmate.Repository.UsuarioRepository;
-import com.techmate.techmate.Security.TokenUtils;
+
+import com.techmate.techmate.Service.borrow.manager.IBorrowStockManager;
+import com.techmate.techmate.dto.BorrowDTO;
+import com.techmate.techmate.dto.DetailsBorrowDTO;
+import com.techmate.techmate.entity.Borrow;
+import com.techmate.techmate.entity.DetailsBorrow;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.entity.Status;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.exception.BorrowBusinessException;
+import com.techmate.techmate.exception.BusinessException;
+import com.techmate.techmate.repository.BorrowRepository;
+import com.techmate.techmate.repository.DetailsBorrowRepository;
+import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.repository.UsuarioRepository;
+import com.techmate.techmate.security.TokenUtils;
 import com.techmate.techmate.Service.BorrowService;
 import com.techmate.techmate.Service.User.BorrowUserService;
 
 @Service
 public class BorrowServiceImpl implements BorrowService {
+    private final BorrowRepository borrowRepository;
+    private final MaterialsRepository materialsRepository;
+    private final DetailsBorrowRepository detailsBorrowRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final IBorrowStockManager borrowStockManager;
 
-    @Autowired
-    private BorrowRepository borrowRepository;
+    public BorrowServiceImpl(BorrowRepository borrowRepository, MaterialsRepository materialsRepository,
+            DetailsBorrowRepository detailsBorrowRepository, UsuarioRepository usuarioRepository,
+            IBorrowStockManager borrowStockManager) {
+        this.borrowRepository = borrowRepository;
+        this.materialsRepository = materialsRepository;
+        this.detailsBorrowRepository = detailsBorrowRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.borrowStockManager = borrowStockManager;
+    }
 
-    @Autowired
-    private MaterialsRepository materialsRepository;
+    // ==================== FALLBACK HELPERS (compatibilidad con tests) ====================
+    /**
+     * Valida disponibilidad de stock usando IBorrowStockManager si existe;
+     * en caso contrario aplica la lógica directa con el repositorio (fallback para tests).
+     */
+    private void validateStockAvailabilityOrFallback(Integer materialId, int requestedQuantity) {
+        if (borrowStockManager != null) {
+            borrowStockManager.validateStockAvailability(materialId, requestedQuantity);
+            return;
+        }
 
-    @Autowired
-    private DetailsBorrowRepository detailsBorrowRepository;
+        Materials material = materialsRepository.findById(materialId)
+                .orElseThrow(() -> BorrowBusinessException.materialNotFound(materialId));
+        if (material.getBorrowable_stock() < requestedQuantity) {
+            throw BorrowBusinessException.insufficientStock(materialId, requestedQuantity, material.getBorrowable_stock());
+        }
+    }
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private void reduceStockOrFallback(Integer materialId, int quantity) {
+        if (borrowStockManager != null) {
+            borrowStockManager.reduceStock(materialId, quantity);
+            return;
+        }
+
+        Materials material = materialsRepository.findById(materialId)
+                .orElseThrow(() -> BorrowBusinessException.materialNotFound(materialId));
+
+        if (material.getBorrowable_stock() < quantity) {
+            throw BorrowBusinessException.insufficientStock(materialId, quantity, material.getBorrowable_stock());
+        }
+
+        material.setBorrowable_stock(material.getBorrowable_stock() - quantity);
+        materialsRepository.save(material);
+    }
+
+    private void restoreStockOrFallback(Integer materialId, int quantity) {
+        if (borrowStockManager != null) {
+            borrowStockManager.restoreStock(materialId, quantity);
+            return;
+        }
+
+        Materials material = materialsRepository.findById(materialId)
+                .orElseThrow(() -> BorrowBusinessException.materialNotFound(materialId));
+        material.setBorrowable_stock(material.getBorrowable_stock() + quantity);
+        materialsRepository.save(material);
+    }
 
     private BorrowDTO convertToDTO(Borrow borrow) {
         BorrowDTO dto = new BorrowDTO();
@@ -78,13 +131,13 @@ public class BorrowServiceImpl implements BorrowService {
                 .collect(Collectors.toList()));
     
         // Obtener el usuario adminId
-        Usuario admin = usuarioRepository.findById(borrowDTO.getAdminId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
+    Usuario admin = usuarioRepository.findById(borrowDTO.getAdminId())
+        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
         borrow.setAdmin(admin);  // Asignamos el admin
     
         // Asignar el usuario (en este caso adminId también puede referirse a un usuario)
-        Usuario usuario = usuarioRepository.findById(borrowDTO.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + borrowDTO.getUsuarioId()));
+    Usuario usuario = usuarioRepository.findById(borrowDTO.getUsuarioId())
+        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Usuario no encontrado con ID: " + borrowDTO.getUsuarioId()));
         borrow.setUsuario(usuario);  // Asignamos el usuario
     
         return borrow;
@@ -99,9 +152,9 @@ public class BorrowServiceImpl implements BorrowService {
         detailsBorrow.setQuantity(detailDTO.getQuantity());
 
         // Obtener el material asociado
-        Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
-                .orElseThrow(
-                        () -> new RuntimeException("Material no encontrado con ID: " + detailDTO.getMaterialsId()));
+    Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
+        .orElseThrow(
+            () -> BorrowBusinessException.materialNotFound(detailDTO.getMaterialsId()));
         detailsBorrow.setMaterials(material); // Establecer la relación con Materials
 
         // Asignar el precio unitario desde el material
@@ -137,8 +190,8 @@ public class BorrowServiceImpl implements BorrowService {
     @Transactional
     public void updateBorrowStatus(Integer borrowId, Status newStatus, Integer adminId) throws Exception {
         // Buscar el préstamo por ID
-        Borrow borrow = borrowRepository.findById(borrowId)
-                .orElseThrow(() -> new Exception("Préstamo no encontrado con ID: " + borrowId));
+    Borrow borrow = borrowRepository.findById(borrowId)
+        .orElseThrow(() -> new BusinessException("BORROW_NOT_FOUND", "Préstamo no encontrado con ID: " + borrowId));
     
         // Verificar el estado actual del préstamo
         if (borrow.getStatus() != Status.PROCESS && borrow.getStatus() != Status.BORROWED) {
@@ -146,8 +199,8 @@ public class BorrowServiceImpl implements BorrowService {
         }
     
         // Establecer el adminId en el préstamo
-        Usuario admin = usuarioRepository.findById(adminId)
-                .orElseThrow(() -> new Exception("Administrador no encontrado con ID: " + adminId));
+    Usuario admin = usuarioRepository.findById(adminId)
+        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Administrador no encontrado con ID: " + adminId));
         borrow.setAdmin(admin); // Asignar el admin al préstamo
     
         switch (newStatus) {
@@ -159,13 +212,11 @@ public class BorrowServiceImpl implements BorrowService {
             case BORROWED:
                 if (borrow.getStatus() == Status.PROCESS) {
                     for (DetailsBorrow detail : borrow.getDetails()) {
-                        Materials material = detail.getMaterials();
-                        if (material.getBorrowable_stock() < detail.getQuantity()) {
-                            throw new RuntimeException(
-                                    "Stock insuficiente para el material con ID: " + material.getMaterialsId());
-                        }
-                        material.setBorrowable_stock(material.getBorrowable_stock() - detail.getQuantity());
-                        materialsRepository.save(material);
+                        Integer materialId = detail.getMaterials().getMaterialsId();
+                        int qty = detail.getQuantity();
+                        // Validar y reducir stock usando el manager especializado o fallback
+                        validateStockAvailabilityOrFallback(materialId, qty);
+                        reduceStockOrFallback(materialId, qty);
                     }
                     borrow.setStartDate(new Date()); // Actualizar la fecha de inicio
                     borrow.setStatus(Status.BORROWED);
@@ -177,9 +228,9 @@ public class BorrowServiceImpl implements BorrowService {
                     throw new Exception("El préstamo debe estar en estado BORROWED para ser devuelto");
                 }
                 for (DetailsBorrow detail : borrow.getDetails()) {
-                    Materials material = detail.getMaterials();
-                    material.setBorrowable_stock(material.getBorrowable_stock() + detail.getQuantity());
-                    materialsRepository.save(material);
+                    Integer materialId = detail.getMaterials().getMaterialsId();
+                    int qty = detail.getQuantity();
+                    restoreStockOrFallback(materialId, qty);
                 }
                 borrow.setStatus(Status.RETURNED);
                 borrow.setReturnDate(new Date());
@@ -187,7 +238,7 @@ public class BorrowServiceImpl implements BorrowService {
                 break;
     
             default:
-                throw new Exception("Estado no válido para modificar el préstamo");
+                throw new BusinessException("INVALID_BORROW_STATUS", "Estado no válido para modificar el préstamo");
         }
 
         borrowRepository.save(borrow); // Guardar el préstamo actualizado

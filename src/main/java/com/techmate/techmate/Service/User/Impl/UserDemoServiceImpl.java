@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.DTO.UsuarioDTO;
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Entity.UsuarioRole;
-import com.techmate.techmate.Repository.UsuarioRepository;
-import com.techmate.techmate.Repository.UsuarioRoleRepository;
 import com.techmate.techmate.Service.TokenService;
 import com.techmate.techmate.Service.User.UserDemoService;
+import com.techmate.techmate.dto.UsuarioDTO;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.entity.UsuarioRole;
+import com.techmate.techmate.repository.UsuarioRepository;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 
 import io.jsonwebtoken.Claims;
 

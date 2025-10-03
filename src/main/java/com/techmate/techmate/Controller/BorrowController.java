@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
-import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.Entity.Status;
-import com.techmate.techmate.Exception.ResourceNotFoundException;
 import com.techmate.techmate.Service.BorrowService;
+import com.techmate.techmate.dto.BorrowDTO;
+import com.techmate.techmate.dto.BorrowResponse;
+import com.techmate.techmate.Service.borrow.mapper.BorrowMapper;
+import com.techmate.techmate.entity.Status;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -24,9 +25,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("admin/borrow")
 public class BorrowController {
+    private final BorrowService borrowService;
+    private final BorrowMapper borrowMapper;
 
-    @Autowired
-    private BorrowService borrowService;
+    public BorrowController(BorrowService borrowService, BorrowMapper borrowMapper) {
+        this.borrowService = borrowService;
+        this.borrowMapper = borrowMapper;
+    }
 
     // Actualizar el estado de un préstamo
     @PutMapping("/update/{borrowId}")
@@ -55,7 +60,7 @@ public ResponseEntity<?> updateBorrowStatus(
 
 
     @GetMapping("/all")
-    public ResponseEntity<List<BorrowDTO>> getAllBorrow() {
+    public ResponseEntity<List<BorrowResponse>> getAllBorrow() {
         try {
 
             List<BorrowDTO> borrowsList = borrowService.getAllBorrowDTO();
@@ -64,7 +69,11 @@ public ResponseEntity<?> updateBorrowStatus(
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return ResponseEntity.ok(borrowsList);
+        List<BorrowResponse> response = borrowsList.stream()
+            .map(b -> borrowMapper.toResponse(b))
+            .toList();
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

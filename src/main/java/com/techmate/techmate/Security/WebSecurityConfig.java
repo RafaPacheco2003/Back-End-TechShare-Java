@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;

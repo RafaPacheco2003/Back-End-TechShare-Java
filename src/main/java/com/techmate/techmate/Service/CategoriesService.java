@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.CategoriesDTO;
+import com.techmate.techmate.dto.CategoriesDTO;
 
 /**
  * La interfaz {@code CategoriesService} define los métodos para manejar

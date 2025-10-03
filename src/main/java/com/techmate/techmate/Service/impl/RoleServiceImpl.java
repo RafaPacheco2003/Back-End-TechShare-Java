@@ -6,61 +6,63 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.DTO.RoleDTO;
-import com.techmate.techmate.Entity.Materials;
-import com.techmate.techmate.Entity.Role;
-import com.techmate.techmate.Entity.RoleMaterials;
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Entity.UsuarioRole;
-import com.techmate.techmate.Repository.MaterialsRepository;
-import com.techmate.techmate.Repository.RoleMaterialsRepository;
-import com.techmate.techmate.Repository.RoleRepository;
-import com.techmate.techmate.Repository.UsuarioRoleRepository;
 import com.techmate.techmate.Service.RoleService;
+import com.techmate.techmate.dto.RoleDTO;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.entity.Role;
+import com.techmate.techmate.entity.RoleMaterials;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.entity.UsuarioRole;
+import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.repository.RoleMaterialsRepository;
+import com.techmate.techmate.repository.RoleRepository;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    @Autowired
-    private UsuarioRoleRepository usuarioRoleRepository;
+    private final UsuarioRoleRepository usuarioRoleRepository;
+    private final MaterialsRepository materialsRepository;
+    private final RoleMaterialsRepository roleMaterialsRepository;
+    private final RoleRepository roleRepository;
+    private final com.techmate.techmate.Service.role.mapper.RoleMapper roleMapper;
+    private final com.techmate.techmate.Service.role.validator.RoleValidator roleValidator;
+    private final com.techmate.techmate.Service.role.query.RoleQueryService roleQueryService;
+    private final com.techmate.techmate.Service.role.manager.RoleAssociationManager roleAssociationManager;
 
-    @Autowired
-    private MaterialsRepository materialsRepository;
-
-    @Autowired
-    RoleMaterialsRepository roleMaterialsRepository;
-    @Autowired
-    private RoleRepository roleRepository;
+    public RoleServiceImpl(UsuarioRoleRepository usuarioRoleRepository,
+                           MaterialsRepository materialsRepository,
+                           RoleMaterialsRepository roleMaterialsRepository,
+                           RoleRepository roleRepository,
+                           com.techmate.techmate.Service.role.mapper.RoleMapper roleMapper,
+                           com.techmate.techmate.Service.role.validator.RoleValidator roleValidator,
+                           com.techmate.techmate.Service.role.query.RoleQueryService roleQueryService,
+                           com.techmate.techmate.Service.role.manager.RoleAssociationManager roleAssociationManager) {
+        this.usuarioRoleRepository = usuarioRoleRepository;
+        this.materialsRepository = materialsRepository;
+        this.roleMaterialsRepository = roleMaterialsRepository;
+        this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
+        this.roleValidator = roleValidator;
+        this.roleQueryService = roleQueryService;
+        this.roleAssociationManager = roleAssociationManager;
+    }
 
     // this Method is used to convert entity DTO
     private RoleDTO convertToDTO(Role rol) {
-        RoleDTO dto = new RoleDTO();
-
-        dto.setRoleId(rol.getRoleId());
-        dto.setName(rol.getNombre());
-
-        return dto;
+        return roleMapper.toDTO(rol);
     }
 
     private Role convertToEntity(RoleDTO roleDTO) {
-
-        Role role = new Role();
-        role.setRoleId(roleDTO.getRoleId());
-        role.setNombre(roleDTO.getName());
-        return role;
+        return roleMapper.toEntity(roleDTO);
     }
 
     @Override
     public RoleDTO createRole(RoleDTO roleDTO) {
 
-        // Verificar si ya existe un rol con el mismo nombre
-        String nombre = roleDTO.getName();
-        if (roleRepository.findByNombre(nombre).isPresent()) {
-            throw new RuntimeException("Ya existe un rol con el nombre: " + nombre);
-        }
-
+        roleValidator.validateUniqueName(roleDTO.getName());
         Role rol = convertToEntity(roleDTO);
         rol = roleRepository.save(rol);
         return convertToDTO(rol);
@@ -68,37 +70,22 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDTO getRoleById(int roleId) {
-        Role rol = roleRepository.findById(roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with ID: " + roleId));
-
-        return convertToDTO(rol);
+    return roleQueryService.getById(roleId);
     }
 
     @Override
     public RoleDTO updateRole(int roleId, RoleDTO roleDTO) {
-        Role rol = roleRepository.findById(roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with ID: " + roleId));
-
-        // Verificar si ya existe un rol con el mismo nombre
-        String nombre = roleDTO.getName();
-        if (roleRepository.findByNombre(nombre).isPresent()) {
-            throw new RuntimeException("Ya existe un rol con el nombre: " + nombre);
-        }
-        // Actualizar los valores del rol existente con los del DTO
-        rol.setNombre(roleDTO.getName());
-
-        // Guardar el rol actualizado
-        Role updatedRole = roleRepository.save(rol);
-
-        return convertToDTO(updatedRole);
+    Role rol = roleRepository.findById(roleId)
+        .orElseThrow(() -> new RuntimeException("Role not found with ID: " + roleId));
+    roleValidator.validateUniqueName(roleDTO.getName());
+    rol.setNombre(roleDTO.getName());
+    Role updatedRole = roleRepository.save(rol);
+    return convertToDTO(updatedRole);
     }
 
     @Override
     public List<RoleDTO> getAllRole() {
-        return roleRepository.findAll().stream()
-                .filter(role -> role.getRoleId() != 1)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    return roleQueryService.getAllRoles();
     }
 
     public String getRoleNameById(int roleId) {
@@ -112,34 +99,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void cleanupRoleAssociations(int roleId) {
-        // Verifica si el rol existe en la base de datos
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new IllegalArgumentException("Role no encontrado con id: " + roleId));
-
-        // Obtener las asociaciones de RoleMaterials relacionadas con el rol
-        List<RoleMaterials> roleMaterialsList = roleMaterialsRepository.findByRole(role);
-
-        // Desasociar materiales y eliminar las referencias al rol
-        for (RoleMaterials roleMaterials : roleMaterialsList) {
-            Materials material = roleMaterials.getMaterials();
-            material.getRoleMaterials().remove(roleMaterials); // Eliminar la relación en el Material
-            roleMaterials.setRole(null); // Eliminar la relación en RoleMaterials
-        }
-
-        // Eliminar las asociaciones de RoleMaterials
-        roleMaterialsRepository.deleteAll(roleMaterialsList);
-
-        // Eliminar las asociaciones de usuarios en UsuarioRole
-        List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByRole(role);
-        for (UsuarioRole usuarioRole : usuarioRoles) {
-            Usuario usuario = usuarioRole.getUsuario();
-            usuario.getRoles().remove(role); // Desasociar el rol del usuario
-        }
-
-        // Eliminar las relaciones en la tabla UsuarioRole
-        usuarioRoleRepository.deleteAll(usuarioRoles);
-
-        // Finalmente, eliminar el rol
+        roleAssociationManager.cleanupRoleAssociations(role);
         roleRepository.delete(role);
     }
 

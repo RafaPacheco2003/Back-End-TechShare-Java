@@ -1,0 +1,44 @@
+package com.techmate.techmate.Service.materials.query;
+
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
+import com.techmate.techmate.dto.MaterialsDTO;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.repository.MaterialsRepository;
+
+/**
+ * Servicio de consultas para Materials (SRP).
+ */
+@Component
+public class MaterialsQueryService {
+
+    private final MaterialsRepository materialsRepository;
+    private final MaterialsMapper materialsMapper;
+
+    public MaterialsQueryService(MaterialsRepository materialsRepository, MaterialsMapper materialsMapper) {
+        this.materialsRepository = materialsRepository;
+        this.materialsMapper = materialsMapper;
+    }
+
+    public List<MaterialsDTO> getAllMaterials() {
+        return materialsRepository.findAll().stream()
+                .map(materialsMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending) {
+        List<Materials> materials = ascending ? materialsRepository.findAllByOrderByPriceAsc()
+                : materialsRepository.findAllByOrderByPriceDesc();
+        return materials.stream().map(materialsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public MaterialsDTO getById(int id) {
+        Materials m = materialsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + id));
+        return materialsMapper.toDTO(m);
+    }
+}

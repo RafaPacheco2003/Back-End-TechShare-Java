@@ -1,9 +1,9 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.Date;
 import java.util.List;
 
-import com.techmate.techmate.Entity.Status;
+import com.techmate.techmate.entity.Status;
 
 import jakarta.persistence.TemporalType;
 import lombok.Data;

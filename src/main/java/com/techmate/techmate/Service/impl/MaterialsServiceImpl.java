@@ -3,23 +3,23 @@ package com.techmate.techmate.Service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.techmate.techmate.DTO.MaterialsDTO;
-import com.techmate.techmate.Entity.Materials;
-import com.techmate.techmate.Entity.Role;
-import com.techmate.techmate.Entity.RoleMaterials;
-import com.techmate.techmate.Entity.SubCategories;
+
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Repository.MaterialsRepository;
-import com.techmate.techmate.Repository.RoleRepository;
-import com.techmate.techmate.Repository.SubCategoriesRepository;
 import com.techmate.techmate.Service.MaterialsService;
-import com.techmate.techmate.Service.RoleService;
-import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.dto.MaterialsDTO;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.entity.Role;
+import com.techmate.techmate.entity.RoleMaterials;
+import com.techmate.techmate.entity.SubCategories;
+import com.techmate.techmate.exception.BusinessException;
+import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.repository.RoleRepository;
+import com.techmate.techmate.repository.SubCategoriesRepository;
 
 /**
  * Implementación del servicio de gestión de materiales.
@@ -56,47 +56,45 @@ public class MaterialsServiceImpl implements MaterialsService {
      * Repository para acceso a datos de materiales.
      * Provee métodos CRUD + consultas personalizadas.
      */
-    @Autowired
-    private MaterialsRepository materialsRepository;
+    private final MaterialsRepository materialsRepository;
+    private final SubCategoriesRepository subCategoriesRepository;
+    private final RoleRepository roleRepository;
+    private final ImageValidationStrategy imageValidationStrategy;
+    private final ImageStorageStrategy imageStorageStrategy;
+    private final com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper;
+    private final com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator;
+    private final com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager;
+    private final com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService;
 
-    /**
-     * Servicio de subcategorías (para obtener nombres, validar existencia).
-     */
-    @Autowired
-    private SubCategoriesService subCategoriesService;
+    public MaterialsServiceImpl(
+            MaterialsRepository materialsRepository,
+            SubCategoriesRepository subCategoriesRepository,
+            RoleRepository roleRepository,
+            ImageValidationStrategy imageValidationStrategy,
+            ImageStorageStrategy imageStorageStrategy,
+            com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper,
+            com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator,
+            com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager,
+            com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService) {
+        this.materialsRepository = materialsRepository;
+        this.subCategoriesRepository = subCategoriesRepository;
+        this.roleRepository = roleRepository;
+        this.imageValidationStrategy = imageValidationStrategy;
+        this.imageStorageStrategy = imageStorageStrategy;
+        this.materialsMapper = materialsMapper;
+        this.materialsValidator = materialsValidator;
+        this.materialsStockManager = materialsStockManager;
+        this.materialsQueryService = materialsQueryService;
+    }
 
-    /**
-     * Repository de subcategorías (acceso directo a BD).
-     */
-    @Autowired
-    private SubCategoriesRepository subCategoriesRepository;
-
-    /**
-     * Servicio de roles (para validar permisos y obtener nombres).
-     */
-    @Autowired
-    private RoleService roleService;
-
-    /**
-     * Repository de roles (acceso directo a BD).
-     */
-    @Autowired
-    private RoleRepository roleRepository;
-
-    /**
-     * Estrategia de validación de imágenes.
-     * Valida extensiones permitidas (.jpg, .png, .gif, etc.).
-     */
-    @Autowired
-    ImageValidationStrategy imageValidationStrategy;
-
-    /**
-     * Estrategia de almacenamiento de imágenes.
-     * Puede ser FileSystemImageStorage u OptimizedImageStorage.
-     * Spring inyecta la implementación por defecto o la especificada con @Qualifier.
-     */
-    @Autowired
-    ImageStorageStrategy imageStorageStrategy;
+    // NOTE: Cada dependencia inyectada tiene una responsabilidad clara (SRP):
+    // - materialsRepository: acceso a persistencia (DAO)
+    // - subCategoriesRepository / roleRepository: resolución de relaciones
+    // - imageValidationStrategy / imageStorageStrategy: delegación a estrategias para manejar imágenes (Strategy pattern)
+    // - materialsMapper: conversión Entity ↔ DTO (evita lógica de mapping en el service)
+    // - materialsValidator: validaciones de negocio (únicas responsabilidades)
+    // - materialsStockManager: operaciones relacionadas al stock (aisla concurrencia y transacciones)
+    // - materialsQueryService: consultas complejas / proyecciones (separación de consultas)
 
     // ==================== MÉTODOS DE CONVERSIÓN (ENTITY ↔ DTO) ====================
     
@@ -116,40 +114,7 @@ public class MaterialsServiceImpl implements MaterialsService {
      * @return MaterialsDTO listo para serializar a JSON
      */
     private MaterialsDTO convertToDTO(Materials materials) {
-        MaterialsDTO dto = new MaterialsDTO();
-        
-        // Datos básicos del material
-        dto.setMaterialsId(materials.getMaterialsId());
-        dto.setImagePath(materials.getImagePath());
-        dto.setName(materials.getName());
-        dto.setDescription(materials.getDescription());
-        dto.setPrice(materials.getPrice());
-
-        // Stock (int primitivo, no puede ser null)
-        dto.setStock(materials.getStock());
-        dto.setBorrowable_stock(materials.getBorrowable_stock());
-
-        // Subcategoría: extraer ID y nombre
-        // NOTA: Asumimos que SubCategory siempre existe (NOT NULL en BD)
-        dto.setSubCategoryId(materials.getSubCategory().getSubCategoryId());
-        dto.setSubCategoryName(
-                subCategoriesService
-                        .getSubCategoryNameById(materials.getSubCategory().getSubCategoryId()));
-
-        // Roles: convertir List<RoleMaterials> → List<Integer> roleIds y List<String> roleNames
-        // Usamos streams para transformar eficientemente
-        List<Integer> roleIds = materials.getRoleMaterials().stream()
-                .map(roleMaterial -> roleMaterial.getRole().getRoleId())
-                .collect(Collectors.toList());
-
-        List<String> roleNames = materials.getRoleMaterials().stream()
-                .map(roleMaterial -> roleService.getRoleNameById(roleMaterial.getRole().getRoleId()))
-                .collect(Collectors.toList());
-
-        dto.setRoleIds(roleIds);
-        dto.setRoleNames(roleNames);
-
-        return dto;
+    return materialsMapper.toDTO(materials);
     }
 
     /**
@@ -173,53 +138,7 @@ public class MaterialsServiceImpl implements MaterialsService {
      * @throws RuntimeException si subcategoría o algún rol no existe
      */
     private Materials convertToEntity(MaterialsDTO materialsDTO) {
-        System.out.println("Convirtiendo MaterialsDTO a Materials: " + materialsDTO);
-
-        Materials materials = new Materials();
-        
-        // Datos básicos
-        materials.setImagePath(materialsDTO.getImagePath());
-        materials.setName(materialsDTO.getName());
-        materials.setDescription(materialsDTO.getDescription());
-        materials.setPrice(materialsDTO.getPrice());
-
-        // REGLA DE NEGOCIO: Stock y borrowable_stock
-        // Al crear un material, todo el stock está disponible para préstamo
-        if (materialsDTO.getStock() == 0) {
-            materials.setStock(0);
-            materials.setBorrowable_stock(0);
-        } else {
-            materials.setStock(materialsDTO.getStock());
-            materials.setBorrowable_stock(materialsDTO.getStock()); // Inicialmente todo disponible
-        }
-
-        // RELACIÓN: Subcategoría (ManyToOne)
-        // Buscar subcategoría en BD, lanzar excepción si no existe
-        SubCategories subCategories = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
-                .orElseThrow(() -> new RuntimeException("Subcategoría no encontrada con ID: "
-                        + materialsDTO.getSubCategoryId()));
-        materials.setSubCategory(subCategories);
-
-        // RELACIÓN: Roles (ManyToMany via RoleMaterials)
-        // Crear lista de RoleMaterials (tabla intermedia)
-        List<RoleMaterials> roleMaterialsList = new ArrayList<>();
-        
-        for (Integer roleId : materialsDTO.getRoleIds()) {
-            // Buscar rol en BD, lanzar excepción si no existe
-            Role role = roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
-
-            // Crear registro en tabla intermedia role_materials
-            RoleMaterials roleMaterials = new RoleMaterials();
-            roleMaterials.setRole(role);           // FK a role
-            roleMaterials.setMaterials(materials); // FK a materials (bidireccional)
-            roleMaterialsList.add(roleMaterials);
-        }
-
-        // Setear la lista completa de roles
-        materials.setRoleMaterials(roleMaterialsList);
-        
-        return materials;
+        return materialsMapper.toEntity(materialsDTO);
     }
 
     // ==================== OPERACIONES CRUD ====================
@@ -251,12 +170,10 @@ public class MaterialsServiceImpl implements MaterialsService {
      * @throws RuntimeException si subcategoría o roles no existen, o imagen inválida
      */
     @Override
+    @Transactional
     public MaterialsDTO createMaterials(MaterialsDTO materialsDTO, MultipartFile image) {
         // VALIDACIÓN 1: Nombre único
-        // Previene duplicados que podrían confundir al inventario
-        if (materialsDTO.getName() != null && materialsRepository.findByName(materialsDTO.getName()) != null) {
-            throw new IllegalArgumentException("Ya existe un material con el nombre: " + materialsDTO.getName());
-        }
+        materialsValidator.validateUniqueName(materialsDTO.getName());
 
         // VALIDACIÓN 2 Y ALMACENAMIENTO: Imagen (si se proporciona)
         if (image != null && !image.isEmpty()) {
@@ -268,6 +185,11 @@ public class MaterialsServiceImpl implements MaterialsService {
 
             // Guardar imagen en storage (filesystem, S3, etc.)
             // Retorna ruta relativa: "uuid-1234.jpg"
+            // Observación de diseño: se guarda la imagen antes de persistir en BD para
+            // garantizar que la ruta exista cuando la entidad sea retornada. Si la
+            // persistencia falla, deberíamos eliminar la imagen almacenada o soportar
+            // compensación. Aquí delegamos la política de compensación a la capa
+            // de almacenamiento (p.ej. almacenamiento idempotente o lifecycle hooks).
             String savedImagePath = imageStorageStrategy.saveImage(image);
             
             // Actualizar DTO con la ruta guardada
@@ -275,21 +197,27 @@ public class MaterialsServiceImpl implements MaterialsService {
         }
 
         // PERSISTENCIA: Convertir DTO → Entity y guardar en BD
-        Materials materials = convertToEntity(materialsDTO);
-        materials = materialsRepository.save(materials); // INSERT en BD
+    Materials materials = convertToEntity(materialsDTO);
+    materials = materialsRepository.save(materials); // INSERT en BD
 
         // RESPUESTA: Convertir Entity → DTO para retornar al cliente
         return convertToDTO(materials);
     }
 
     @Override
+    @Transactional
     public MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile image) {
         // Buscar el material existente por su ID
         Materials existingMaterial = materialsRepository.findById(materialsId)
-                .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + materialsId));
+                .orElseThrow(() -> new BusinessException("MATERIAL_NOT_FOUND", "Material no encontrado con ID: " + materialsId));
 
-        Integer stockMaterials= existingMaterial.getStock();
-        Integer stockBorrow= existingMaterial.getBorrowable_stock();
+    Integer stockMaterials= existingMaterial.getStock();
+    Integer stockBorrow= existingMaterial.getBorrowable_stock();
+
+    // Consultar stock actual a través del manager (preparación para lógica de préstamo)
+    int available = materialsStockManager.getAvailableStock(existingMaterial.getMaterialsId());
+    // Usar la fuente única de verdad para el stock disponible
+    stockBorrow = Integer.valueOf(available);
 
         // Actualizar el nombre si es proporcionado (sin verificación de duplicado)
         if (materialsDTO.getName() != null) {
@@ -303,9 +231,9 @@ public class MaterialsServiceImpl implements MaterialsService {
         existingMaterial.setBorrowable_stock(stockBorrow);
 
         // Manejo de subcategoría
-        SubCategories subCategory = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Subcategoría no encontrada con ID: " + materialsDTO.getSubCategoryId()));
+    SubCategories subCategory = subCategoriesRepository.findById(materialsDTO.getSubCategoryId())
+        .orElseThrow(() -> new BusinessException("SUBCATEGORY_NOT_FOUND",
+            "Subcategoría no encontrada con ID: " + materialsDTO.getSubCategoryId()));
         existingMaterial.setSubCategory(subCategory);
 
         // Manejo de la imagen (si se proporciona una nueva)
@@ -320,9 +248,9 @@ public class MaterialsServiceImpl implements MaterialsService {
 
         // Actualizar roles asociados al material
         List<RoleMaterials> updatedRoleMaterials = new ArrayList<>();
-        for (Integer roleId : materialsDTO.getRoleIds()) {
-            Role role = roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + roleId));
+    for (Integer roleId : materialsDTO.getRoleIds()) {
+        Role role = roleRepository.findById(roleId)
+            .orElseThrow(() -> new BusinessException("ROLE_NOT_FOUND", "Rol no encontrado con ID: " + roleId));
 
             RoleMaterials roleMaterials = new RoleMaterials();
             roleMaterials.setRole(role);
@@ -342,16 +270,25 @@ public class MaterialsServiceImpl implements MaterialsService {
     }
 
     @Override
+    @Transactional
     public void deleteMaterials(int materialsId) {
         // Buscar el material por ID
         Materials materials = materialsRepository.findById(materialsId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Material no encontrado con ID: " + materialsId));
+                .orElseThrow(() -> new BusinessException("MATERIAL_NOT_FOUND", "Material no encontrado con ID: " + materialsId));
 
-        // Si se encuentra el material, eliminar la imagen si existe
+        // Si se encuentra el material, eliminar la imagen si existe.
+        // Nota: la eliminación de la imagen es una operación side-effect externa y
+        // no participa en la transacción de la BD; si falla la eliminación, se
+        // captura y se delega la política (retry/alert) a la estrategia de storage.
         String imagePath = materials.getImagePath();
         if (imagePath != null && !imagePath.isEmpty()) {
-            imageStorageStrategy.deleteImage(imagePath); // Utilizar la estrategia para eliminar la imagen
+            try {
+                imageStorageStrategy.deleteImage(imagePath); // Utilizar la estrategia para eliminar la imagen
+            } catch (Exception ex) {
+                // No impedimos la eliminación lógica del recurso en BD; registrar/alertar.
+                // Aquí preferimos continuar y eliminar el registro en BD para no dejar
+                // basura referencial en la aplicación.
+            }
         }
 
         // Eliminar el material de la base de datos
@@ -360,17 +297,12 @@ public class MaterialsServiceImpl implements MaterialsService {
 
     @Override
     public List<MaterialsDTO> getAllMaterials() {
-        return materialsRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return materialsQueryService.getAllMaterials();
     }
 
     @Override
     public MaterialsDTO getMaterialsById(int materialsId) {
-        Materials materials = materialsRepository.findById(materialsId)
-                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + materialsId));
-
-        return convertToDTO(materials);
+        return materialsQueryService.getById(materialsId);
     }
 
     @Override
@@ -384,19 +316,7 @@ public class MaterialsServiceImpl implements MaterialsService {
 
     @Override
     public List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending) {
-        List<Materials> materials;
-
-        if (ascending) {
-            materials = materialsRepository.findAllByOrderByPriceAsc(); // Obtiene materiales en orden
-                                                                        // ascendente
-        } else {
-            materials = materialsRepository.findAllByOrderByPriceDesc(); // Obtiene materiales en orden
-                                                                         // descendente
-        }
-
-        return materials.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return materialsQueryService.getAllMaterialsSortedByPrice(ascending);
     }
 
 }

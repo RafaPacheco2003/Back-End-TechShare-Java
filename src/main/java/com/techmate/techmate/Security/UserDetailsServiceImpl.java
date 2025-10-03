@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +7,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Repository.UsuarioRepository;
-import com.techmate.techmate.Repository.UsuarioRoleRepository;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.repository.UsuarioRepository;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 
 /**
  * Implementación del servicio de autenticación de usuarios para Spring Security.
@@ -30,11 +30,13 @@ import com.techmate.techmate.Repository.UsuarioRoleRepository;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     // Inyecta el repositorio de usuarios para acceder a la base de datos.
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRoleRepository usuarioRoleRepository; // Inyecta el repositorio de roles
 
-    @Autowired
-    private UsuarioRoleRepository usuarioRoleRepository; // Inyecta el repositorio de roles
+    public UserDetailsServiceImpl(UsuarioRepository usuarioRepository, UsuarioRoleRepository usuarioRoleRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.usuarioRoleRepository = usuarioRoleRepository;
+    }
 
 
     /**

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.SubCategoriesDTO;
+import com.techmate.techmate.dto.SubCategoriesDTO;
 
 public interface SubCategoriesService {
     

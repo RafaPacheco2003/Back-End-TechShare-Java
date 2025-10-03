@@ -1,11 +1,12 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
 
-import com.techmate.techmate.Entity.Movements;
-import com.techmate.techmate.Entity.Usuario;
+import com.techmate.techmate.entity.Movements;
+import com.techmate.techmate.entity.Usuario;
+
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer>{

@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.DTO.DetailsBorrowDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.techmate.techmate.Service.User.BorrowUserService;
+import com.techmate.techmate.dto.BorrowDTO;
+import com.techmate.techmate.dto.DetailsBorrowDTO;
 
 import java.util.ArrayList;
 import java.util.Date;

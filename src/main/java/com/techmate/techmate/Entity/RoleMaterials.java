@@ -1,4 +1,4 @@
-package com.techmate.techmate.Entity;
+package com.techmate.techmate.entity;
 
 
 import jakarta.persistence.Column;

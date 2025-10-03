@@ -3,38 +3,32 @@ package com.techmate.techmate.Service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.SubCategoriesDTO;
-import com.techmate.techmate.Entity.Categories;
-import com.techmate.techmate.Entity.SubCategories;
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Repository.CategoriesRepository;
-import com.techmate.techmate.Repository.SubCategoriesRepository;
 import com.techmate.techmate.Service.CategoriesService;
 import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.dto.SubCategoriesDTO;
+import com.techmate.techmate.entity.Categories;
+import com.techmate.techmate.entity.SubCategories;
+import com.techmate.techmate.repository.CategoriesRepository;
+import com.techmate.techmate.repository.SubCategoriesRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class SubCategoriesServiceImpl implements SubCategoriesService {
 
-    @Autowired
     private SubCategoriesRepository subCategoriesRepository;
 
-    @Autowired
     private CategoriesRepository categoriesRepository;
-    @Autowired
     private CategoriesService categoriesService;
 
-    @Autowired
     private ImageStorageStrategy imageStorageStrategy;
 
-    @Autowired
     private ImageValidationStrategy imageValidationStrategy; // Inyección de la estrategia de validación
 
     @Value("${storage.location}")
@@ -42,6 +36,20 @@ public class SubCategoriesServiceImpl implements SubCategoriesService {
 
     @Value("${server.url}")
     private String serverUrl; // URL base del servidor
+
+    // Constructor para inyección por constructor (mejor para pruebas y SOLID)
+    public SubCategoriesServiceImpl(SubCategoriesRepository subCategoriesRepository,
+            CategoriesRepository categoriesRepository, CategoriesService categoriesService,
+            ImageStorageStrategy imageStorageStrategy, ImageValidationStrategy imageValidationStrategy,
+            @Value("${storage.location}") String storageLocation, @Value("${server.url}") String serverUrl) {
+        this.subCategoriesRepository = subCategoriesRepository;
+        this.categoriesRepository = categoriesRepository;
+        this.categoriesService = categoriesService;
+        this.imageStorageStrategy = imageStorageStrategy;
+        this.imageValidationStrategy = imageValidationStrategy;
+        this.storageLocation = storageLocation;
+        this.serverUrl = serverUrl;
+    }
 
     // Método para convertir de entidad a DTO
     private SubCategoriesDTO convertToDTO(SubCategories subCategory) {

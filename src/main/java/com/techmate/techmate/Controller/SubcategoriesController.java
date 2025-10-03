@@ -6,10 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,10 +17,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.SubCategoriesDTO;
 import com.techmate.techmate.Service.SubCategoriesService;
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.Service.subcategories.mapper.SubCategoriesMapper;
+// ImageStorageStrategy not needed in controller after refactor
+import com.techmate.techmate.dto.ErrorResponse;
+import com.techmate.techmate.dto.SubCategoriesDTO;
+import com.techmate.techmate.dto.SubCategoryRequest;
+import com.techmate.techmate.dto.SubCategoryResponse;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
@@ -34,6 +33,9 @@ public class SubcategoriesController {
     @Autowired
     private SubCategoriesService subcategoriesService;
 
+    @Autowired
+    private SubCategoriesMapper subCategoriesMapper;
+
     @Value("${storage.location}")
     private String storageLocation; // Directorio para almacenar imágenes
 
@@ -41,89 +43,73 @@ public class SubcategoriesController {
     private String serverUrl; // URL base del servidor
 
     @PostMapping("/create")
-    public ResponseEntity<SubCategoriesDTO> createSubcategory(
-            @RequestParam("name") String name,
-            @RequestParam("image") MultipartFile image,
-            @RequestParam("idCategory") Integer idCategoria) {
+    public ResponseEntity<?> createSubcategory(
+            @Valid @ModelAttribute SubCategoryRequest request,
+            @RequestParam("image") MultipartFile image) {
 
         try {
-            // Validar la imagen
-
-            SubCategoriesDTO subcategoryDTO = new SubCategoriesDTO();
-            subcategoryDTO.setName(name);
-            subcategoryDTO.setCategoryId(idCategoria); // Asocia la subcategoría a una categoría
-
-            SubCategoriesDTO savedSubcategory = subcategoriesService.createSubCategory(subcategoryDTO, image);
-            savedSubcategory.setImagePath(serverUrl + "/admin/subcategories/images/" + savedSubcategory.getImagePath());
-
-            return new ResponseEntity<>(savedSubcategory, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error de validación
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error al guardar la imagen o subcategoría
+        SubCategoriesDTO dto = subCategoriesMapper.fromRequest(request);
+        SubCategoriesDTO saved = subcategoriesService.createSubCategory(dto, image);
+        SubCategoryResponse resp = subCategoriesMapper.toResponse(saved, serverUrl);
+        return new ResponseEntity<>(resp, HttpStatus.CREATED);
+        } catch (com.techmate.techmate.exception.NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (com.techmate.techmate.exception.BusinessException e) {
+            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubCategoriesDTO> getSubcategoryById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getSubcategoryById(@PathVariable("id") Integer id) {
         try {
             SubCategoriesDTO subcategory = subcategoriesService.getSubCategoryById(id);
 
             if (subcategory == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            subcategory.setImagePath(serverUrl + "/admin/subcategories/images/" + subcategory.getImagePath());
-            return new ResponseEntity<>(subcategory, HttpStatus.OK);
+
+        SubCategoryResponse resp = subCategoriesMapper.toResponse(subcategory, serverUrl);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (com.techmate.techmate.exception.NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener la subcategoría
         }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<SubCategoriesDTO> updateSubcategory(
+    public ResponseEntity<?> updateSubcategory(
             @PathVariable("id") Integer id,
-            @RequestParam(value = "name", required = false) @Valid String name,
-            @RequestParam(value = "image", required = false) MultipartFile image,
-            @RequestParam(value = "idCategoria", required = false) @Valid Integer idCategoria) {
+            @Valid @ModelAttribute SubCategoryRequest request,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
 
         try {
-            SubCategoriesDTO existingSubcategory = subcategoriesService.getSubCategoryById(id);
+            SubCategoriesDTO dto = subCategoriesMapper.fromRequest(request);
+            SubCategoriesDTO updated = subcategoriesService.updateSubCategory(id, dto, image);
 
-            existingSubcategory.setName(name);
-            existingSubcategory.setCategoryId(idCategoria); // Actualiza la categoría asociada
-
-            SubCategoriesDTO updatedSubcategory = subcategoriesService.updateSubCategory(id, existingSubcategory,
-                    image);
-
-            if (updatedSubcategory == null) {
+            if (updated == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            updatedSubcategory
-                    .setImagePath(serverUrl + "/admin/subcategories/images/" + updatedSubcategory.getImagePath());
-
-            return new ResponseEntity<>(updatedSubcategory, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error de validación
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Error en la actualización
+            SubCategoryResponse resp = subCategoriesMapper.toResponse(updated, serverUrl);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        } catch (com.techmate.techmate.exception.NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (com.techmate.techmate.exception.BusinessException e) {
+            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<SubCategoriesDTO>> getAllSubcategories() {
+    public ResponseEntity<?> getAllSubcategories() {
         try {
-            List<SubCategoriesDTO> subcategories = subcategoriesService.getAllSubCategories().stream()
-                    .map(subcategory -> {
-                        String imagePath = serverUrl + "/admin/subcategories/images/" + subcategory.getImagePath();
-                        subcategory.setImagePath(imagePath);
-                        return subcategory;
-                    })
-                    .collect(Collectors.toList());
+        List<SubCategoryResponse> subcategories = subcategoriesService.getAllSubCategories().stream()
+            .map(subcategory -> subCategoriesMapper.toResponse(subcategory, serverUrl))
+            .collect(Collectors.toList());
 
             if (subcategories.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
@@ -138,10 +124,10 @@ public class SubcategoriesController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSubcategory(@PathVariable("id") Integer id) {
         try {
-            SubCategoriesDTO subcategory = subcategoriesService.getSubCategoryById(id);
-
             subcategoriesService.deleteSubCategory(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Eliminación exitosa
+        } catch (com.techmate.techmate.exception.NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al eliminar la subcategoría
         }

@@ -2,14 +2,17 @@ package com.techmate.techmate.Controller;
 
 import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
+// ...existing imports...
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.techmate.techmate.DTO.MovementsDTO;
-import com.techmate.techmate.Entity.MoveType;
+
 import com.techmate.techmate.Service.MovementsService;
+import com.techmate.techmate.dto.MovementsDTO;
+import com.techmate.techmate.dto.MovementResponse;
+import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
+import com.techmate.techmate.entity.MoveType;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,12 +22,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/admin/movement")
 public class MovementsController {
 
-    @Autowired
-    private MovementsService movementsService;
+    private final MovementsService movementsService;
+    private final MovementsMapper movementsMapper;
 
     // Crear un nuevo movimiento
-    public MovementsController(MovementsService movementsService) {
+    public MovementsController(MovementsService movementsService, MovementsMapper movementsMapper) {
         this.movementsService = movementsService;
+        this.movementsMapper = movementsMapper;
     }
 
     @PostMapping("/create")
@@ -73,7 +77,8 @@ public ResponseEntity<?> createMovement(
 
     try {
         MovementsDTO createdMovement = movementsService.createMovementsDTO(movementsDTO, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdMovement);
+        MovementResponse resp = movementsMapper.toResponse(createdMovement);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     } catch (Exception e) {
         e.printStackTrace(); // Mostrar más detalles del error en consola
         // Aquí puedes personalizar el mensaje de error que deseas devolver
@@ -84,20 +89,21 @@ public ResponseEntity<?> createMovement(
 
     // Obtener un movimiento por ID
     @GetMapping("/{id}")
-    public ResponseEntity<MovementsDTO> getMovementById(@RequestParam("id") Integer id) {
+    public ResponseEntity<MovementResponse> getMovementById(@RequestParam("id") Integer id) {
         try {
             MovementsDTO movementsDTO = movementsService.getMovementsByID(id);
             if (movementsDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            return ResponseEntity.ok(movementsDTO);
+            MovementResponse resp = movementsMapper.toResponse(movementsDTO);
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<MovementsDTO>> getAllMovements() {
+    public ResponseEntity<List<MovementResponse>> getAllMovements() {
         try {
             // Llamar al servicio para obtener la lista de movimientos
             List<MovementsDTO> movementsList = movementsService.getAllMovementsDTO();
@@ -107,8 +113,13 @@ public ResponseEntity<?> createMovement(
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
+            // Mapear a response público y devolver la lista
+            List<MovementResponse> resp = movementsList.stream()
+                    .map(movementsMapper::toResponse)
+                    .toList();
+
             // Devolver la lista de movimientos con el código HTTP 200 OK
-            return ResponseEntity.ok(movementsList);
+            return ResponseEntity.ok(resp);
 
         } catch (Exception e) {
             // En caso de error, devolver un estado de error interno del servidor
@@ -117,7 +128,7 @@ public ResponseEntity<?> createMovement(
     }
 
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<MovementsDTO>> getMovementsByType(@PathVariable String type) {
+    public ResponseEntity<List<MovementResponse>> getMovementsByType(@PathVariable String type) {
         try {
             List<MovementsDTO> movementDTOsList = movementsService.getMovementsByType(type);
 
@@ -125,14 +136,18 @@ public ResponseEntity<?> createMovement(
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return ResponseEntity.ok(movementDTOsList);
+            List<MovementResponse> resp = movementDTOsList.stream()
+                    .map(movementsMapper::toResponse)
+                    .toList();
+
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/filterByDate")
-    public ResponseEntity<List<MovementsDTO>> getMovementsByDate(
+    public ResponseEntity<List<MovementResponse>> getMovementsByDate(
             @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         try {
@@ -142,7 +157,11 @@ public ResponseEntity<?> createMovement(
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return ResponseEntity.ok(movementsDTOs);
+            List<MovementResponse> resp = movementsDTOs.stream()
+                    .map(movementsMapper::toResponse)
+                    .toList();
+
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

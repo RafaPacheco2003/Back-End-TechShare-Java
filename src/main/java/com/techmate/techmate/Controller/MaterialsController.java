@@ -1,9 +1,13 @@
 package com.techmate.techmate.Controller;
 
-import com.techmate.techmate.DTO.MaterialsDTO;
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
+// image storage handled by service
+import java.util.stream.Collectors;
 import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
+import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
+import com.techmate.techmate.dto.MaterialRequest;
+import com.techmate.techmate.dto.MaterialResponse;
+import com.techmate.techmate.dto.MaterialsDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+// org.springframework.beans.factory.annotation.Autowired removed (not used)
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,46 +29,40 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/admin/materials")
 public class MaterialsController {
 
-    @Autowired
-    private MaterialsService materialsService;
+    private final MaterialsService materialsService;
+    private final EmailService emailService;
+    private final MaterialsMapper materialsMapper;
+    private final String storageLocation; // Directorio para almacenar imágenes
+    private final String serverUrl; // URL base del servidor
+    // image storage strategy is injected but not used directly in this controller
+    // image storage handled by service
 
-    @Autowired
-    private EmailService emailService;
-
-    @Value("${storage.location}")
-    private String storageLocation; // Directorio para almacenar imágenes
-
-    @Value("${server.url}")
-    private String serverUrl; // URL base del servidor
-
-    @Autowired
-    private ImageStorageStrategy imageStorageStrategy;
+    public MaterialsController(MaterialsService materialsService, EmailService emailService,
+            MaterialsMapper materialsMapper,
+            @Value("${storage.location}") String storageLocation, @Value("${server.url}") String serverUrl) {
+        this.materialsService = materialsService;
+        this.emailService = emailService;
+        this.materialsMapper = materialsMapper;
+        this.storageLocation = storageLocation;
+        this.serverUrl = serverUrl;
+    }
 
     @PostMapping("/create")
-    public ResponseEntity<MaterialsDTO> createMaterials(
+    public ResponseEntity<MaterialResponse> createMaterials(
             @RequestParam("image") MultipartFile image,
-            @RequestParam("name") String name,
-            @RequestParam("description") String description,
-            @RequestParam("stock") int stock,
-            @RequestParam("price") double price,
-            @RequestParam("subCategoryId") int subCategoryId,
-            @RequestParam("roleIds") List<Integer> roleIds) { // Cambiado a roleIds como lista
+            @ModelAttribute MaterialRequest materialRequest) {
 
         try {
-            // Crear un nuevo DTO de Materials
-            MaterialsDTO materialsDTO = new MaterialsDTO();
-            materialsDTO.setImagePath(image.getOriginalFilename()); // Obtener el nombre original de la imagen
-            materialsDTO.setName(name);
-            materialsDTO.setStock(stock);
-            materialsDTO.setDescription(description);
-            materialsDTO.setPrice(price);
-            materialsDTO.setSubCategoryId(subCategoryId);
-            materialsDTO.setRoleIds(roleIds); // Asignar la lista de roleIds
+        // Mapear request público -> DTO interno usando MaterialsMapper
+        MaterialsDTO requestDto = materialsMapper.fromRequest(materialRequest);
+        requestDto.setImagePath(image != null ? image.getOriginalFilename() : null);
 
-            // Llamar al servicio para guardar el material
-            MaterialsDTO createdMaterial = materialsService.createMaterials(materialsDTO, image);
+        MaterialsDTO createdMaterial = materialsService.createMaterials(requestDto, image);
 
-            return new ResponseEntity<>(createdMaterial, HttpStatus.CREATED);
+        // Mapear DTO interno -> response público
+        MaterialResponse resp = materialsMapper.toResponse(createdMaterial, serverUrl);
+
+            return new ResponseEntity<>(resp, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
@@ -77,13 +75,13 @@ public class MaterialsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MaterialsDTO> getMaterialById(@PathVariable("id") Integer id) {
+    public ResponseEntity<MaterialResponse> getMaterialById(@PathVariable("id") Integer id) {
         try {
             MaterialsDTO materialsDTO = materialsService.getMaterialsById(id);
-            materialsDTO.setImagePath(serverUrl + "/admin/materials/images/" + materialsDTO.getImagePath());
-            return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+        MaterialResponse resp = materialsMapper.toResponse(materialsDTO, serverUrl);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -91,21 +89,11 @@ public class MaterialsController {
     public ResponseEntity<?> updateMaterials(
             @PathVariable("id") Integer id,
             @RequestParam(value = "image", required = false) MultipartFile image,
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam("stock") int stock,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "price", required = false) Double price,
-            @RequestParam(value = "subCategoryId", required = false) Integer subCategoryId,
-            @RequestParam(value = "roleIds", required = false) List<Integer> roleIds) { // Cambiado a roleIds como lista
+            @ModelAttribute MaterialRequest materialRequest) {
 
-        MaterialsDTO materialsDTO = new MaterialsDTO();
-
-        materialsDTO.setName(name);
-        materialsDTO.setDescription(description);
-        materialsDTO.setStock(stock);
-        materialsDTO.setPrice(price);
-        materialsDTO.setSubCategoryId(subCategoryId);
-        materialsDTO.setRoleIds(roleIds); // Asignar la lista de roleIds
+        MaterialsDTO materialsDTO = materialsMapper.fromRequest(materialRequest);
+        // image handled by controller when provided
+        if (image != null) materialsDTO.setImagePath(image.getOriginalFilename());
 
         MaterialsDTO updatedMaterial = materialsService.updateMaterials(id, materialsDTO, image);
 
@@ -113,13 +101,13 @@ public class MaterialsController {
             return new ResponseEntity<>("Error al actualizar un nuevo material", HttpStatus.NOT_FOUND);
         }
 
-        updatedMaterial.setImagePath(serverUrl + "/admin/materials/images/" + updatedMaterial.getImagePath());
+        MaterialResponse resp = materialsMapper.toResponse(updatedMaterial, serverUrl);
 
-        return new ResponseEntity<>(updatedMaterial, HttpStatus.OK);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<MaterialsDTO>> getAllMaterials() {
+    public ResponseEntity<List<MaterialResponse>> getAllMaterials() {
         try {
             List<MaterialsDTO> materialsDTO = materialsService.getAllMaterials();
 
@@ -127,20 +115,18 @@ public class MaterialsController {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            materialsDTO.forEach(material -> {
-                if (material.getImagePath() != null) {
-                    material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
-                }
-            });
+            List<MaterialResponse> resp = materialsDTO.stream()
+                    .map(material -> materialsMapper.toResponse(material, serverUrl))
+                    .collect(Collectors.toList());
 
-            return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/sorted-by-price")
-    public ResponseEntity<List<MaterialsDTO>> getAllMaterialsSortedByPrice(
+    public ResponseEntity<List<MaterialResponse>> getAllMaterialsSortedByPrice(
             @RequestParam(value = "asc", defaultValue = "false") boolean ascending) {
         try {
             List<MaterialsDTO> materialsDTO = materialsService.getAllMaterialsSortedByPrice(ascending);
@@ -149,13 +135,11 @@ public class MaterialsController {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            materialsDTO.forEach(material -> {
-                if (material.getImagePath() != null) {
-                    material.setImagePath(serverUrl + "/admin/materials/images/" + material.getImagePath());
-                }
-            });
+            List<MaterialResponse> resp = materialsDTO.stream()
+                    .map(material -> materialsMapper.toResponse(material, serverUrl))
+                    .collect(Collectors.toList());
 
-            return new ResponseEntity<>(materialsDTO, HttpStatus.OK);
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener materiales
         }

@@ -3,17 +3,19 @@ package com.techmate.techmate.Service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.CategoriesDTO;
-import com.techmate.techmate.Entity.Categories;
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Repository.CategoriesRepository;
 import com.techmate.techmate.Service.CategoriesService;
 import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.dto.CategoriesDTO;
+import com.techmate.techmate.entity.Categories;
+import com.techmate.techmate.repository.CategoriesRepository;
+import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
+import com.techmate.techmate.Service.categories.validator.CategoriesValidator;
+import com.techmate.techmate.Service.categories.query.CategoriesQueryService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -32,20 +34,32 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class CategoriesServiceImp implements CategoriesService {
 
-    @Autowired
-    CategoriesRepository categoriesRepository;
-
-    @Autowired
-    private ImageStorageStrategy imageStorageStrategy;
-
-    @Autowired
-    private ImageValidationStrategy imageValidationStrategy; // Inyección de la estrategia de validación
+    private final CategoriesRepository categoriesRepository;
+    private final ImageStorageStrategy imageStorageStrategy;
+    private final ImageValidationStrategy imageValidationStrategy; // Inyección de la estrategia de validación
+    private final CategoriesMapper categoriesMapper;
+    private final CategoriesValidator categoriesValidator;
+    private final CategoriesQueryService categoriesQueryService;
 
     @Value("${storage.location}")
     private String storageLocation; // Directorio para almacenar imágenes
 
     @Value("${server.url}")
     private String serverUrl; // URL base del servidor
+
+    public CategoriesServiceImp(CategoriesRepository categoriesRepository,
+                                ImageStorageStrategy imageStorageStrategy,
+                                ImageValidationStrategy imageValidationStrategy,
+                                CategoriesMapper categoriesMapper,
+                                CategoriesValidator categoriesValidator,
+                                CategoriesQueryService categoriesQueryService) {
+        this.categoriesRepository = categoriesRepository;
+        this.imageStorageStrategy = imageStorageStrategy;
+        this.imageValidationStrategy = imageValidationStrategy;
+        this.categoriesMapper = categoriesMapper;
+        this.categoriesValidator = categoriesValidator;
+        this.categoriesQueryService = categoriesQueryService;
+    }
 
     /**
      * Convierte una entidad {@code Categories} a un objeto {@code CategoriesDTO}.
@@ -54,12 +68,7 @@ public class CategoriesServiceImp implements CategoriesService {
      * @return Un objeto {@code CategoriesDTO} que representa la categoría.
      */
     private CategoriesDTO convertToDTO(Categories category) {
-        CategoriesDTO dto = new CategoriesDTO();
-        dto.setCategoryId(category.getCategoryId());
-        dto.setName(category.getName());
-        dto.setImagePath(category.getImagePath());
-
-        return dto;
+        return categoriesMapper.toDTO(category);
     }
 
     /**
@@ -69,19 +78,13 @@ public class CategoriesServiceImp implements CategoriesService {
      * @return La entidad {@code Categories} correspondiente.
      */
     private Categories convertToEntity(CategoriesDTO categoriesDTO) {
-        Categories categories = new Categories();
-        categories.setCategoryId(categoriesDTO.getCategoryId());
-        categories.setName(categoriesDTO.getName());
-        categories.setImagePath(categoriesDTO.getImagePath());
-        return categories;
+        return categoriesMapper.toEntity(categoriesDTO);
     }
 
     @Override
     public CategoriesDTO createCategory(CategoriesDTO categoriesDTO, MultipartFile image) {
         // Verificar si ya existe una categoría con el mismo nombre
-        if (categoriesRepository.findByName(categoriesDTO.getName()) != null) {
-            throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + categoriesDTO.getName());
-        }
+        categoriesValidator.validateUniqueName(categoriesDTO.getName());
         String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
         imageValidationStrategy.validate(imagePath); // Validación de la extensión
 
@@ -94,19 +97,15 @@ public class CategoriesServiceImp implements CategoriesService {
         categoriesDTO.setImagePath(savedImagePath);
 
         // Convertir el DTO a entidad y guardarlo en la base de datos
-        Categories categories = convertToEntity(categoriesDTO);
-        categories = categoriesRepository.save(categories);
-
-        return convertToDTO(categories);
+    Categories categories = convertToEntity(categoriesDTO);
+    categories = categoriesRepository.save(categories);
+    return convertToDTO(categories);
     }
 
     @Override
     public CategoriesDTO getCategoryById(int categoryID) {
         // Buscar la categoría por ID y lanzar excepción si no se encuentra
-        Categories categories = categoriesRepository.findById(categoryID)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
-
-        return categories != null ? convertToDTO(categories) : null;
+        return categoriesQueryService.getById(categoryID);
     }
 
     @Override
@@ -115,12 +114,9 @@ public class CategoriesServiceImp implements CategoriesService {
         Categories categories = categoriesRepository.findById(categoryID)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryID));
 
-        // Verificar si ya existe otra categoría con el mismo nombre y el nombre ha
-        // cambiado
-        if (categoriesDTO.getName() != null &&
-                !categoriesDTO.getName().equals(categories.getName()) &&
-                categoriesRepository.findByName(categoriesDTO.getName()) != null) {
-            throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + categoriesDTO.getName());
+        // Verificar nombre único si cambió
+        if (categoriesDTO.getName() != null && !categoriesDTO.getName().equals(categories.getName())) {
+            categoriesValidator.validateUniqueName(categoriesDTO.getName());
         }
 
         // Actualizar el nombre solo si es diferente y no es nulo
@@ -169,9 +165,7 @@ public class CategoriesServiceImp implements CategoriesService {
 
     @Override
     public List<CategoriesDTO> getAllCategories() {
-        return categoriesRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return categoriesQueryService.getAll();
     }
 
     @Override

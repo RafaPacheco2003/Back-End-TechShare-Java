@@ -1,7 +1,7 @@
 package com.techmate.techmate.Service.impl;
 
-import com.techmate.techmate.Security.TokenUtils;
 import com.techmate.techmate.Service.TokenService;
+import com.techmate.techmate.security.TokenUtils;
 
 import io.jsonwebtoken.Claims;
 

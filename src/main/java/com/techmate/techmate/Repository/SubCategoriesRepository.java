@@ -1,10 +1,10 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.techmate.techmate.Entity.SubCategories;
+import com.techmate.techmate.entity.SubCategories;
 
 @Repository
 public interface SubCategoriesRepository extends JpaRepository<SubCategories, Integer>{

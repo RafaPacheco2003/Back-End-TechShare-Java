@@ -8,37 +8,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Entity.VerificationToken;
-import com.techmate.techmate.Repository.UsuarioRepository;
-import com.techmate.techmate.Repository.VerificationTokenRepository;
+import com.techmate.techmate.dto.VerificationResponse;
+import com.techmate.techmate.Service.VerificationService;
 
 @RestController
 public class TokenVeriController {
 
-    @Autowired
-    private VerificationTokenRepository verificationTokenRepository;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final VerificationService verificationService;
+
+    public TokenVeriController(VerificationService verificationService) {
+        this.verificationService = verificationService;
+    }
 
     @GetMapping("/verify")
-public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
-    VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
-    if (verificationToken == null) {
-        return ResponseEntity.badRequest().body("Token inválido.");
+    public ResponseEntity<String> verifyAccount(@RequestParam("token") String token) {
+        VerificationResponse result = verificationService.verifyToken(token);
+        if (!result.isSuccess()) {
+            return ResponseEntity.badRequest().body(result.getMessage());
+        }
+        return ResponseEntity.ok(result.getMessage());
     }
 
-    Usuario usuario = verificationToken.getUsuario();
-    Calendar cal = Calendar.getInstance();
-    if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-        return ResponseEntity.badRequest().body("Token caducado.");
-    }
-
-    usuario.setEnabled(true);
-    usuarioRepository.save(usuario);
-
-    return ResponseEntity.ok("Cuenta verificada con éxito. Ahora puedes iniciar sesión.");
-}
-
-    
 }

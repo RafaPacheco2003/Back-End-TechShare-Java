@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.techmate.techmate.DTO.UsuarioDTO;
-import com.techmate.techmate.Entity.Usuario;
 import com.techmate.techmate.Service.TokenService;
 import com.techmate.techmate.Service.User.UserDemoService;
+import com.techmate.techmate.dto.UsuarioDTO;
+import com.techmate.techmate.entity.Usuario;
 
 @RequestMapping("/user")
 @RestController

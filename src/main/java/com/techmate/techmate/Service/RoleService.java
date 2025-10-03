@@ -2,7 +2,7 @@ package com.techmate.techmate.Service;
 
 import java.util.*;
 
-import com.techmate.techmate.DTO.RoleDTO;
+import com.techmate.techmate.dto.RoleDTO;
 
 public interface RoleService {
     

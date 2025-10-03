@@ -6,7 +6,7 @@ import java.util.*;
 
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.DTO.MovementsDTO;
+import com.techmate.techmate.dto.MovementsDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 

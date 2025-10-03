@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.techmate.techmate.DTO.UsuarioDTO;
 import com.techmate.techmate.Service.UserService;
+import com.techmate.techmate.dto.UsuarioDTO;
 
 @RestController
 @RequestMapping("/admin/user")

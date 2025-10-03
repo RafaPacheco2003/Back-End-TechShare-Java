@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.DTO.MaterialsDTO;
+import com.techmate.techmate.dto.MaterialsDTO;
 
 
 public interface MaterialsService {

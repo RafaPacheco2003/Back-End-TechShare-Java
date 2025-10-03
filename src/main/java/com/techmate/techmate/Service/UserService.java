@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.techmate.techmate.DTO.UsuarioDTO;
+import com.techmate.techmate.dto.UsuarioDTO;
 
 public interface UserService {
     List<UsuarioDTO> getAllUser();

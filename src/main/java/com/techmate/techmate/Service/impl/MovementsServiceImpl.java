@@ -4,23 +4,21 @@ package com.techmate.techmate.Service.impl;
 import java.util.stream.Collectors;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
-
-import com.techmate.techmate.DTO.MovementsDTO;
-import com.techmate.techmate.Entity.Materials;
-import com.techmate.techmate.Entity.MoveType;
-import com.techmate.techmate.Entity.Movements;
-import com.techmate.techmate.Entity.Usuario;
-import com.techmate.techmate.Repository.MaterialsRepository;
-import com.techmate.techmate.Repository.MovementsRepository;
-import com.techmate.techmate.Repository.UsuarioRepository;
-import com.techmate.techmate.Security.TokenUtils;
-import com.techmate.techmate.Security.UserDetailsServiceImpl;
 import com.techmate.techmate.Service.MaterialsService;
 import com.techmate.techmate.Service.MovementsService;
+import com.techmate.techmate.dto.MovementsDTO;
+import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.entity.MoveType;
+import com.techmate.techmate.entity.Movements;
+import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.repository.MovementsRepository;
+import com.techmate.techmate.repository.UsuarioRepository;
+import com.techmate.techmate.security.TokenUtils;
+import com.techmate.techmate.security.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,141 +27,79 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class MovementsServiceImpl implements MovementsService {
 
-    @Autowired
-    private MovementsRepository movementsRepository;
+    private final MovementsRepository movementsRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final UserDetailsServiceImpl userService;
+    private final MaterialsRepository materialsRepository;
+    private final MaterialsService materialsService;
+    private final com.techmate.techmate.Service.movements.mapper.MovementMapper movementMapper;
+    private final com.techmate.techmate.Service.movements.validator.MovementValidator movementValidator;
+    private final com.techmate.techmate.Service.movements.manager.MovementStockManager movementStockManager;
+    private final com.techmate.techmate.Service.movements.query.MovementQueryService movementQueryService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private UserDetailsServiceImpl userService;
-
-    @Autowired
-    private MaterialsRepository materialsRepository;
-
-    @Autowired
-    private MaterialsService materialsService;
+    public MovementsServiceImpl(MovementsRepository movementsRepository,
+                                UsuarioRepository usuarioRepository,
+                                UserDetailsServiceImpl userService,
+                                MaterialsRepository materialsRepository,
+                                MaterialsService materialsService,
+                                com.techmate.techmate.Service.movements.mapper.MovementMapper movementMapper,
+                                com.techmate.techmate.Service.movements.validator.MovementValidator movementValidator,
+                                com.techmate.techmate.Service.movements.manager.MovementStockManager movementStockManager,
+                                com.techmate.techmate.Service.movements.query.MovementQueryService movementQueryService) {
+        this.movementsRepository = movementsRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.userService = userService;
+        this.materialsRepository = materialsRepository;
+        this.materialsService = materialsService;
+        this.movementMapper = movementMapper;
+        this.movementValidator = movementValidator;
+        this.movementStockManager = movementStockManager;
+        this.movementQueryService = movementQueryService;
+    }
 
     private Movements convertToEntity(MovementsDTO movementsDTO, Integer userId) {
-        Movements movements = new Movements();
-
-        movements.setMovementsId(movementsDTO.getMovementsId());
-        // Asignar MoveType directamente desde el DTO
-        movements.setMoveType(movementsDTO.getMoveType());
-        String comment = movementsDTO.getComment();
-
-        movements.setQuantity(movementsDTO.getQuantity());
-        movements.setDate(movementsDTO.getDate());
-        movements.setComment(movementsDTO.getComment());
-
-        // Aquí asignamos el ID de usuario obtenido del token
-        Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        movements.setUsuario(usuario);
-
-        Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
-                .orElseThrow(
-                        () -> new RuntimeException("Material no encontrado"));
-        movements.setMaterials(materials);
-
-        return movements;
+        Usuario usuario = usuarioRepository.findById(userId).orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Usuario no encontrado"));
+        Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId()).orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Material no encontrado"));
+        return movementMapper.toEntity(movementsDTO, usuario, materials);
     }
 
     private MovementsDTO convertToDTO(Movements movements) {
-        MovementsDTO dto = new MovementsDTO();
-        dto.setMovementsId(movements.getMovementsId());
-
-        // Asignar MoveType directamente, ya que es del mismo tipo
-        dto.setMoveType(movements.getMoveType());
-
-        String comment = movements.getComment();
-        System.out.println(comment + "A la hora de convertir a dto");
-        dto.setQuantity(movements.getQuantity());
-        dto.setDate(movements.getDate());
-        dto.setComment(comment);
-
-        // Obtener y asignar IDs y nombres
-        dto.setAdminId(movements.getUsuario().getId());
-        dto.setMaterialsId(movements.getMaterials().getMaterialsId());
-
-        // Obtener y asignar nombres de Usuario y Materials mediante los servicios
-        dto.setAdminName(userService.getUsuarioUsernamById(movements.getUsuario().getId()));
-        dto.setMaterialsName(materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId()));
-
-        return dto;
+        String adminName = userService.getUsuarioUsernamById(movements.getUsuario().getId());
+        String materialName = materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId());
+        return movementMapper.toDTO(movements, adminName, materialName);
     }
 
     @Override
     public MovementsDTO createMovementsDTO(MovementsDTO movementsDTO, Integer userId) {
 
-        // Verificar si la cantidad es menor o igual a 0
-        if (movementsDTO.getQuantity() <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
-        }
+        movementValidator.validateQuantity(movementsDTO);
 
         String comment = movementsDTO.getComment();
         movementsDTO.setComment(comment);
         // Asignar la fecha actual al movimientFo
         movementsDTO.setDate(new Date());
 
-        // Convertir DTO a entidad
-        Movements movements = convertToEntity(movementsDTO, userId);
-        // Obtener el material correspondiente antes de ajustar el stock
-        Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId())
-                .orElseThrow(
-                        () -> new RuntimeException("Material no encontrado"));
-
-        adjustMaterialStock(materials, movements);
-        materialsRepository.save(materials);
-
-        movements = movementsRepository.save(movements);
-        return convertToDTO(movements);
+    Movements movements = convertToEntity(movementsDTO, userId);
+    Materials materials = movements.getMaterials();
+    movementStockManager.adjustMaterialStock(materials, movements);
+    materialsRepository.save(materials);
+    movements = movementsRepository.save(movements);
+    return convertToDTO(movements);
     }
 
     // Ajustar stock de material
-    private void adjustMaterialStock(Materials materials, Movements movements) {
-
-        switch (movements.getMoveType()) {
-            case IN:
-                // Incrementar el stock total y el borrowable_stock cuando entra material
-                materials.setBorrowable_stock(materials.getBorrowable_stock() + movements.getQuantity());
-                materials.setStock(materials.getStock() + movements.getQuantity());
-                break;
-            case OUT:
-                // Verificar si el stock total es suficiente
-                if (materials.getStock() < movements.getQuantity()) {
-                    throw new IllegalArgumentException(
-                            "Stock insuficiente para el material");
-                }
-                // Reducir el borrowable_stock y el stock total cuando sale material
-                materials.setBorrowable_stock(materials.getBorrowable_stock() - movements.getQuantity());
-                materials.setStock(materials.getStock() - movements.getQuantity());
-                break;
-            case ADJUST:
-                // En el caso de ajustes, se ajusta tanto el borrowable_stock como el stock
-                // total
-                int difference = movements.getQuantity() - materials.getStock();
-                materials.setBorrowable_stock(materials.getBorrowable_stock() + difference);
-                materials.setStock(movements.getQuantity());
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo de movimiento inválido");
-        }
-    }
+    // Stock adjustments now delegated to MovementStockManager
 
     @Override
     public MovementsDTO getMovementsByID(Integer movementsId) {
-        Movements movements = movementsRepository.findById(movementsId)
-                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
+    Movements movements = movementsRepository.findById(movementsId)
+        .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Movimiento no encontrado"));
         return convertToDTO(movements);
     }
 
     @Override
     public List<MovementsDTO> getAllMovementsDTO() {
-        // Recuperar todos los movimientos y convertirlos a DTO
-        return movementsRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return movementQueryService.getAll();
     }
 
     @Override
@@ -185,18 +121,12 @@ public class MovementsServiceImpl implements MovementsService {
                 throw new IllegalArgumentException("Tipo de movimiento inválido: " + type);
         }
 
-        // Filtrar y convertir los movimientos a DTOs en una sola operación
-        return movementsRepository.findByMoveType(moveType).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    return movementQueryService.getByMoveType(moveType);
     }
 
     @Override
     public List<MovementsDTO> getMovementsByDate(Date startDate, Date endDate) {
-        // Filtrar movimientos en el rango de fechas y convertir a DTOs
-        return movementsRepository.findByDateBetween(startDate, endDate).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return movementQueryService.getByDateRange(startDate, endDate);
     }
 
     @Override
@@ -228,10 +158,10 @@ public class MovementsServiceImpl implements MovementsService {
                 System.out.println("User ID: " + userId);
                 
             } else {
-                throw new RuntimeException("Token no válido");
+            throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "Token no válido");
             }
         } else {
-            throw new RuntimeException("No se proporcionó un token");
+            throw new com.techmate.techmate.exception.BusinessException("MISSING_TOKEN", "No se proporcionó un token");
         }
     }
     

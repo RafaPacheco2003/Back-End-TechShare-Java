@@ -1,7 +1,9 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
-import com.techmate.techmate.Entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.techmate.techmate.entity.Role;
+
 import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {

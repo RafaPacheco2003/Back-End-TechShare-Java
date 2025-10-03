@@ -1,12 +1,13 @@
-package com.techmate.techmate.Repository;
+package com.techmate.techmate.repository;
 
 import java.util.List;
 import java.util.Date;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.techmate.techmate.Entity.Borrow;
-import com.techmate.techmate.Entity.Status; // Cambia esto para importar tu clase Status
+
+import com.techmate.techmate.entity.Borrow;
+import com.techmate.techmate.entity.Status;
 
 @Repository
 public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
