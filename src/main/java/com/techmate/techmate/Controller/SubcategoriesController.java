@@ -25,8 +25,8 @@ import com.techmate.techmate.dto.SubCategoriesDTO;
 import com.techmate.techmate.dto.SubCategoryRequest;
 import com.techmate.techmate.dto.SubCategoryResponse;
 
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("admin/subcategories")
 public class SubcategoriesController {
 

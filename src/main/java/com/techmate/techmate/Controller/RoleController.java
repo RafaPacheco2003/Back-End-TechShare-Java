@@ -17,7 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.techmate.techmate.Service.RoleService;
 import com.techmate.techmate.dto.RoleDTO;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
 @RequestMapping("/admin/role")
 public class RoleController {

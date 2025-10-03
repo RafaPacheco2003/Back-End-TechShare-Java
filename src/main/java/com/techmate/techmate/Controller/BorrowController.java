@@ -21,8 +21,8 @@ import com.techmate.techmate.entity.Status;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("admin/borrow")
 public class BorrowController {
     private final BorrowService borrowService;

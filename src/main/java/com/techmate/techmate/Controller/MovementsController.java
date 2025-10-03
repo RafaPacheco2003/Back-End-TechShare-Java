@@ -19,7 +19,7 @@ import com.techmate.techmate.security.TokenUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
 @RequestMapping("/admin/movement")
 public class MovementsController {

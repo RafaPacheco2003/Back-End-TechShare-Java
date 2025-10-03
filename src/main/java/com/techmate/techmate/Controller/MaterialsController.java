@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
 @RequestMapping("/admin/materials")
 public class MaterialsController {

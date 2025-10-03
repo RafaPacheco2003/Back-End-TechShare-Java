@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("/borrow")
 public class BorrowUserController {
 

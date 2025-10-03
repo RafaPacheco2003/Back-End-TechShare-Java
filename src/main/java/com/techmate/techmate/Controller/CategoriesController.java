@@ -31,8 +31,8 @@ import jakarta.validation.Valid;
  * relacionadas
  * con las categorías en el sistema.
  */
+// CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("admin/categories")
 @Validated
 public class CategoriesController {
