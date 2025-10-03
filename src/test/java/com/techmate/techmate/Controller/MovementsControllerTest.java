@@ -1,0 +1,95 @@
+package com.techmate.techmate.Controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.techmate.techmate.Service.MovementsService;
+import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
+import com.techmate.techmate.dto.MovementsDTO;
+import com.techmate.techmate.dto.MovementResponse;
+import com.techmate.techmate.entity.MoveType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import com.techmate.techmate.testutils.JWTTestHelper;
+
+@WebMvcTest(controllers = com.techmate.techmate.Controller.MovementsController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class MovementsControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private MovementsService movementsService;
+
+    @MockBean
+    private MovementsMapper movementsMapper;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void getMovementById_returnsMovementResponse() throws Exception {
+        MovementsDTO dto = new MovementsDTO();
+        dto.setMovementsId(1);
+        dto.setQuantity(5);
+        dto.setMoveType(MoveType.IN);
+
+        MovementResponse resp = new MovementResponse(1, MoveType.IN, 5, new java.util.Date(), "", 1, "Admin", 2, "MaterialName");
+
+        when(movementsService.getMovementsByID(1)).thenReturn(dto);
+        when(movementsMapper.toResponse(eq(dto))).thenReturn(resp);
+
+        // call path /admin/movement/1 and include request param id=1 to satisfy the controller signature
+        mockMvc.perform(get("/admin/movement/1").param("id", "1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movementsId").value(1))
+                .andExpect(jsonPath("$.quantity").value(5));
+    }
+
+    @Test
+    void createMovement_handlesParamsAndReturnsCreated() throws Exception {
+        MovementsDTO reqDto = new MovementsDTO();
+        reqDto.setQuantity(3);
+        reqDto.setMoveType(MoveType.OUT);
+        reqDto.setMaterialsId(2);
+
+        MovementsDTO created = new MovementsDTO();
+        created.setMovementsId(10);
+        created.setQuantity(3);
+        created.setMoveType(MoveType.OUT);
+        created.setMaterialsId(2);
+
+        MovementResponse resp = new MovementResponse(10, MoveType.OUT, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
+
+    String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
+    when(movementsService.getUserIdFromToken(token)).thenReturn(5);
+        when(movementsService.createMovementsDTO(any(MovementsDTO.class), eq(5))).thenReturn(created);
+        when(movementsMapper.toResponse(eq(created))).thenReturn(resp);
+
+        mockMvc.perform(post("/admin/movement/create")
+        .header("Authorization", "Bearer " + token)
+                .param("quantity", "3")
+                .param("moveType", "OUT")
+                .param("id_material", "2")
+                .param("comment", "test")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.movementsId").value(10))
+                .andExpect(jsonPath("$.moveType").value("OUT"));
+    }
+}
