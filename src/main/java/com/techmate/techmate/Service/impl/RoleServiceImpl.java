@@ -1,18 +1,11 @@
 package com.techmate.techmate.Service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.techmate.techmate.Service.RoleService;
 import com.techmate.techmate.dto.RoleDTO;
-import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
-import com.techmate.techmate.entity.RoleMaterials;
-import com.techmate.techmate.entity.Usuario;
-import com.techmate.techmate.entity.UsuarioRole;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.RoleMaterialsRepository;
 import com.techmate.techmate.repository.RoleRepository;

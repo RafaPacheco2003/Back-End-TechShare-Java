@@ -76,9 +76,9 @@ public ResponseEntity<?> createMovement(
         MovementResponse resp = movementsMapper.toResponse(createdMovement);
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     } catch (Exception e) {
-        e.printStackTrace(); // Mostrar más detalles del error en consola
-        // Aquí puedes personalizar el mensaje de error que deseas devolver
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el movimiento: " + e.getMessage());
+        log.error("Error creating movement: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error al crear el movimiento: " + e.getMessage());
     }
 }
 

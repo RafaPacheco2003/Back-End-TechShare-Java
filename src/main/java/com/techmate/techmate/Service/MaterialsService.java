@@ -2,6 +2,8 @@ package com.techmate.techmate.Service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.techmate.techmate.dto.MaterialsDTO;
@@ -14,6 +16,7 @@ public interface MaterialsService {
     MaterialsDTO updateMaterials(int materialsId, MaterialsDTO materialsDTO, MultipartFile iMultipartFile);
     void deleteMaterials(int materialsId);
     List<MaterialsDTO> getAllMaterials();
+    Page<MaterialsDTO> getAllMaterialsPaginated(Pageable pageable);
     List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending);
 
     

@@ -15,7 +15,6 @@ import com.techmate.techmate.dto.DetailsBorrowDTO;
 import com.techmate.techmate.entity.*;
 import com.techmate.techmate.repository.*;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -112,7 +111,7 @@ class BorrowServiceImplTest {
         testBorrow.setAmount(77.97);
         testBorrow.setUsuario(testUser);
         testBorrow.setAdmin(testAdmin);
-    testBorrow.setDetails(new ArrayList<>(Arrays.asList(testDetail)));
+        testBorrow.setDetails(new ArrayList<>(Arrays.asList(testDetail)));
         
         testDetail.setBorrow(testBorrow); // Relación bidireccional
 
@@ -177,7 +176,7 @@ class BorrowServiceImplTest {
         // Given: Préstamo en estado PROCESS con stock suficiente
         when(borrowRepository.findById(1)).thenReturn(Optional.of(testBorrow));
         when(usuarioRepository.findById(200)).thenReturn(Optional.of(testAdmin));
-    when(borrowRepository.save(any(Borrow.class))).thenReturn(testBorrow);
+        when(borrowRepository.save(any(Borrow.class))).thenReturn(testBorrow);
 
         // When: Admin aprueba el préstamo
         borrowService.updateBorrowStatus(1, Status.BORROWED, 200);

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.techmate.techmate.Controller.MovementsController;
 import com.techmate.techmate.Service.MovementsService;
 import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
 import com.techmate.techmate.dto.MovementsDTO;
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.techmate.techmate.testutils.JWTTestHelper;
 import org.springframework.security.core.Authentication;
 
-@WebMvcTest(controllers = com.techmate.techmate.Controller.MovementsController.class)
+@WebMvcTest(controllers = MovementsController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class MovementsControllerTest {
 

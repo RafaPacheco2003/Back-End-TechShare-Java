@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

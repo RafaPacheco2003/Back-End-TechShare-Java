@@ -1,13 +1,16 @@
 package com.techmate.techmate.Controller;
 
-// image storage handled by service
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
 import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
 import com.techmate.techmate.dto.MaterialRequest;
 import com.techmate.techmate.dto.MaterialResponse;
 import com.techmate.techmate.dto.MaterialsDTO;
+import com.techmate.techmate.dto.PageResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +19,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-// org.springframework.beans.factory.annotation.Autowired removed (not used)
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/admin/materials")
 public class MaterialsController {
+
+    private static final Logger log = LoggerFactory.getLogger(MaterialsController.class);
 
     private final MaterialsService materialsService;
     private final EmailService emailService;
@@ -64,11 +72,13 @@ public class MaterialsController {
 
             return new ResponseEntity<>(resp, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
+            log.error("Invalid material data: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
+            log.error("Runtime error creating material: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            e.printStackTrace(); // Esto te dará la traza del error en la consola
+            log.error("Unexpected error creating material: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -106,21 +116,57 @@ public class MaterialsController {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
+    /**
+     * Obtiene todos los materiales con paginación y ordenamiento
+     * 
+     * @param page Número de página (default 0)
+     * @param size Tamaño de página (default 10, max 100)
+     * @param sortBy Campo de ordenamiento (default: id)
+     * @param sortDir Dirección de ordenamiento: asc o desc (default: asc)
+     * @return Respuesta paginada con materiales
+     */
     @GetMapping("/all")
-    public ResponseEntity<List<MaterialResponse>> getAllMaterials() {
+    public ResponseEntity<PageResponse<MaterialResponse>> getAllMaterials(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir) {
         try {
-            List<MaterialsDTO> materialsDTO = materialsService.getAllMaterials();
-
-            if (materialsDTO.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            List<MaterialResponse> resp = materialsDTO.stream()
+            // Validar parámetros
+            if (page < 0) page = 0;
+            if (size < 1 || size > 100) size = 10; // Máximo 100 elementos por página
+            
+            // Crear objeto de paginación y ordenamiento
+            Sort sort = sortDir.equalsIgnoreCase("desc") 
+                ? Sort.by(sortBy).descending() 
+                : Sort.by(sortBy).ascending();
+            
+            Pageable pageable = PageRequest.of(page, size, sort);
+            
+            // Obtener datos paginados del servicio
+            Page<MaterialsDTO> materialsPage = materialsService.getAllMaterialsPaginated(pageable);
+            
+            // Mapear DTOs a respuestas
+            List<MaterialResponse> responseList = materialsPage.getContent().stream()
                     .map(material -> materialsMapper.toResponse(material, serverUrl))
                     .collect(Collectors.toList());
-
-            return new ResponseEntity<>(resp, HttpStatus.OK);
+            
+            // Construir respuesta paginada
+            PageResponse<MaterialResponse> pageResponse = PageResponse.<MaterialResponse>builder()
+                    .content(responseList)
+                    .page(materialsPage.getNumber())
+                    .size(materialsPage.getSize())
+                    .totalElements(materialsPage.getTotalElements())
+                    .totalPages(materialsPage.getTotalPages())
+                    .first(materialsPage.isFirst())
+                    .last(materialsPage.isLast())
+                    .hasPrevious(materialsPage.hasPrevious())
+                    .hasNext(materialsPage.hasNext())
+                    .build();
+            
+            return new ResponseEntity<>(pageResponse, HttpStatus.OK);
         } catch (Exception e) {
+            log.error("Error getting paginated materials: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

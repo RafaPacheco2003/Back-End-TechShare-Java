@@ -2,8 +2,9 @@ package com.techmate.techmate.Service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -298,6 +299,18 @@ public class MaterialsServiceImpl implements MaterialsService {
     @Override
     public List<MaterialsDTO> getAllMaterials() {
         return materialsQueryService.getAllMaterials();
+    }
+
+    /**
+     * Obtiene todos los materiales con paginación y ordenamiento.
+     * 
+     * @param pageable Configuración de paginación (página, tamaño, ordenamiento)
+     * @return Page de MaterialsDTO con metadatos de paginación
+     */
+    @Override
+    public Page<MaterialsDTO> getAllMaterialsPaginated(Pageable pageable) {
+        Page<Materials> materialsPage = materialsRepository.findAll(pageable);
+        return materialsPage.map(this::convertToDTO);
     }
 
     @Override

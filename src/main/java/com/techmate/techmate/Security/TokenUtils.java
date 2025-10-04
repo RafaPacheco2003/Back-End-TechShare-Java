@@ -21,11 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public class TokenUtils {
 
     // Leer secret y expiración desde variables de entorno para no dejar secretos en el repo
-    private static final String ACCESS_TOKEN_SECRET = getJwtSecret();
+    private static final String ACCESS_TOKEN_SECRET = System.getenv().getOrDefault("JWT_SECRET", "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc");
 
     // Validez en segundos (por defecto 3600 = 1 hora). Se puede configurar con JWT_EXPIRATION_SECONDS
     private static final Long ACCESS_TOKEN_VALIDITY_SECONDS;
@@ -72,12 +73,15 @@ public class TokenUtils {
                     .getBody();
 
             String email = claims.getSubject();
+            
+            // Obtener roles del token de forma type-safe
             @SuppressWarnings("unchecked")
-            List<String> roles = (List<String>) claims.get("roles"); // Obtener roles del token
+            List<String> roles = (List<String>) claims.get("roles");
             if (roles == null) roles = List.of();
-            // Convertir roles a authorities con prefijo ROLE_ para Spring Security
+            
+            // Convertir roles a authorities
             var authorities = roles.stream()
-                                   .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+                                   .map(role -> new SimpleGrantedAuthority(role))
                                    .collect(Collectors.toList());
 
             return new UsernamePasswordAuthenticationToken(email, null, authorities);
@@ -90,12 +94,22 @@ public class TokenUtils {
     public static String getAuthenticatedUserRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        if (authentication != null && authentication.getAuthorities() != null) {
-            // Leer directamente desde authorities sin depender del tipo de principal
+        if (authentication != null) {
+            // Si el principal es UserDetails, obtener authorities desde ahí
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                return userDetails.getAuthorities().stream()
+                                  .findFirst() // Ajusta si el usuario puede tener varios roles
+                                  .map(GrantedAuthority::getAuthority)
+                                  .orElse(null); // Devuelve el rol o null si no tiene ninguno
+            }
+            
+            // Si no es UserDetails, obtener authorities directamente del Authentication
+            // (útil para tests o autenticaciones personalizadas)
             return authentication.getAuthorities().stream()
-                              .findFirst() // Ajusta si el usuario puede tener varios roles
-                              .map(GrantedAuthority::getAuthority)
-                              .orElse(null); // Devuelve el rol o null si no tiene ninguno
+                                .findFirst()
+                                .map(GrantedAuthority::getAuthority)
+                                .orElse(null);
         }
         return null;
     }
@@ -135,19 +149,10 @@ public class TokenUtils {
             if (rolesClaim != null) {
                 try {
                     @SuppressWarnings("unchecked")
-                    List<Object> rawRoles = (List<Object>) rolesClaim;
-                    // Convertir cada elemento a Integer de forma segura
-                    List<Integer> roles = rawRoles.stream()
-                        .map(obj -> {
-                            if (obj instanceof Integer) return (Integer) obj;
-                            if (obj instanceof String) return Integer.parseInt((String) obj);
-                            throw new IllegalArgumentException("Invalid role type: " + obj.getClass());
-                        })
-                        .collect(Collectors.toList());
+                    List<Integer> roles = (List<Integer>) rolesClaim; // Cast a List<Integer>
                     return Optional.of(roles);
-                } catch (Exception e) {
-                    // Log the error but return empty
-                    System.err.println("Error parsing roles from token: " + e.getMessage());
+                } catch (ClassCastException e) {
+                    // ignore and return empty
                 }
             }
         }
@@ -169,21 +174,6 @@ public class TokenUtils {
         }
     }
     
-    private static String getJwtSecret() {
-        String secret = System.getenv("JWT_SECRET");
-        if (secret == null || secret.isBlank()) {
-            // En desarrollo local, permitir fallback con advertencia
-            String activeProfile = System.getProperty("spring.profiles.active", "dev");
-            if ("dev".equals(activeProfile) || "test".equals(activeProfile)) {
-                System.err.println("⚠️  ADVERTENCIA: Usando JWT_SECRET por defecto. Configura JWT_SECRET en producción.");
-                return "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc"; // Solo para desarrollo
-            } else {
-                throw new IllegalStateException("JWT_SECRET es requerido en producción. Configura la variable de entorno JWT_SECRET.");
-            }
-        }
-        return secret;
-    }
-
     private static SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
     }

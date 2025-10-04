@@ -80,10 +80,8 @@ public class WebSecurityConfig {
                         ).permitAll();
                     }
                     
-                    // Endpoints de Actuator (health, info, metrics)
-                    auth.requestMatchers("/actuator/health", "/actuator/info", "/actuator/metrics/**").permitAll()
-                        // Endpoints públicos (login, registro)
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                    // Endpoints públicos (login, registro)
+                    auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/verify").permitAll()
                         // Recursos estáticos y uploads

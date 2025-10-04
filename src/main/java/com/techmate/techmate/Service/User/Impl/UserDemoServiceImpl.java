@@ -16,8 +16,6 @@ import com.techmate.techmate.entity.UsuarioRole;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
 
-import io.jsonwebtoken.Claims;
-
 @Service
 public class UserDemoServiceImpl implements UserDemoService {
 

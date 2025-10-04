@@ -2,7 +2,6 @@ package com.techmate.techmate.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import com.techmate.techmate.dto.UsuarioDTO;
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.13</version>
+		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.techmate</groupId>
@@ -70,7 +70,7 @@
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.30</version>
+        <version>1.18.36</version>
         <scope>provided</scope>
         <optional>true</optional>
     </dependency>
@@ -107,7 +107,6 @@
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
-        <version>3.3.4</version>
     </dependency>
 
     <!-- jjwt dependencies -->
@@ -137,13 +136,13 @@
     <dependency>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-mysql</artifactId>
-        <version>10.10.0</version>
+        <version>10.21.0</version>
     </dependency>
     <!-- OpenAPI / Swagger UI -->
     <dependency>
         <groupId>org.springdoc</groupId>
         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        <version>2.1.0</version>
+        <version>2.7.0</version>
     </dependency>
 </dependencies>
 
@@ -152,7 +151,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>17</source>
                     <target>17</target>
@@ -160,7 +159,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.30</version>
+                            <version>1.18.36</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

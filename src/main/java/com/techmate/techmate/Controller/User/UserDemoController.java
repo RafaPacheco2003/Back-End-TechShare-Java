@@ -1,11 +1,9 @@
 package com.techmate.techmate.Controller.User;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.techmate.techmate.Service.TokenService;
 import com.techmate.techmate.Service.User.UserDemoService;
 import com.techmate.techmate.dto.UsuarioDTO;
-import com.techmate.techmate.entity.Usuario;
 
 @RequestMapping("/user")
 @RestController
