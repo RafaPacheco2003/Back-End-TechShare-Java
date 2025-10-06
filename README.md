@@ -74,6 +74,6 @@ Sigue estos pasos para levantar el proyecto en un entorno local.
 
 **Jafeth Daniel Gamboa Baas**
 
-* [cite_start]**LinkedIn:** [linkedin.com/in/jafethgamboabaas](https://linkedin.com/in/jafethgamboabaas) [cite: 2]
-* [cite_start]**Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app) [cite: 2]
-* [cite_start]**Email:** [jafethgamboa27@gmail.com](mailto:jafethgamboa27@gmail.com) [cite: 2]
+* **LinkedIn:** [linkedin.com/in/jafethgamboabaas](https://linkedin.com/in/jafethgamboabaas)
+* **Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app) 
+* **Email:** [jafethgamboa27@gmail.com](mailto:jafethgamboa27@gmail.com) 
