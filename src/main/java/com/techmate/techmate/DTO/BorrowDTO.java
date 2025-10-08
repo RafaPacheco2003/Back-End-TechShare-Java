@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.techmate.techmate.entity.Status;
 
-import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 @Data

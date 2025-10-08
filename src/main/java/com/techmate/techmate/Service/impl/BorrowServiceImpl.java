@@ -22,8 +22,6 @@ import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.security.TokenUtils;
 import com.techmate.techmate.Service.BorrowService;
-import com.techmate.techmate.Service.User.BorrowUserService;
-
 @Service
 public class BorrowServiceImpl implements BorrowService {
     private final BorrowRepository borrowRepository;

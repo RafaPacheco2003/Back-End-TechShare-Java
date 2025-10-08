@@ -1,7 +1,5 @@
 package com.techmate.techmate.dto.response;
 
-import com.techmate.techmate.entity.MoveType;
-
 /**
  * DTO para estadísticas mensuales de movimientos.
  * Usado en queries de agregación nativas.
