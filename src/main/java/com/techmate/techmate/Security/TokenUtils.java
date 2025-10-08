@@ -25,8 +25,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class TokenUtils {
 
-    // Leer secret y expiración desde variables de entorno para no dejar secretos en el repo
-    private static final String ACCESS_TOKEN_SECRET = System.getenv().getOrDefault("JWT_SECRET", "uD1Fzv9pJ2GU8y2T7mLnOiZmQg3JsX5R9B8PslDFNc");
+    // Secret key is initialized at application startup via JwtConfig
+    private static volatile String ACCESS_TOKEN_SECRET;
 
     // Validez en segundos (por defecto 3600 = 1 hora). Se puede configurar con JWT_EXPIRATION_SECONDS
     private static final Long ACCESS_TOKEN_VALIDITY_SECONDS;
@@ -175,7 +175,67 @@ public class TokenUtils {
     }
     
     private static SecretKey getSecretKey() {
+        // If not initialized via JwtConfig, attempt common fallbacks useful for tests:
+        if (ACCESS_TOKEN_SECRET == null || ACCESS_TOKEN_SECRET.isBlank()) {
+            // 1) System property set via -DJWT_SECRET=...
+            String fromSysProp = System.getProperty("JWT_SECRET");
+            if (fromSysProp != null && !fromSysProp.isBlank()) {
+                ACCESS_TOKEN_SECRET = fromSysProp;
+            }
+        }
+
+        if (ACCESS_TOKEN_SECRET == null || ACCESS_TOKEN_SECRET.isBlank()) {
+            // 2) Environment variable (useful in CI or manual runs)
+            String fromEnv = System.getenv("JWT_SECRET");
+            if (fromEnv != null && !fromEnv.isBlank()) {
+                ACCESS_TOKEN_SECRET = fromEnv;
+            }
+        }
+
+        if (ACCESS_TOKEN_SECRET == null || ACCESS_TOKEN_SECRET.isBlank()) {
+            // 3) Try loading test properties from classpath (src/test/resources/application-test.properties)
+            try (var is = TokenUtils.class.getClassLoader().getResourceAsStream("application-test.properties")) {
+                if (is != null) {
+                    var props = new java.util.Properties();
+                    props.load(is);
+                    String prop = props.getProperty("JWT_SECRET");
+                    if (prop != null && !prop.isBlank()) {
+                        ACCESS_TOKEN_SECRET = prop;
+                    }
+                }
+            } catch (Exception ignore) {
+                // ignore, we'll throw below if still missing
+            }
+        }
+
+        if (ACCESS_TOKEN_SECRET == null || ACCESS_TOKEN_SECRET.isBlank()) {
+            // As a last resort, allow generation of an ephemeral secret for test/dev contexts where
+            // tests may call TokenUtils directly without starting the Spring context. We detect a
+            // test/dev intention via common properties. If running in production-like env, fail fast.
+            String activeProfile = System.getProperty("spring.profiles.active");
+            if (activeProfile == null || activeProfile.isBlank()) {
+                activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+            }
+            boolean isTestOrDev = activeProfile != null && (activeProfile.equalsIgnoreCase("test") || activeProfile.equalsIgnoreCase("dev"));
+
+            if (isTestOrDev) {
+                byte[] key = new byte[32];
+                new java.security.SecureRandom().nextBytes(key);
+                ACCESS_TOKEN_SECRET = java.util.Base64.getEncoder().encodeToString(key);
+                return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
+            }
+
+            throw new IllegalStateException("JWT secret is not configured. Set JWT_SECRET environment/property before using tokens.");
+        }
+
         return Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET.getBytes());
+    }
+
+    /**
+     * Initialize the static secret used by TokenUtils. This should be called once at application startup.
+     */
+    public static void init(String secret) {
+        ACCESS_TOKEN_SECRET = secret;
     }
     
 }

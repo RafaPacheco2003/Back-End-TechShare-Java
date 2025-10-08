@@ -25,8 +25,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest request) {
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), request.getRequestURI(), null,
-                Collections.singletonList(ex.getMessage()));
+        log.warn("Resource not found: {}", ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
@@ -36,7 +45,19 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.toList());
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), request.getRequestURI(), "VALIDATION_ERROR", errors);
+        
+        log.warn("Validation failed for request to {}: {}", request.getRequestURI(), errors);
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Validation failed")
+                .path(request.getRequestURI())
+                .code("VALIDATION_ERROR")
+                .validationErrors(errors)
+                .build();
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
@@ -46,55 +67,121 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
                 .collect(Collectors.toList());
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), request.getRequestURI(), "VALIDATION_ERROR", errors);
+        
+        log.warn("Constraint violation on {}: {}", request.getRequestURI(), errors);
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Validation failed")
+                .path(request.getRequestURI())
+                .code("VALIDATION_ERROR")
+                .validationErrors(errors)
+                .build();
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiErrorResponse> handleInsufficientStock(InsufficientStockException ex, HttpServletRequest request) {
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.CONFLICT.value(), request.getRequestURI(), "INSUFFICIENT_STOCK",
-                Collections.singletonList(ex.getMessage()));
+        log.warn("Insufficient stock: {}", ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .code("INSUFFICIENT_STOCK")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex, HttpServletRequest request) {
-        String code = ex.getCode();
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.UNPROCESSABLE_ENTITY.value(), request.getRequestURI(), code,
-                Collections.singletonList(ex.getMessage()));
+        log.warn("Business exception [{}]: {}", ex.getCode(), ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .code(ex.getCode())
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.FORBIDDEN.value(), request.getRequestURI(), "ACCESS_DENIED",
-                Collections.singletonList(ex.getMessage()));
+        log.warn("Access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .code("ACCESS_DENIED")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiErrorResponse> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), request.getRequestURI(), "UNAUTHENTICATED",
-                Collections.singletonList(ex.getMessage()));
+        log.warn("Authentication failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .code("UNAUTHENTICATED")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), request.getRequestURI(), "MALFORMED_JSON",
-                Collections.singletonList("JSON inválido o cuerpo no parseable"));
+        log.warn("Malformed JSON on {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("JSON inválido o cuerpo no parseable")
+                .path(request.getRequestURI())
+                .code("MALFORMED_JSON")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception on {} {}", request.getMethod(), request.getRequestURI(), ex);
-        ApiErrorResponse body = ApiErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                request.getRequestURI(),
-                "INTERNAL_ERROR",
-                Collections.singletonList("Ha ocurrido un error interno")
-        );
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message("Ha ocurrido un error interno")
+                .path(request.getRequestURI())
+                .code("INTERNAL_ERROR")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

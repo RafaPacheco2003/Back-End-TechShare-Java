@@ -25,6 +25,6 @@ public class GlobalExceptionHandlerUnitTest {
         assertThat(body).isNotNull();
         assertThat(body.getStatus()).isEqualTo(404);
         assertThat(body.getPath()).isEqualTo("/test/not-found");
-        assertThat(body.getErrors()).containsExactly("Recurso no encontrado");
+        assertThat(body.getMessage()).isEqualTo("Recurso no encontrado");
     }
 }

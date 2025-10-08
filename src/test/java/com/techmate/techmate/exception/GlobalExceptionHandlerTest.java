@@ -18,12 +18,12 @@ public class GlobalExceptionHandlerTest {
 
         ResponseEntity<ApiErrorResponse> resp = handler.handleNotFound(new NotFoundException("forced not found"), request);
 
-        assertEquals(404, resp.getStatusCodeValue());
+        assertEquals(404, resp.getStatusCode().value());
         ApiErrorResponse body = resp.getBody();
         assertNotNull(body);
         assertEquals(404, body.getStatus());
         assertEquals("/test/force-notfound", body.getPath());
-        assertEquals("forced not found", body.getErrors().get(0));
+        assertEquals("forced not found", body.getMessage());
         assertNotNull(body.getTimestamp());
     }
 }
