@@ -70,7 +70,14 @@ Sigue estos pasos para levantar el proyecto en un entorno local.
 
 ---
 
-## 👤 Autor
+## � Documentación centralizada
+
+Toda la documentación técnica, guías y tutoriales están centralizados en la carpeta `docs/`.
+Abre `docs/README.md` para un índice rápido y enlaces a las guías de optimización, pruebas y despliegue.
+
+---
+
+## �👤 Autor
 
 **Jafeth Daniel Gamboa Baas**
 
