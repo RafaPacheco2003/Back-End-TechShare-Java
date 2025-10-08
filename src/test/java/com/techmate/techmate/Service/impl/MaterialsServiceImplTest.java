@@ -4,7 +4,6 @@ import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.dto.MaterialsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
-import com.techmate.techmate.entity.RoleMaterials;
 import com.techmate.techmate.entity.SubCategories;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.RoleMaterialsRepository;
