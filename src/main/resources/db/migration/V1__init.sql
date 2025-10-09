@@ -12,7 +12,7 @@ CREATE TABLE role (
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
-    imagePath VARCHAR(255),
+    image_path VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
 );
@@ -20,7 +20,7 @@ CREATE TABLE categories (
 CREATE TABLE subCategories (
     subCategory_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    imagePath VARCHAR(255),
+    image_path VARCHAR(255),
     category_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -41,7 +41,7 @@ CREATE TABLE usuario (
 
 CREATE TABLE materials (
     materials_id INT AUTO_INCREMENT PRIMARY KEY,
-    imagePath VARCHAR(255),
+    image_path VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DOUBLE,

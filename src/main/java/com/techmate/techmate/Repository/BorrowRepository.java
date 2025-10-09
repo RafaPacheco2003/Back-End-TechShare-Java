@@ -161,4 +161,14 @@ public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
     List<Borrow> findByStatus(Status status);
     List<Borrow> findByDateBetween(Date startDate, Date endDate);
     List<Borrow> findByStatusAndDateBetween(Status status, Date startDate, Date endDate);
+    
+    // ============================================
+    // MÉTODOS PARA HEALTH CHECKS
+    // ============================================
+    
+    /**
+     * Cuenta préstamos por estado.
+     * Usado por BorrowSystemHealthIndicator para monitoreo.
+     */
+    long countByStatus(Status status);
 }

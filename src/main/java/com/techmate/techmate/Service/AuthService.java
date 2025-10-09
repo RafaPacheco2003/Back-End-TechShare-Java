@@ -49,7 +49,7 @@ public class AuthService {
         VerificationToken verificationToken = new VerificationToken(token, usuario);
         verificationTokenRepository.save(verificationToken);
 
-    String verificationUrl = appProperties.getVerification().getUrl() + token;
+        String verificationUrl = appProperties.getVerification().getUrl() + token;
         emailService.sendEmail(usuario.getEmail(), "Verificación de cuenta",
                 "Por favor, verifica tu cuenta haciendo clic en el siguiente enlace: " + verificationUrl);
 
