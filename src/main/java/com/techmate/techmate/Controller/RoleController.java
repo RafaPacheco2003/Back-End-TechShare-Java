@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.access.AccessDeniedException;
 
 import com.techmate.techmate.Service.RoleService;
 import com.techmate.techmate.dto.RoleDTO;
@@ -29,32 +28,22 @@ public class RoleController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createRol(@RequestBody RoleDTO roleDTO) {
-        try {
-            // Guardar el rol usando el servicio
-            RoleDTO createdRole = roleService.createRole(roleDTO);
-            return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
-        } catch (AccessDeniedException e) {
-            // Manejar el error de acceso denegado (403)
-            return new ResponseEntity<>("No tienes permisos suficientes para realizar esta operación.", HttpStatus.FORBIDDEN); // 403 Forbidden
-        } catch (Exception e) {
-            // Devolver el mensaje de error general
-            return new ResponseEntity<>("Error al crear el rol: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
-        }
+        
+        // Guardar el rol usando el servicio
+        RoleDTO createdRole = roleService.createRole(roleDTO);
+        return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getRoleByID(@PathVariable("id") Integer id) {
-        try {
-            // Obtener el rol por ID
-            RoleDTO role = roleService.getRoleById(id);
-            if (role != null) {
-                return new ResponseEntity<>(role, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+        
+        // Obtener el rol por ID
+        RoleDTO role = roleService.getRoleById(id);
+        if (role != null) {
+            return new ResponseEntity<>(role, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
         }
     }
 
@@ -62,16 +51,13 @@ public class RoleController {
     public ResponseEntity<RoleDTO> updateRole(
             @PathVariable("id") Integer id,
             @RequestBody RoleDTO roleDTO) {
-        try {
-            // Actualizar el rol con los datos del DTO
-            RoleDTO updatedRole = roleService.updateRole(id, roleDTO);
-            if (updatedRole != null) {
-                return new ResponseEntity<>(updatedRole, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+        
+        // Actualizar el rol con los datos del DTO
+        RoleDTO updatedRole = roleService.updateRole(id, roleDTO);
+        if (updatedRole != null) {
+            return new ResponseEntity<>(updatedRole, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
         }
     }
 
@@ -79,12 +65,9 @@ public class RoleController {
 
     @GetMapping("/all")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
-        try {
-            List<RoleDTO> roles = roleService.getAllRole(); // Llama al servicio para obtener todos los roles
-            return new ResponseEntity<>(roles, HttpStatus.OK); // Retorna 200 OK con la lista de roles
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
-        }
+        
+        List<RoleDTO> roles = roleService.getAllRole(); // Llama al servicio para obtener todos los roles
+        return new ResponseEntity<>(roles, HttpStatus.OK); // Retorna 200 OK con la lista de roles
     }
     @DeleteMapping("/delete/{roleId}")
     public ResponseEntity<String> cleanupRoleAssociations(@PathVariable int roleId) {

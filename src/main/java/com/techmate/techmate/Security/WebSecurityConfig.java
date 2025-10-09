@@ -30,6 +30,9 @@ public class WebSecurityConfig {
 
     // Filtro que valida el JWT en cada petición entrante
     private final JWTAuthorizationFilter jWTAuthorizationFilter;
+    
+    // Filtro de Rate Limiting para prevenir abuso de API
+    private final RateLimitFilter rateLimitFilter;
 
     // Servicio para cargar usuarios desde la base de datos (JPA)
     private final UserDetailsService userDetailsService;
@@ -84,6 +87,10 @@ public class WebSecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/verify").permitAll()
+                        // Actuator health/info/prometheus should be reachable for monitoring
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/info").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
                         // Recursos estáticos y uploads
                         .requestMatchers("/admin/categories/images/**", "/admin/materials/images/**", "/admin/subcategories/images/**", "/uploaded-images/**").permitAll()
                         // Rutas de administración requieren rol ADMIN
@@ -94,8 +101,9 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated();
                 });
 
-        // Añadimos filtros: autenticación primero, luego autorización (validación JWT)
-        http.addFilter(jwtAuthenticationFilter)
+        // Añadimos filtros: Rate Limiting primero, autenticación, luego autorización (validación JWT)
+        http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(jWTAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

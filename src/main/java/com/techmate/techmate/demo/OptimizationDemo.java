@@ -6,14 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * DEMO: Comparación de queries ANTES vs DESPUÉS
  * 
- * Este archivo es SOLO PARA DEMOSTRACIÓN.
  * Puedes eliminarlo después de verificar las mejoras.
  * 
  * Para ejecutar: mvnw spring-boot:run

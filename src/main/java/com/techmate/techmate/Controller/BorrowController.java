@@ -58,23 +58,18 @@ public ResponseEntity<?> updateBorrowStatus(
 
     @GetMapping("/all")
     public ResponseEntity<List<BorrowResponse>> getAllBorrow() {
-        try {
+        
+        List<BorrowDTO> borrowsList = borrowService.getAllBorrowDTO();
 
-            List<BorrowDTO> borrowsList = borrowService.getAllBorrowDTO();
-
-            if (borrowsList.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
+        if (borrowsList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
 
         List<BorrowResponse> response = borrowsList.stream()
             .map(b -> borrowMapper.toResponse(b))
             .toList();
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(response);
     }
     
     

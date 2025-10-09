@@ -11,6 +11,9 @@ import com.techmate.techmate.entity.Materials;
 public interface MaterialsRepository extends JpaRepository<Materials, Integer> {
     //Sirve para buscar material por name
     Materials findByName(String name);
+    
+    // Validación: verifica si existe un material con el nombre dado
+    boolean existsByName(String name);
 
     List<Materials> findAllByOrderByPriceAsc(); // Para obtener materiales ordenados por precio ascendente
     List<Materials> findAllByOrderByPriceDesc(); // Para obtener materiales ordenados por precio descendente

@@ -1,5 +1,7 @@
 package com.techmate.techmate.config;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -7,8 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * Propiedades de configuración personalizadas de la aplicación.
@@ -53,6 +53,26 @@ public class AppProperties {
          * Ejemplo: http://localhost:3000,http://localhost:3001
          */
         private List<String> allowedOrigins = List.of("http://localhost:3000", "http://localhost:3001");
+        
+        /**
+         * Métodos HTTP permitidos
+         */
+        private String[] allowedMethods = {"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"};
+        
+        /**
+         * Headers permitidos
+         */
+        private String[] allowedHeaders = {"*"};
+        
+        /**
+         * Permitir credenciales (cookies, authorization headers)
+         */
+        private boolean allowCredentials = true;
+        
+        /**
+         * Tiempo de cache para preflight requests (en segundos)
+         */
+        private long maxAge = 3600L;
     }
 
     @Data
@@ -73,5 +93,15 @@ public class AppProperties {
          */
         @NotBlank
         private String location = "uploaded-images";
+        
+        /**
+         * Tamaño máximo de archivo en bytes (10MB por defecto)
+         */
+        private Long maxFileSize = 10485760L;
+        
+        /**
+         * Tipos de archivo permitidos
+         */
+        private String[] allowedTypes = {"image/jpeg", "image/png", "image/gif", "image/webp"};
     }
 }

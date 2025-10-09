@@ -1,12 +1,11 @@
 package com.techmate.techmate.Controller;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.CategoriesService;
+import com.techmate.techmate.config.AppProperties;
 // ...existing code...
 import com.techmate.techmate.dto.CategoriesDTO;
 import com.techmate.techmate.dto.CategoryRequest;
@@ -40,20 +40,16 @@ public class CategoriesController {
     private final CategoriesService categoriesService;
     private final ImageStorageStrategy imageStorageStrategy;
     private final CategoriesMapper categoriesMapper;
-    // ...existing code... (image validation handled elsewhere)
-    private final String storageLocation; // Directorio para almacenar imágenes
-    private final String serverUrl; // URL base del servidor
+    private final AppProperties appProperties;
 
     public CategoriesController(CategoriesService categoriesService,
             ImageStorageStrategy imageStorageStrategy,
             CategoriesMapper categoriesMapper,
-            @Value("${storage.location}") String storageLocation,
-            @Value("${server.url}") String serverUrl) {
+            AppProperties appProperties) {
         this.categoriesService = categoriesService;
         this.imageStorageStrategy = imageStorageStrategy;
         this.categoriesMapper = categoriesMapper;
-        this.storageLocation = storageLocation;
-        this.serverUrl = serverUrl;
+        this.appProperties = appProperties;
     }
 
     @PostMapping("/create")
@@ -77,37 +73,27 @@ public class CategoriesController {
                                                                                                    // validación
         }
 
-        try {
-            // Mapear request -> internal DTO usando mapper
-            CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
-            CategoriesDTO savedCategory = categoriesService.createCategory(dto, image);
+        // Mapear request -> internal DTO usando mapper
+        CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
+        CategoriesDTO savedCategory = categoriesService.createCategory(dto, image);
 
-            // Mapear a response público usando mapper
-            CategoryResponse response = categoriesMapper.toResponse(savedCategory, serverUrl);
+        // Mapear a response público usando mapper
+        CategoryResponse response = categoriesMapper.toResponse(savedCategory, appProperties.getServerUrl());
 
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (com.techmate.techmate.exception.BusinessException e) {
-            // Devolver el mensaje de negocio como ErrorResponse para que el cliente lo reciba
-            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
-        }
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable("id") Integer id) {
-        try {
-            CategoriesDTO category = categoriesService.getCategoryById(id);
-            if (category == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            CategoryResponse resp = categoriesMapper.toResponse(category, serverUrl);
-
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener la categoría
+        
+        CategoriesDTO category = categoriesService.getCategoryById(id);
+        if (category == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        CategoryResponse resp = categoriesMapper.toResponse(category, appProperties.getServerUrl());
+
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     // Endpoint para actualizar una categoría
@@ -135,66 +121,46 @@ public class CategoriesController {
                                                                                                    // validación
         }
 
-        try {
-            // Mapear request -> DTO y delegar la actualización
-            CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
-            CategoriesDTO updatedCategory = categoriesService.updateCategory(id, dto, image);
+        // Mapear request -> DTO y delegar la actualización
+        CategoriesDTO dto = categoriesMapper.fromRequest(categoriesRequest);
+        CategoriesDTO updatedCategory = categoriesService.updateCategory(id, dto, image);
 
-            if (updatedCategory == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            CategoryResponse resp = categoriesMapper.toResponse(updatedCategory, serverUrl);
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (com.techmate.techmate.exception.BusinessException e) {
-            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
+        if (updatedCategory == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        CategoryResponse resp = categoriesMapper.toResponse(updatedCategory, appProperties.getServerUrl());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        try {
+        
         List<CategoryResponse> categories = categoriesService.getAllCategories().stream()
-            .map(category -> categoriesMapper.toResponse(category, serverUrl))
+            .map(category -> categoriesMapper.toResponse(category, appProperties.getServerUrl()))
             .collect(Collectors.toList());
 
-            if (categories.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
-            }
-            return new ResponseEntity<>(categories, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener categorías
+        if (categories.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
         }
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable("id") Integer id) {
-        try {
-            // Delegar la eliminación al servicio directamente
-            categoriesService.deleteCategory(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Categoría eliminada correctamente
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Error si la categoría no se encuentra
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error en la eliminación de la imagen o
-                                                                           // categoría
-        }
+        
+        // Delegar la eliminación al servicio directamente
+        categoriesService.deleteCategory(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Categoría eliminada correctamente
     }
 
     @GetMapping("/images/{filename:.+}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String filename) {
-        try {
-            byte[] imageBytes = imageStorageStrategy.getImage(filename); // Utiliza el método getImage de la estrategia
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE,
-                            Files.probeContentType(Paths.get(storageLocation).resolve(filename)))
-                    .body(imageBytes);
-        } catch (com.techmate.techmate.exception.NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Imagen no encontrada
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
-        }
+    public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
+        
+        byte[] imageBytes = imageStorageStrategy.getImage(filename); // Utiliza el método getImage de la estrategia
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE,
+                        Files.probeContentType(Paths.get(appProperties.getStorage().getLocation()).resolve(filename)))
+                .body(imageBytes);
     }
 }

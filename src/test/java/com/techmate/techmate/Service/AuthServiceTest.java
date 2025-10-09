@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import com.techmate.techmate.Service.mapper.AuthMapper;
+import com.techmate.techmate.config.AppProperties;
 import com.techmate.techmate.dto.RegisterRequest;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.entity.VerificationToken;
@@ -31,14 +32,23 @@ class AuthServiceTest {
     @Mock
     EmailService emailService;
 
+    @Mock
+    AppProperties appProperties;
+
     AuthMapper authMapper = new AuthMapper();
 
     AuthService authService;
 
     @BeforeEach
     void setUp() {
-    MockitoAnnotations.openMocks(this);
-    authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, emailService, authMapper, "http://localhost:8080/verify?token=");
+        MockitoAnnotations.openMocks(this);
+        
+        // Mock AppProperties and its nested configuration
+        AppProperties.Verification verification = new AppProperties.Verification();
+        verification.setUrl("http://localhost:8080/verify?token=");
+        when(appProperties.getVerification()).thenReturn(verification);
+        
+        authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, emailService, authMapper, appProperties);
     }
 
     @Test

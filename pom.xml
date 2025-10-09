@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<mockito.version>5.3.1</mockito.version>
 	</properties>
 	<dependencies>
     <dependency>
@@ -156,6 +157,35 @@
         <groupId>com.github.ben-manes.caffeine</groupId>
         <artifactId>caffeine</artifactId>
     </dependency>
+    
+    <!-- Bucket4j for Rate Limiting -->
+    <dependency>
+        <groupId>com.bucket4j</groupId>
+        <artifactId>bucket4j-core</artifactId>
+        <version>8.7.0</version>
+    </dependency>
+    
+    <!-- Micrometer Prometheus for Metrics -->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    
+    <!-- Logstash Logback Encoder for Structured JSON Logging -->
+    <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>7.4</version>
+    </dependency>
+    
+    <!-- Spring Boot Starter Data Redis -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    
+    <!-- Lettuce (Redis client - ya viene con spring-boot-starter-data-redis) -->
+    <!-- No necesita dependency extra, pero si quieres usar Jedis en vez de Lettuce, agrégalo aquí -->
 </dependencies>
 
     <build>
@@ -167,6 +197,8 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <!-- Ensure compilation and API level target for reproducible builds -->
+                    <release>17</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -196,7 +228,15 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>-Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC</argLine>
+                    <!-- Configuración mejorada para JDK 23 + Mockito -->
+                    <argLine>
+                        -Xmx256m 
+                        -Xms128m 
+                        -XX:MaxMetaspaceSize=128m 
+                        -XX:+UseSerialGC
+                        -XX:+EnableDynamicAgentLoading
+                        -Djdk.instrument.traceUsage=false
+                    </argLine>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
                     <!-- Forzar propiedades en el entorno de test para evitar que variables de entorno del SO sobreescriban application-test.properties -->

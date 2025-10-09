@@ -3,6 +3,7 @@ package com.techmate.techmate.Service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.entity.RoleMaterials;
 import com.techmate.techmate.entity.SubCategories;
+import com.techmate.techmate.event.MaterialLowStockEvent;
 import com.techmate.techmate.exception.BusinessException;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.RoleRepository;
@@ -66,6 +68,14 @@ public class MaterialsServiceImpl implements MaterialsService {
     private final com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator;
     private final com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager;
     private final com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService;
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * Umbral de stock bajo (Low Stock Threshold).
+     * Cuando el stock de un material cae por debajo de este valor,
+     * se dispara un MaterialLowStockEvent para alertar al sistema.
+     */
+    private static final int LOW_STOCK_THRESHOLD = 10;
 
     public MaterialsServiceImpl(
             MaterialsRepository materialsRepository,
@@ -76,7 +86,8 @@ public class MaterialsServiceImpl implements MaterialsService {
             com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper,
             com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator,
             com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager,
-            com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService) {
+            com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService,
+            ApplicationEventPublisher eventPublisher) {
         this.materialsRepository = materialsRepository;
         this.subCategoriesRepository = subCategoriesRepository;
         this.roleRepository = roleRepository;
@@ -86,6 +97,7 @@ public class MaterialsServiceImpl implements MaterialsService {
         this.materialsValidator = materialsValidator;
         this.materialsStockManager = materialsStockManager;
         this.materialsQueryService = materialsQueryService;
+        this.eventPublisher = eventPublisher;
     }
 
     // NOTE: Cada dependencia inyectada tiene una responsabilidad clara (SRP):
@@ -266,6 +278,9 @@ public class MaterialsServiceImpl implements MaterialsService {
         // Guardar el material actualizado en el repositorio
         Materials updatedMaterial = materialsRepository.save(existingMaterial);
 
+        // Verificar si el stock está bajo y publicar evento si es necesario
+        checkAndPublishLowStockEvent(updatedMaterial);
+
         // Convertir el material actualizado a DTO y devolverlo
         return convertToDTO(updatedMaterial);
     }
@@ -330,6 +345,39 @@ public class MaterialsServiceImpl implements MaterialsService {
     @Override
     public List<MaterialsDTO> getAllMaterialsSortedByPrice(boolean ascending) {
         return materialsQueryService.getAllMaterialsSortedByPrice(ascending);
+    }
+
+    // ==================== DOMAIN EVENTS ====================
+
+    /**
+     * Verifica si el stock de un material está por debajo del umbral
+     * y publica un MaterialLowStockEvent si es necesario.
+     * 
+     * PROPÓSITO:
+     * - Detectar materiales con stock crítico
+     * - Notificar al sistema mediante eventos de dominio
+     * - Permitir reacciones asíncronas (emails, alertas, compras automáticas)
+     * 
+     * LÓGICA:
+     * - Si stock < LOW_STOCK_THRESHOLD (10 unidades por defecto)
+     * - Publicar evento MaterialLowStockEvent
+     * - Los listeners (MaterialEventListener) reaccionarán de forma asíncrona
+     * 
+     * CASOS DE USO:
+     * 1. Después de crear un material con stock inicial bajo
+     * 2. Después de actualizar un material y reducir su stock
+     * 3. Después de un préstamo que reduce el stock disponible
+     * 
+     * @param material El material a verificar
+     */
+    private void checkAndPublishLowStockEvent(Materials material) {
+        if (material.getStock() < LOW_STOCK_THRESHOLD) {
+            MaterialLowStockEvent event = new MaterialLowStockEvent(
+                material,
+                LOW_STOCK_THRESHOLD
+            );
+            eventPublisher.publishEvent(event);
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.techmate.techmate.Service.impl;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,8 @@ import com.techmate.techmate.entity.DetailsBorrow;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Status;
 import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.event.BorrowCreatedEvent;
+import com.techmate.techmate.event.BorrowReturnedEvent;
 import com.techmate.techmate.exception.BorrowBusinessException;
 import com.techmate.techmate.exception.BusinessException;
 import com.techmate.techmate.repository.BorrowRepository;
@@ -29,15 +32,18 @@ public class BorrowServiceImpl implements BorrowService {
     private final DetailsBorrowRepository detailsBorrowRepository;
     private final UsuarioRepository usuarioRepository;
     private final IBorrowStockManager borrowStockManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     public BorrowServiceImpl(BorrowRepository borrowRepository, MaterialsRepository materialsRepository,
             DetailsBorrowRepository detailsBorrowRepository, UsuarioRepository usuarioRepository,
-            IBorrowStockManager borrowStockManager) {
+            IBorrowStockManager borrowStockManager,
+            ApplicationEventPublisher eventPublisher) {
         this.borrowRepository = borrowRepository;
         this.materialsRepository = materialsRepository;
         this.detailsBorrowRepository = detailsBorrowRepository;
         this.usuarioRepository = usuarioRepository;
         this.borrowStockManager = borrowStockManager;
+        this.eventPublisher = eventPublisher;
     }
 
     // ==================== FALLBACK HELPERS (compatibilidad con tests) ====================
@@ -218,6 +224,9 @@ public class BorrowServiceImpl implements BorrowService {
                     }
                     borrow.setStartDate(new Date()); // Actualizar la fecha de inicio
                     borrow.setStatus(Status.BORROWED);
+                    
+                    // Publicar evento de préstamo creado
+                    publishBorrowCreatedEvent(borrow);
                 }
                 break;
     
@@ -233,6 +242,9 @@ public class BorrowServiceImpl implements BorrowService {
                 borrow.setStatus(Status.RETURNED);
                 borrow.setReturnDate(new Date());
                 borrow.setEndDate(new Date());
+                
+                // Publicar evento de devolución
+                publishBorrowReturnedEvent(borrow);
                 break;
     
             default:
@@ -287,6 +299,49 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     public Integer getUserIdFromToken(String token) {
         return TokenUtils.getUserIdFromToken(token);
+    }
+
+    // ==================== DOMAIN EVENTS ====================
+
+    /**
+     * Publica un evento cuando se crea un préstamo (transición PROCESS → BORROWED).
+     * 
+     * PROPÓSITO:
+     * - Notificar al sistema que se ha aprobado y entregado un préstamo
+     * - Permitir reacciones asíncronas (emails de confirmación, actualización de estadísticas, etc.)
+     * 
+     * INFORMACIÓN DEL EVENTO:
+     * - ID del préstamo
+     * - ID del usuario que solicitó
+     * - Fechas del préstamo (fecha, inicio, fin)
+     * - Monto total del préstamo
+     * 
+     * @param borrow El préstamo recién creado/aprobado
+     */
+    private void publishBorrowCreatedEvent(Borrow borrow) {
+        BorrowCreatedEvent event = new BorrowCreatedEvent(borrow);
+        eventPublisher.publishEvent(event);
+    }
+
+    /**
+     * Publica un evento cuando se devuelve un préstamo (transición BORROWED → RETURNED).
+     * 
+     * PROPÓSITO:
+     * - Notificar al sistema que se ha completado una devolución
+     * - Detectar devoluciones tardías para aplicar penalizaciones
+     * - Permitir reacciones asíncronas (emails, cálculo de multas, actualización de historial)
+     * 
+     * LÓGICA:
+     * - El evento detecta automáticamente si la devolución fue tardía
+     * - Compara returnDate con endDate para marcar wasLate=true si corresponde
+     * - Los listeners pueden implementar lógica de penalización
+     * 
+     * @param borrow El préstamo que se devolvió
+     */
+    private void publishBorrowReturnedEvent(Borrow borrow) {
+        Date returnDate = borrow.getReturnDate() != null ? borrow.getReturnDate() : new Date();
+        BorrowReturnedEvent event = new BorrowReturnedEvent(borrow, returnDate);
+        eventPublisher.publishEvent(event);
     }
 
 }

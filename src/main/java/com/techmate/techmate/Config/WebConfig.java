@@ -1,40 +1,64 @@
 package com.techmate.techmate.config;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Configuración web para CORS y otras configuraciones MVC
- * @author TechShare Team
+ * Configuración web para CORS, recursos estáticos y otras configuraciones MVC.
+ * Utiliza AppProperties para configuración centralizada y tipada.
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
-    private String[] allowedOrigins;
+    private final AppProperties appProperties;
+
+    public WebConfig(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
+        AppProperties.Cors corsConfig = appProperties.getCors();
+        String[] origins = corsConfig.getAllowedOrigins().toArray(new String[0]);
+        
+        // CORS para endpoints de API y admin
         registry.addMapping("/api/**")
-                .allowedOrigins(allowedOrigins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+                .allowedOrigins(origins)
+                .allowedMethods(corsConfig.getAllowedMethods())
+                .allowedHeaders(corsConfig.getAllowedHeaders())
+                .allowCredentials(corsConfig.isAllowCredentials())
+                .maxAge(corsConfig.getMaxAge());
                 
-        // También permitir CORS para swagger y actuator
+        registry.addMapping("/admin/**")
+                .allowedOrigins(origins)
+                .allowedMethods(corsConfig.getAllowedMethods())
+                .allowedHeaders(corsConfig.getAllowedHeaders())
+                .allowCredentials(corsConfig.isAllowCredentials())
+                .maxAge(corsConfig.getMaxAge());
+                
+        // CORS para Swagger UI y documentación
         registry.addMapping("/swagger-ui/**")
-                .allowedOrigins(allowedOrigins)
+                .allowedOrigins(origins)
                 .allowedMethods("GET")
                 .allowedHeaders("*")
-                .maxAge(3600);
+                .maxAge(corsConfig.getMaxAge());
                 
-        registry.addMapping("/api-docs/**")
-                .allowedOrigins(allowedOrigins)
+        registry.addMapping("/v3/api-docs/**")
+                .allowedOrigins(origins)
                 .allowedMethods("GET")
                 .allowedHeaders("*")
-                .maxAge(3600);
+                .maxAge(corsConfig.getMaxAge());
+    }
+
+    @Override
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        // Servir imágenes estáticas desde el directorio de uploads
+        String uploadDir = appProperties.getStorage().getLocation();
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:" + uploadDir + "/")
+                .setCachePeriod(3600); // Cache por 1 hora
     }
 }

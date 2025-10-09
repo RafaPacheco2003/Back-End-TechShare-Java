@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.Service.subcategories.mapper.SubCategoriesMapper;
 // ImageStorageStrategy not needed in controller after refactor
-import com.techmate.techmate.dto.ErrorResponse;
 import com.techmate.techmate.dto.SubCategoriesDTO;
 import com.techmate.techmate.dto.SubCategoryRequest;
 import com.techmate.techmate.dto.SubCategoryResponse;
@@ -49,36 +48,23 @@ public class SubcategoriesController {
             @Valid @ModelAttribute SubCategoryRequest request,
             @RequestParam("image") MultipartFile image) {
 
-        try {
         SubCategoriesDTO dto = subCategoriesMapper.fromRequest(request);
         SubCategoriesDTO saved = subcategoriesService.createSubCategory(dto, image);
         SubCategoryResponse resp = subCategoriesMapper.toResponse(saved, serverUrl);
         return new ResponseEntity<>(resp, HttpStatus.CREATED);
-        } catch (com.techmate.techmate.exception.NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (com.techmate.techmate.exception.BusinessException e) {
-            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
-        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSubcategoryById(@PathVariable("id") Integer id) {
-        try {
-            SubCategoriesDTO subcategory = subcategoriesService.getSubCategoryById(id);
+        
+        SubCategoriesDTO subcategory = subcategoriesService.getSubCategoryById(id);
 
-            if (subcategory == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+        if (subcategory == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         SubCategoryResponse resp = subCategoriesMapper.toResponse(subcategory, serverUrl);
         return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (com.techmate.techmate.exception.NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener la subcategoría
-        }
     }
 
     @PutMapping("/update/{id}")
@@ -87,70 +73,51 @@ public class SubcategoriesController {
             @Valid @ModelAttribute SubCategoryRequest request,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        try {
-            SubCategoriesDTO dto = subCategoriesMapper.fromRequest(request);
-            SubCategoriesDTO updated = subcategoriesService.updateSubCategory(id, dto, image);
+        SubCategoriesDTO dto = subCategoriesMapper.fromRequest(request);
+        SubCategoriesDTO updated = subcategoriesService.updateSubCategory(id, dto, image);
 
-            if (updated == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            SubCategoryResponse resp = subCategoriesMapper.toResponse(updated, serverUrl);
-            return new ResponseEntity<>(resp, HttpStatus.OK);
-        } catch (com.techmate.techmate.exception.NotFoundException e) {
+        if (updated == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (com.techmate.techmate.exception.BusinessException e) {
-            return new ResponseEntity<>(new ErrorResponse(List.of(e.getMessage())), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error general
         }
+
+        SubCategoryResponse resp = subCategoriesMapper.toResponse(updated, serverUrl);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllSubcategories() {
-        try {
+        
         List<SubCategoryResponse> subcategories = subcategoriesService.getAllSubCategories().stream()
             .map(subcategory -> subCategoriesMapper.toResponse(subcategory, serverUrl))
             .collect(Collectors.toList());
 
-            if (subcategories.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
-            }
-
-            return new ResponseEntity<>(subcategories, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al obtener subcategorías
+        if (subcategories.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
         }
+
+        return new ResponseEntity<>(subcategories, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSubcategory(@PathVariable("id") Integer id) {
-        try {
-            subcategoriesService.deleteSubCategory(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Eliminación exitosa
-        } catch (com.techmate.techmate.exception.NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al eliminar la subcategoría
-        }
+        
+        subcategoriesService.deleteSubCategory(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Eliminación exitosa
     }
 
     @GetMapping("/images/{filename:.+}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String filename) {
-        try {
-            Path imagePath = Paths.get(storageLocation).resolve(filename);
-            File file = imagePath.toFile();
+    public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
+        
+        Path imagePath = Paths.get(storageLocation).resolve(filename);
+        File file = imagePath.toFile();
 
-            if (!file.exists()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Imagen no encontrada
-            }
-
-            byte[] imageBytes = Files.readAllBytes(imagePath);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(imagePath))
-                    .body(imageBytes);
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Error al leer la imagen
+        if (!file.exists()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Imagen no encontrada
         }
+
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(imagePath))
+                .body(imageBytes);
     }
 }

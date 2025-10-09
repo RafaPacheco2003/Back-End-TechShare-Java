@@ -17,8 +17,6 @@ import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
 import com.techmate.techmate.entity.MoveType;
 import com.techmate.techmate.security.TokenUtils;
 
-import jakarta.persistence.EntityNotFoundException;
-
 // CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
 @RequestMapping("/admin/movement")
@@ -52,127 +50,96 @@ public ResponseEntity<?> createMovement(
 
     Integer userId = null;
 
-    try {
-        // Obtener información del usuario desde el SecurityContext
-        String userEmail = authentication.getName(); // Obtenemos el email del usuario autenticado
-        log.info("Usuario autenticado: {}", userEmail);
+    // Obtener información del usuario desde el SecurityContext
+    String userEmail = authentication.getName(); // Obtenemos el email del usuario autenticado
+    log.info("Usuario autenticado: {}", userEmail);
 
-        // Obtener roles del usuario
-        String userRole = TokenUtils.getAuthenticatedUserRole();
-        log.info("Rol del usuario: {}", userRole);
+    // Obtener roles del usuario
+    String userRole = TokenUtils.getAuthenticatedUserRole();
+    log.info("Rol del usuario: {}", userRole);
 
-        // TODO: Implementar método en el servicio para obtener userId por email
-        // Por ahora usamos un placeholder - en una implementación real:
-        // userId = userService.getUserIdByEmail(userEmail);
-        userId = extractUserIdFromAuthentication(authentication);
+    // TODO: Implementar método en el servicio para obtener userId por email
+    // Por ahora usamos un placeholder - en una implementación real:
+    // userId = userService.getUserIdByEmail(userEmail);
+    userId = extractUserIdFromAuthentication(authentication);
 
-    } catch (Exception e) {
-        log.error("Error al obtener información del usuario autenticado: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener información del usuario: " + e.getMessage());
-    }
-
-    try {
-        MovementsDTO createdMovement = movementsService.createMovementsDTO(movementsDTO, userId);
-        MovementResponse resp = movementsMapper.toResponse(createdMovement);
-        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
-    } catch (Exception e) {
-        log.error("Error creating movement: {}", e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error al crear el movimiento: " + e.getMessage());
-    }
+    MovementsDTO createdMovement = movementsService.createMovementsDTO(movementsDTO, userId);
+    MovementResponse resp = movementsMapper.toResponse(createdMovement);
+    return ResponseEntity.status(HttpStatus.CREATED).body(resp);
 }
 
 
     // Obtener un movimiento por ID
     @GetMapping("/{id}")
     public ResponseEntity<MovementResponse> getMovementById(@PathVariable("id") Integer id) {
-        try {
-            MovementsDTO movementsDTO = movementsService.getMovementsByID(id);
-            if (movementsDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-            MovementResponse resp = movementsMapper.toResponse(movementsDTO);
-            return ResponseEntity.ok(resp);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        
+        MovementsDTO movementsDTO = movementsService.getMovementsByID(id);
+        if (movementsDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        MovementResponse resp = movementsMapper.toResponse(movementsDTO);
+        return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<MovementResponse>> getAllMovements() {
-        try {
-            // Llamar al servicio para obtener la lista de movimientos
-            List<MovementsDTO> movementsList = movementsService.getAllMovementsDTO();
+        
+        // Llamar al servicio para obtener la lista de movimientos
+        List<MovementsDTO> movementsList = movementsService.getAllMovementsDTO();
 
-            // Verificar si la lista está vacía
-            if (movementsList.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            // Mapear a response público y devolver la lista
-            List<MovementResponse> resp = movementsList.stream()
-                    .map(movementsMapper::toResponse)
-                    .toList();
-
-            // Devolver la lista de movimientos con el código HTTP 200 OK
-            return ResponseEntity.ok(resp);
-
-        } catch (Exception e) {
-            // En caso de error, devolver un estado de error interno del servidor
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        // Verificar si la lista está vacía
+        if (movementsList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+        // Mapear a response público y devolver la lista
+        List<MovementResponse> resp = movementsList.stream()
+                .map(movementsMapper::toResponse)
+                .toList();
+
+        // Devolver la lista de movimientos con el código HTTP 200 OK
+        return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/type/{type}")
     public ResponseEntity<List<MovementResponse>> getMovementsByType(@PathVariable String type) {
-        try {
-            List<MovementsDTO> movementDTOsList = movementsService.getMovementsByType(type);
+        
+        List<MovementsDTO> movementDTOsList = movementsService.getMovementsByType(type);
 
-            if (movementDTOsList.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            List<MovementResponse> resp = movementDTOsList.stream()
-                    .map(movementsMapper::toResponse)
-                    .toList();
-
-            return ResponseEntity.ok(resp);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (movementDTOsList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+        List<MovementResponse> resp = movementDTOsList.stream()
+                .map(movementsMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/filterByDate")
     public ResponseEntity<List<MovementResponse>> getMovementsByDate(
             @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
-        try {
-            List<MovementsDTO> movementsDTOs = movementsService.getMovementsByDate(startDate, endDate);
+        
+        List<MovementsDTO> movementsDTOs = movementsService.getMovementsByDate(startDate, endDate);
 
-            if (movementsDTOs.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            List<MovementResponse> resp = movementsDTOs.stream()
-                    .map(movementsMapper::toResponse)
-                    .toList();
-
-            return ResponseEntity.ok(resp);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (movementsDTOs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+        List<MovementResponse> resp = movementsDTOs.stream()
+                .map(movementsMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(resp);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMovement(@PathVariable Integer id) {
-        try {
-            movementsService.deleteMovementById(id);
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build(); // 404 Not Found
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
-        }
+        
+        movementsService.deleteMovementById(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
     /**

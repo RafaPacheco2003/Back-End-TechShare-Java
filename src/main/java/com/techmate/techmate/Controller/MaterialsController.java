@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
 import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
+import com.techmate.techmate.config.AppProperties;
 import com.techmate.techmate.dto.MaterialRequest;
 import com.techmate.techmate.dto.MaterialResponse;
 import com.techmate.techmate.dto.MaterialsDTO;
@@ -19,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,19 +40,14 @@ public class MaterialsController {
     private final MaterialsService materialsService;
     private final EmailService emailService;
     private final MaterialsMapper materialsMapper;
-    private final String storageLocation; // Directorio para almacenar imágenes
-    private final String serverUrl; // URL base del servidor
-    // image storage strategy is injected but not used directly in this controller
-    // image storage handled by service
+    private final AppProperties appProperties;
 
     public MaterialsController(MaterialsService materialsService, EmailService emailService,
-            MaterialsMapper materialsMapper,
-            @Value("${storage.location}") String storageLocation, @Value("${server.url}") String serverUrl) {
+            MaterialsMapper materialsMapper, AppProperties appProperties) {
         this.materialsService = materialsService;
         this.emailService = emailService;
         this.materialsMapper = materialsMapper;
-        this.storageLocation = storageLocation;
-        this.serverUrl = serverUrl;
+        this.appProperties = appProperties;
     }
 
     @PostMapping("/create")
@@ -68,7 +63,7 @@ public class MaterialsController {
         MaterialsDTO createdMaterial = materialsService.createMaterials(requestDto, image);
 
         // Mapear DTO interno -> response público
-        MaterialResponse resp = materialsMapper.toResponse(createdMaterial, serverUrl);
+        MaterialResponse resp = materialsMapper.toResponse(createdMaterial, appProperties.getServerUrl());
 
             return new ResponseEntity<>(resp, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
@@ -88,7 +83,7 @@ public class MaterialsController {
     public ResponseEntity<MaterialResponse> getMaterialById(@PathVariable("id") Integer id) {
         try {
             MaterialsDTO materialsDTO = materialsService.getMaterialsById(id);
-        MaterialResponse resp = materialsMapper.toResponse(materialsDTO, serverUrl);
+        MaterialResponse resp = materialsMapper.toResponse(materialsDTO, appProperties.getServerUrl());
         return new ResponseEntity<>(resp, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -111,7 +106,7 @@ public class MaterialsController {
             return new ResponseEntity<>("Error al actualizar un nuevo material", HttpStatus.NOT_FOUND);
         }
 
-        MaterialResponse resp = materialsMapper.toResponse(updatedMaterial, serverUrl);
+        MaterialResponse resp = materialsMapper.toResponse(updatedMaterial, appProperties.getServerUrl());
 
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
@@ -148,7 +143,7 @@ public class MaterialsController {
             
             // Mapear DTOs a respuestas
             List<MaterialResponse> responseList = materialsPage.getContent().stream()
-                    .map(material -> materialsMapper.toResponse(material, serverUrl))
+                    .map(material -> materialsMapper.toResponse(material, appProperties.getServerUrl()))
                     .collect(Collectors.toList());
             
             // Construir respuesta paginada
@@ -182,7 +177,7 @@ public class MaterialsController {
             }
 
             List<MaterialResponse> resp = materialsDTO.stream()
-                    .map(material -> materialsMapper.toResponse(material, serverUrl))
+                    .map(material -> materialsMapper.toResponse(material, appProperties.getServerUrl()))
                     .collect(Collectors.toList());
 
             return new ResponseEntity<>(resp, HttpStatus.OK);
@@ -220,7 +215,7 @@ public class MaterialsController {
 
     @GetMapping("/images/{filename:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
-        Path imagePath = Paths.get(storageLocation).resolve(filename);
+        Path imagePath = Paths.get(appProperties.getStorage().getLocation()).resolve(filename);
         File file = imagePath.toFile();
 
         if (!file.exists()) {

@@ -57,6 +57,9 @@ class BorrowServiceImplTest {
     @Mock
     private com.techmate.techmate.Service.borrow.manager.IBorrowStockManager borrowStockManager;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private BorrowServiceImpl borrowService;
 

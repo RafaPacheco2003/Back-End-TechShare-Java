@@ -34,7 +34,7 @@ public class BorrowUserController {
     public ResponseEntity<?> createBorrow(
             @RequestParam("details") String detailsJson,
             HttpServletRequest request // Pasamos los detalles como un String JSON
-    ) {
+    ) throws Exception {
         BorrowDTO borrowDTO = new BorrowDTO();
         borrowDTO.setDate(new Date());
 
@@ -60,12 +60,8 @@ public class BorrowUserController {
         List<DetailsBorrowDTO> details = convertJsonToDetailsList(detailsJson);
         borrowDTO.setDetails(details);
 
-        try {
-            BorrowDTO createdBorrow = borrowUserService.createBorrowDTO(borrowDTO, roles);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdBorrow);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        BorrowDTO createdBorrow = borrowUserService.createBorrowDTO(borrowDTO, roles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBorrow);
     }
 
     private List<DetailsBorrowDTO> convertJsonToDetailsList(String detailsJson) {
@@ -84,13 +80,10 @@ public class BorrowUserController {
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            try {
-                userId = borrowUserService.getUserIdFromToken(token);
-                List<BorrowDTO> borrows = borrowUserService.getAllBorrowsByUserId(userId);
-                return ResponseEntity.ok(borrows);
-            } catch (RuntimeException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
+            
+            userId = borrowUserService.getUserIdFromToken(token);
+            List<BorrowDTO> borrows = borrowUserService.getAllBorrowsByUserId(userId);
+            return ResponseEntity.ok(borrows);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
