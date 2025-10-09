@@ -1,6 +1,4 @@
-# 🚀 TechShare Backend - Sistema de Gestión de Materiales# 🚀 TechShare Backend - Sistema de Gestión de Materiales
-
-
+# TechShare Backend - Sistema de Gestión de Materiales
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-brightgreen.svg)](https://spring.io/projects/spring-boot)[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
 
@@ -12,180 +10,165 @@
 
 [![Quality](https://img.shields.io/badge/Quality-10%2F10%20Perfect-gold.svg)]()[![Quality](https://img.shields.io/badge/Quality-10%2F10%20Perfect-gold.svg)]()
 
-
-
-**Sistema backend completo para gestión de materiales educativos con autenticación JWT, rate limiting, documentación OpenAPI y arquitectura enterprise.****Sistema backend completo para gestión de materiales educativos con autenticación JWT, rate limiting, documentación OpenAPI y arquitectura enterprise.**
-
+**Sistema backend completo para gestión de materiales educativos con autenticación JWT, rate limiting, documentación OpenAPI y arquitectura enterprise.**
 
 ---
 Este proyecto representa mi transición y especialización en el desarrollo backend con tecnologías de Java, buscando aplicar mis habilidades en entornos profesionales.
 
+## Tabla de Contenidos
+
+- [Inicio Rápido](#-inicio-rápido) Características Principales
+- [Características](#-características)
+- [Arquitectura](#️-arquitectura)
+    * **API RESTful:** Endpoints bien definidos para la gestión de usuarios, publicaciones, comentarios y más.
+- [Configuración](#-configuración)
+    * **Seguridad Integral:** Implementación de autenticación y autorización utilizando **Spring Security** y JSON Web Tokens (JWT) para proteger los endpoints.
+- [Deployment](#-deployment)
+    * **Persistencia de Datos:** Gestión de la base de datos relacional con **Spring Data JPA** y Hibernate, facilitando las operaciones CRUD.
+- [API Documentation](#-api-documentation)
+    * **Validación de Datos:** Reglas de validación a nivel de controlador para asegurar la integridad de los datos de entrada.
+- [Testing](#-testing)
+    * **Manejo de Excepciones:** Gestor global de excepciones para proporcionar respuestas de error claras y consistentes.
 
 
-## 📋 Tabla de Contenidos---
+## Tecnologías Utilizadas
 
-
-
-- [🚀 Inicio Rápido](#-inicio-rápido)## ✨ Características Principales
-
-- [✨ Características](#-características)
-
-- [🏗️ Arquitectura](#️-arquitectura)* **API RESTful:** Endpoints bien definidos para la gestión de usuarios, publicaciones, comentarios y más.
-
-- [🔧 Configuración](#-configuración)* **Seguridad Integral:** Implementación de autenticación y autorización utilizando **Spring Security** y JSON Web Tokens (JWT) para proteger los endpoints.
-
-- [🚀 Deployment](#-deployment)* **Persistencia de Datos:** Gestión de la base de datos relacional con **Spring Data JPA** y Hibernate, facilitando las operaciones CRUD.
-
-- [📚 API Documentation](#-api-documentation)* **Validación de Datos:** Reglas de validación a nivel de controlador para asegurar la integridad de los datos de entrada.
-
-- [🧪 Testing](#-testing)* **Manejo de Excepciones:** Gestor global de excepciones para proporcionar respuestas de error claras y consistentes.
-
-- [📖 Desarrollo](#-desarrollo)
-
-- [🤝 Contribuir](#-contribuir)---
-
-
-
----## 🛠️ Tecnologías Utilizadas
-
-
-
-## 🚀 Inicio Rápido* **Lenguaje:** Java 17+
-
+## Inicio Rápido
+* **Lenguaje:** Java 17+
 * **Framework:** Spring Boot 3
 
-### Requisitos Previos* **Seguridad:** Spring Security
+### Requisitos Previos
+* **Seguridad:** Spring Security
 
-- **Java 17+** (LTS recomendado)  * **Base de Datos:** Spring Data JPA, Hibernate, MySQL
+- **Java 17+** (LTS recomendado)  
+* **Base de Datos:** Spring Data JPA, Hibernate, MySQL
 
-- **MySQL 8.0+*** **Dependencias:** Maven
+- **MySQL 8.0+**  
+* **Dependencias:** Maven
 
-- **Maven 3.8+*** **Herramientas Adicionales:** Lombok para reducir el código boilerplate.
+- **Maven 3.8+**  
+* **Herramientas Adicionales:** Lombok para reducir el código boilerplate.
 
-- **Git*** **Control de Versiones:** Git y GitHub
+- **Git**  
+* **Control de Versiones:** Git y GitHub
 
+### Instalación Rápida
 
-
-### Instalación Rápida---
-
-
-
-```bash## 🚀 Cómo Empezar
+```bash
+## Cómo Empezar
 
 # 1. Clonar el repositorio
+git clone https://github.com/DARKTOTEM2703/Back-End-TechShare-Java.git
 
-git clone https://github.com/DARKTOTEM2703/Back-End-TechShare-Java.gitSigue estos pasos para levantar el proyecto en un entorno local.
+Sigue estos pasos para levantar el proyecto en un entorno local.
 
 cd Back-End-TechShare-Java
 
-### **Prerrequisitos**
+### Prerrequisitos
 
 # 2. Configurar variables de entorno
+cp .env.example .env
 
-cp .env.example .env* JDK 17 o superior
-
-# Editar .env con tus configuraciones* Maven 3.x
-
+# Editar .env con tus configuraciones
+* JDK 17 o superior
+* Maven 3.x
 * Un gestor de base de datos como MySQL o MariaDB
 
 # 3. Crear base de datos
+mysql -u root -p -e "CREATE DATABASE techshare CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
 
-mysql -u root -p -e "CREATE DATABASE techshare CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"### **Instalación**
+### Instalación
 
+```bash
+# 4. Ejecutar la aplicación
 
+# 1. Clona el repositorio:
+git clone https://github.com/DARKTOTEM2703/Back-End-TechShare-Java.git
 
-# 4. Ejecutar la aplicación1.  **Clona el repositorio:**
+# 2. Navega al directorio del proyecto:
+cd Back-End-TechShare-Java
 
-./mvnw spring-boot:run    ```sh
+# 3. Configura la base de datos:
+# Crea una base de datos en MySQL.
+# Renombra el archivo `application.properties.example` a `application.properties`.
+# Modifica el archivo `application.properties` con tus credenciales de la base de datos (URL, usuario y contraseña).
 
-```    git clone [https://github.com/DARKTOTEM2703/Back-End-TechShare-Java.git](https://github.com/DARKTOTEM2703/Back-End-TechShare-Java.git)
-
-    ```
+# 4. Ejecutar la aplicación:
+./mvnw spring-boot:run
+```
 
 ### Con Docker (Recomendado)
 
-2.  **Navega al directorio del proyecto:**
+```bash
+# Ejecutar todo el stack
+docker-compose up -d
 
-```bash    ```sh
+# Ver logs
+docker-compose logs -f backend
+```
 
-# Ejecutar todo el stack    cd Back-End-TechShare-Java
-
-docker-compose up -d    ```
-
-
-
-# Ver logs3.  **Configura la base de datos:**
-
-docker-compose logs -f backend    * Crea una base de datos en MySQL.
-
-```    * Renombra el archivo `application.properties.example` a `application.properties`.
-
-    * Modifica el archivo `application.properties` con tus credenciales de la base de datos (URL, usuario y contraseña).
+* Crea una base de datos en MySQL.  
+* Renombra el archivo `application.properties.example` a `application.properties`.  
+* Modifica el archivo `application.properties` con tus credenciales de la base de datos (URL, usuario y contraseña).
 
 ### Verificación
 
-4.  **Instala las dependencias y ejecuta el proyecto:**
+```bash
+# Instala las dependencias y ejecuta el proyecto:
+mvn spring-boot:run
+```
 
-Después de ejecutar, accede a:    ```sh
-
-- **API Base:** http://localhost:8080    mvn spring-boot:run
-
-- **Health Check:** http://localhost:8080/actuator/health    ```
-
+- **API Base:** http://localhost:8080
+- **Health Check:** http://localhost:8080/actuator/health
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **API Docs:** http://localhost:8080/v3/api-docs
 
-- **API Docs:** http://localhost:8080/v3/api-docs¡La API estará corriendo en `http://localhost:8080`!
+¡La API estará corriendo en `http://localhost:8080`!
 
+## Características
 
+## Documentación centralizada
 
-------
+Toda la documentación técnica, guías y tutoriales están centralizados en la carpeta `docs/`.
 
-
-
-## ✨ Características## � Documentación centralizada
-
-
-
-### 🔐 Seguridad EmpresarialToda la documentación técnica, guías y tutoriales están centralizados en la carpeta `docs/`.
-
-- **JWT Authentication** con refresh tokensAbre `docs/README.md` para un índice rápido y enlaces a las guías de optimización, pruebas y despliegue.
+- **JWT Authentication** con refresh tokens  
+Abre `docs/README.md` para un índice rápido y enlaces a las guías de optimización, pruebas y despliegue.
 
 - **Rate Limiting** avanzado con Bucket4j
-
-- **CORS** configurado correctamente---
-
+- **CORS** configurado correctamente
 - **Input Validation** con Bean Validation
+- **SQL Injection Protection** con JPA/Hibernate
 
-- **SQL Injection Protection** con JPA/Hibernate## �👤 Autor
+## Autor
 
-
-
-### 📊 API Moderna**Jafeth Daniel Gamboa Baas**
+### API Moderna
+**Jafeth Daniel Gamboa Baas**
 
 - **RESTful API** completa
-
-- **OpenAPI 3.0** documentación automática* **LinkedIn:** [linkedin.com/in/jafethgamboabaas](https://linkedin.com/in/jafethgamboabaas)
-
-- **Swagger UI** integrado* **Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app) 
-
-- **Error Handling** estandarizado* **Email:** [jafethgamboa27@gmail.com](mailto:jafethgamboa27@gmail.com) 
-
+- **OpenAPI 3.0** documentación automática
+- **Swagger UI** integrado
+- **Error Handling** estandarizado
 - **Paginación** y filtrado
 
-### 🏗️ Arquitectura Robusta
+* **LinkedIn:** [linkedin.com/in/jafethgamboabaas](https://linkedin.com/in/jafethgamboabaas)
+* **Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app)
+* **Email:** [jafethgamboa27@gmail.com](mailto:jafethgamboa27@gmail.com)
+
+### Arquitectura Robusta
 - **Spring Boot 3.4.1** (última versión estable)
 - **Java 17** (LTS)
 - **MySQL 8.0** con optimizaciones
 - **Flyway** para migraciones
 - **Maven** para gestión de dependencias
 
-### 📈 Observabilidad
+### Observabilidad
 - **Spring Actuator** para health checks
 - **Prometheus** metrics
 - **Structured Logging** con Logback
 - **Error Tracking** detallado
 
-### 🚀 Características del Negocio
+### Características del Negocio
 - **Gestión de Materiales** (CRUD completo)
 - **Sistema de Categorías** jerárquico
 - **Movimientos de Inventario** con auditoría
@@ -193,20 +176,18 @@ Después de ejecutar, accede a:    ```sh
 - **Gestión de Usuarios** y roles
 - **Carga de Imágenes** optimizada
 
----
-
-## 🏗️ Arquitectura
+## Arquitectura
 
 ### Stack Tecnológico
 
 ```
 Frontend React → Nginx Reverse Proxy → Spring Boot 3.4.1
-                                     ├── Spring Security + JWT
-                                     ├── Spring Data JPA
-                                     ├── Bucket4j Rate Limiting
-                                     ├── MySQL 8.0
-                                     ├── File Storage
-                                     └── Email Service
+                                                                         ├── Spring Security + JWT
+                                                                         ├── Spring Data JPA
+                                                                         ├── Bucket4j Rate Limiting
+                                                                         ├── MySQL 8.0
+                                                                         ├── File Storage
+                                                                         └── Email Service
 ```
 
 ### Estructura del Proyecto
@@ -215,14 +196,14 @@ Frontend React → Nginx Reverse Proxy → Spring Boot 3.4.1
 src/main/java/com/techmate/techmate/
 ├── config/          # Configuraciones (Security, CORS, OpenAPI)
 ├── controller/      # Controladores REST
-├── dto/            # Data Transfer Objects
-├── entity/         # Entidades JPA
-├── repository/     # Repositorios Spring Data
-├── service/        # Lógica de negocio
-├── security/       # Configuración de seguridad
-├── filter/         # Filtros (Rate Limiting)
-├── exception/      # Manejo de excepciones
-└── utils/          # Utilidades
+├── dto/              # Data Transfer Objects
+├── entity/           # Entidades JPA
+├── repository/       # Repositorios Spring Data
+├── service/          # Lógica de negocio
+├── security/         # Configuración de seguridad
+├── filter/           # Filtros (Rate Limiting)
+├── exception/        # Manejo de excepciones
+└── utils/            # Utilidades
 ```
 
 ### Patrones Implementados
@@ -233,9 +214,7 @@ src/main/java/com/techmate/techmate/
 - **Exception Handling** centralizado
 - **Dependency Injection** limpia
 
----
-
-## 🔧 Configuración
+## Configuración
 
 ### Variables de Entorno Principales
 
@@ -275,35 +254,33 @@ logging.level.com.techmate=INFO
 management.endpoints.web.exposure.include=health,info,metrics
 ```
 
----
-
-## 🚀 Deployment
+## Deployment
 
 ### Docker Compose (Recomendado)
 
 ```yaml
 version: '3.8'
 services:
-  backend:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - DB_URL=jdbc:mysql://mysql:3306/techshare
-    depends_on:
-      - mysql
-    
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: techshare
-    volumes:
-      - mysql_data:/var/lib/mysql
+    backend:
+        build: .
+        ports:
+            - "8080:8080"
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - DB_URL=jdbc:mysql://mysql:3306/techshare
+        depends_on:
+            - mysql
+        
+    mysql:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: rootpassword
+            MYSQL_DATABASE: techshare
+        volumes:
+            - mysql_data:/var/lib/mysql
 
 volumes:
-  mysql_data:
+    mysql_data:
 ```
 
 ### Deployment Manual
@@ -314,34 +291,32 @@ volumes:
 
 # 2. Ejecutar en producción
 java -jar target/techmate-0.0.1-SNAPSHOT.jar \
-  --spring.profiles.active=prod \
-  --server.port=8080
+    --spring.profiles.active=prod \
+    --server.port=8080
 ```
 
 ### Con Nginx (Reverse Proxy)
 
 ```nginx
 server {
-    listen 80;
-    server_name tu-dominio.com;
-    
-    location / {
-        proxy_pass http://localhost:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+        listen 80;
+        server_name tu-dominio.com;
+        
+        location / {
+                proxy_pass http://localhost:8080;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
 }
 ```
 
----
-
-## 📚 API Documentation
+## API Documentation
 
 ### Endpoints Principales
 
-#### 🔐 Autenticación
+#### Autenticación
 ```
 POST /auth/register    # Registro de usuario
 POST /auth/login       # Login
@@ -349,7 +324,7 @@ POST /auth/refresh     # Refresh token
 POST /auth/verify      # Verificar email
 ```
 
-#### 📦 Materiales
+#### Materiales
 ```
 GET    /admin/materials           # Listar materiales (paginado)
 POST   /admin/materials/create    # Crear material
@@ -358,21 +333,21 @@ PUT    /admin/materials/update/{id} # Actualizar material
 DELETE /admin/materials/delete/{id} # Eliminar material
 ```
 
-#### 📊 Movimientos
+#### Movimientos
 ```
 GET  /admin/movement/all          # Listar movimientos
 POST /admin/movement/create       # Crear movimiento
 GET  /admin/movement/by-material/{id} # Movimientos por material
 ```
 
-#### 👥 Usuarios
+#### Usuarios
 ```
 GET /admin/user/all     # Listar usuarios
 GET /admin/user/{id}    # Obtener usuario
 PUT /admin/user/{id}    # Actualizar usuario
 ```
 
-#### 🏷️ Categorías
+#### Categorías
 ```
 GET  /admin/categories/all       # Listar categorías
 POST /admin/categories/create    # Crear categoría
@@ -388,29 +363,27 @@ Accede a la documentación interactiva en: `http://localhost:8080/swagger-ui.htm
 #### Registro de Usuario
 ```bash
 curl -X POST http://localhost:8080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_name": "john_doe",
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john@example.com",
-    "password": "SecurePass123!"
-  }'
+    -H "Content-Type: application/json" \
+    -d '{
+        "user_name": "john_doe",
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john@example.com",
+        "password": "SecurePass123!"
+    }'
 ```
 
 #### Login
 ```bash
 curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_name": "john_doe",
-    "password": "SecurePass123!"
-  }'
+    -H "Content-Type: application/json" \
+    -d '{
+        "user_name": "john_doe",
+        "password": "SecurePass123!"
+    }'
 ```
 
----
-
-## 🧪 Testing
+## Testing
 
 ### Ejecutar Tests
 
@@ -445,9 +418,7 @@ src/test/java/com/techmate/techmate/
 └── integration/     # Tests de integración
 ```
 
----
-
-## 📖 Desarrollo
+## Desarrollo
 
 ### Setup para Desarrollo
 
@@ -460,7 +431,7 @@ src/test/java/com/techmate/techmate/
 
 # 3. Hot reload con DevTools
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev \
-  -Dspring.devtools.restart.enabled=true
+    -Dspring.devtools.restart.enabled=true
 
 # 4. Debug mode
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
@@ -496,19 +467,17 @@ Environment variables: DB_URL=jdbc:mysql://localhost:3306/techshare;DB_USERNAME=
 #### VS Code
 ```json
 {
-  "java.configuration.runtimes": [
-    {
-      "name": "JavaSE-17",
-      "path": "/path/to/jdk-17"
-    }
-  ],
-  "spring-boot.ls.java.home": "/path/to/jdk-17"
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "/path/to/jdk-17"
+        }
+    ],
+    "spring-boot.ls.java.home": "/path/to/jdk-17"
 }
 ```
 
----
-
-## 🤝 Contribuir
+## Contribuir
 
 ### Git Workflow
 
@@ -550,15 +519,13 @@ Examples:
 - [ ] Seguridad verificada
 - [ ] Logs apropiados incluidos
 
----
-
-## 📞 Contacto y Soporte
+## Contacto y Soporte
 
 ### Desarrollador Principal
 **Jafeth Daniel Gamboa Baas**
 
 * **LinkedIn:** [linkedin.com/in/jafethgamboabaas](https://linkedin.com/in/jafethgamboabaas)
-* **Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app) 
+* **Portafolio:** [jafethgamboa.netlify.app](https://jafethgamboa.netlify.app)
 * **Email:** [jafethgamboa27@gmail.com](mailto:jafethgamboa27@gmail.com)
 * **GitHub:** [DARKTOTEM2703](https://github.com/DARKTOTEM2703)
 
@@ -576,15 +543,11 @@ Para reportar bugs o solicitar features, crear un issue en GitHub con:
 3. **Stack Overflow:** Usar tags `spring-boot`, `java`, `mysql`
 4. **Comunidad:** Participar en discusiones de GitHub
 
----
-
-## 📄 Licencia
+## Licencia
 
 Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
----
-
-## 🙏 Agradecimientos
+## Agradecimientos
 
 - **Spring Boot Team** por el excelente framework
 - **MySQL Community** por la base de datos robusta
@@ -593,9 +556,7 @@ Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más det
 - **Bucket4j** por rate limiting eficiente
 - **Todos los contributors** del proyecto
 
----
-
-## 📈 Roadmap
+## Roadmap
 
 ### Próximas Features (v1.1.0)
 - [ ] Sistema de notificaciones push
@@ -611,8 +572,6 @@ Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más det
 - [ ] Containerización con Kubernetes
 - [ ] CI/CD pipeline completo
 
----
-
-**¡Listo para usar! Backend 10/10 Perfect** 🚀
+**¡Listo para usar! Backend 10/10 Perfect**
 
 > Este proyecto representa un sistema backend enterprise-grade, completamente funcional y listo para producción. Con arquitectura limpia, documentación completa y calidad de código perfecta.
