@@ -6,30 +6,31 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@Table(name = "borrow")
 @Data
 public class Borrow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer borrowId; 
+    private Integer borrowId;  // Auto-mapea a borrow_id
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "fecha")
+    @Column(name = "fecha")  // Mantener: columna NO sigue convención (debería ser 'date')
     private Date date;
 
     @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private Date startDate;  // Auto-mapea a start_date
 
     @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private Date endDate;  // Auto-mapea a end_date
 
     @Temporal(TemporalType.DATE)
-    private Date returnDate;
+    private Date returnDate;  // Auto-mapea a return_date
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private double amount;
+    private double amount;  // Auto-mapea a amount
 
    
 

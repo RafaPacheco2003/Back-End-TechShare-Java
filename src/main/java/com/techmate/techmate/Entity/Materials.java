@@ -3,7 +3,6 @@ package com.techmate.techmate.entity;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,40 +25,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Materials extends AuditableEntity {
+// TEMPORAL: Deshabilitado hasta que migraciones añadan columnas
+// public class Materials extends AuditableEntity {
+public class Materials {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "materials_id")
-    private int materialsId;
+    private int materialsId;  // Auto-mapea a materials_id
 
-    @Column(name = "imagePath") 
-    private String imagePath;
+    private String imagePath;  // Auto-mapea a image_path
 
     @NotBlank(message = "El nombre no puede estar vacío")
-    @Column(name = "name")
     private String name;
 
     @NotBlank(message = "La descripción no puede estar vacía")
-    @Column(name = "description")
     private String description;
 
     @NotNull(message = "El precio no puede ser nulo")
-    @Column(name = "price")
     private double price; // Permite que el precio sea 0
 
     @NotNull(message = "El stock no puede ser nulo")
     @Min(value = 0, message = "El stock debe ser mayor o igual a 0") // Permite que el stock sea 0
-    @Column(name = "stock")
     private int stock;
 
     @NotNull(message = "El stock prestable no puede ser nulo")
     @Min(value = 0, message = "El stock prestable debe ser mayor o igual a 0") // Permite que el stock prestable sea 0
-    @Column(name = "borrowable_stock")
-    private int borrowable_stock;
+    private int borrowable_stock;  // Ya está en snake_case, auto-mapea directo
 
     @ManyToOne
-    @JoinColumn(name = "subCategory_id")
+    @JoinColumn(name = "sub_category_id")
     private SubCategories subCategory;
 
     @OneToMany(mappedBy = "materials", cascade = CascadeType.ALL, orphanRemoval = true)

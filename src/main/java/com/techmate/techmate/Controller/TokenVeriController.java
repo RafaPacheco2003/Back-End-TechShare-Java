@@ -2,6 +2,7 @@ package com.techmate.techmate.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,6 +10,7 @@ import com.techmate.techmate.dto.VerificationResponse;
 import com.techmate.techmate.Service.VerificationService;
 
 @RestController
+@RequestMapping("/auth")  // ✅ Agregar prefijo /auth
 public class TokenVeriController {
 
     private final VerificationService verificationService;

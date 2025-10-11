@@ -5,6 +5,8 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,19 +29,17 @@ public class Movements {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "movements_id")
-    private int movementsId;
+    private int movementsId;  // Auto-mapea a movements_id
 
-    private MoveType moveType;
+    @Enumerated(EnumType.STRING)
+    private MoveType moveType;  // Auto-mapea a move_type
 
-   
+    private int quantity;  // Auto-mapea a quantity
 
-    private int quantity;
+    private String comment;  // Auto-mapea a comment
 
-    private String comment;
-
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date date;  // Auto-mapea a date
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

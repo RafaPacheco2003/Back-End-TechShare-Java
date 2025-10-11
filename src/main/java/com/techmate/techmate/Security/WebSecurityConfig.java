@@ -83,10 +83,11 @@ public class WebSecurityConfig {
                         ).permitAll();
                     }
                     
-                    // Endpoints públicos (login, registro)
+                    // Endpoints públicos (login, registro, verificación de email)
                     auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
                         .requestMatchers("/verify").permitAll()
+                        .requestMatchers("/auth/verify").permitAll()
                         // Actuator health/info/prometheus should be reachable for monitoring
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()

@@ -82,7 +82,7 @@ public class AppProperties {
          * Se concatena con el token para formar la URL completa.
          */
         @NotBlank
-        private String url = "http://localhost:8080/verify?token=";
+        private String url = "http://localhost:3000/verify?token=";
     }
 
     @Data

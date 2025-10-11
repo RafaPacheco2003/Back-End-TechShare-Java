@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Table(name = "usuario")
 @Data
 public class Usuario {
 
@@ -15,13 +16,17 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String user_name; // Cambiado de 'nombre' a 'user_name'
-    private String first_name; // Nuevo campo
-    private String last_name; // Nuevo campo
+    private String user_name;  // Ya está en snake_case, mapea directo
+    
+    private String first_name;  // Ya está en snake_case, mapea directo
+    
+    private String last_name;  // Ya está en snake_case, mapea directo
+    
     private String email;
+    
     private String password;
 
-    private boolean isEnabled = false;
+    private boolean isEnabled = false;  // Auto-mapea a is_enabled
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "usuario_role", // Nombre de la tabla intermedia

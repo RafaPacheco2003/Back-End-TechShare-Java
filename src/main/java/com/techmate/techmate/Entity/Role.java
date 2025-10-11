@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Table(name = "role")
 @Data
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer roleId;
+    private Integer roleId;  // Auto-mapea a role_id
 
     @NotBlank(message = "El nombre no puede estar en blanco")
     @Size(max = 50, message = "El nombre no puede tener más de 50 caracteres")
-    @Column(unique = true, nullable = false)
+    @Column(name = "nombre", unique = true, nullable = false)  // Mantener: columna NO sigue convención (debería ser 'name')
     private String nombre;
 
     @ManyToMany(mappedBy = "roles")
