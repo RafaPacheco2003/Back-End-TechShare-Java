@@ -2,6 +2,8 @@ package com.techmate.techmate.Service;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.techmate.techmate.config.AppProperties;
@@ -15,10 +17,13 @@ import com.techmate.techmate.Service.mapper.AuthMapper;
 
 @Service
 public class AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    
     private final UsuarioRepository usuarioRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final RoleRepository roleRepository;
     private final EmailService emailService;
+    private final EmailTemplateService emailTemplateService;
     private final AuthMapper authMapper;
     private final AppProperties appProperties;
 
@@ -26,12 +31,14 @@ public class AuthService {
             VerificationTokenRepository verificationTokenRepository,
             RoleRepository roleRepository,
             EmailService emailService,
+            EmailTemplateService emailTemplateService,
             AuthMapper authMapper,
             AppProperties appProperties) {
         this.usuarioRepository = usuarioRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.roleRepository = roleRepository;
         this.emailService = emailService;
+        this.emailTemplateService = emailTemplateService;
         this.authMapper = authMapper;
         this.appProperties = appProperties;
     }
@@ -48,10 +55,40 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken(token, usuario);
         verificationTokenRepository.save(verificationToken);
-
+        
         String verificationUrl = appProperties.getVerification().getUrl() + token;
-        emailService.sendEmail(usuario.getEmail(), "Verificación de cuenta",
-                "Por favor, verifica tu cuenta haciendo clic en el siguiente enlace: " + verificationUrl);
+        
+        // Generar plantilla HTML profesional para el email
+        String userName = usuario.getFirst_name() != null ? usuario.getFirst_name() : usuario.getUser_name();
+        
+        try {
+            log.info("Generando email de verificación para usuario: {}", userName);
+            String htmlContent = emailTemplateService.generateVerificationEmail(
+                userName, 
+                verificationUrl
+            );
+            
+            log.info("Enviando email HTML a: {}", usuario.getEmail());
+            emailService.sendHtmlEmail(
+                usuario.getEmail(), 
+                "Verificación de cuenta - TechShare", 
+                htmlContent
+            );
+            log.info("Email enviado exitosamente a: {}", usuario.getEmail());
+        } catch (Exception e) {
+            log.error("Error al enviar email HTML, intentando fallback a texto plano", e);
+            try {
+                emailService.sendEmail(
+                    usuario.getEmail(), 
+                    "Verificación de cuenta",
+                    "Por favor, verifica tu cuenta haciendo clic en el siguiente enlace: " + verificationUrl
+                );
+                log.info("Email de texto plano enviado exitosamente a: {}", usuario.getEmail());
+            } catch (Exception fallbackException) {
+                log.error("Error crítico: No se pudo enviar email ni en HTML ni en texto plano", fallbackException);
+                throw new RuntimeException("No se pudo enviar el email de verificación. Por favor, contacta al administrador.", fallbackException);
+            }
+        }
 
         return "Usuario registrado con éxito. Revisa tu correo para verificar tu cuenta.";
     }

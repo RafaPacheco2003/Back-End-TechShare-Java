@@ -33,6 +33,9 @@ class AuthServiceTest {
     EmailService emailService;
 
     @Mock
+    EmailTemplateService emailTemplateService;
+
+    @Mock
     AppProperties appProperties;
 
     AuthMapper authMapper = new AuthMapper();
@@ -48,7 +51,11 @@ class AuthServiceTest {
         verification.setUrl("http://localhost:8080/verify?token=");
         when(appProperties.getVerification()).thenReturn(verification);
         
-        authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, emailService, authMapper, appProperties);
+        // Mock EmailTemplateService
+        when(emailTemplateService.generateVerificationEmail(anyString(), anyString()))
+            .thenReturn("<html>Test Email</html>");
+        
+        authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, emailService, emailTemplateService, authMapper, appProperties);
     }
 
     @Test
