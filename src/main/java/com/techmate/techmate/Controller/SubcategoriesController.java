@@ -86,16 +86,20 @@ public class SubcategoriesController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllSubcategories() {
-        
-        List<SubCategoryResponse> subcategories = subcategoriesService.getAllSubCategories().stream()
-            .map(subcategory -> subCategoriesMapper.toResponse(subcategory, serverUrl))
-            .collect(Collectors.toList());
+        try {
+            List<SubCategoryResponse> subcategories = subcategoriesService.getAllSubCategories().stream()
+                .map(subcategory -> subCategoriesMapper.toResponse(subcategory, serverUrl))
+                .collect(Collectors.toList());
 
-        if (subcategories.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
+            if (subcategories == null || subcategories.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT); // No hay subcategorías
+            }
+
+            return new ResponseEntity<>(subcategories, HttpStatus.OK);
+        } catch (Exception e) {
+            // Manejo de errores inesperados
+            return new ResponseEntity<>("Error al obtener las subcategorías: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(subcategories, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

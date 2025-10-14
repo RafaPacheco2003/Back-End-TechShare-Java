@@ -14,6 +14,7 @@ import com.techmate.techmate.entity.VerificationToken;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.VerificationTokenRepository;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -28,6 +29,9 @@ class AuthServiceTest {
 
     @Mock
     RoleRepository roleRepository;
+
+    @Mock
+    UsuarioRoleRepository usuarioRoleRepository;
 
     @Mock
     EmailService emailService;
@@ -55,7 +59,7 @@ class AuthServiceTest {
         when(emailTemplateService.generateVerificationEmail(anyString(), anyString()))
             .thenReturn("<html>Test Email</html>");
         
-        authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, emailService, emailTemplateService, authMapper, appProperties);
+    authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, usuarioRoleRepository, emailService, emailTemplateService, authMapper, appProperties);
     }
 
     @Test

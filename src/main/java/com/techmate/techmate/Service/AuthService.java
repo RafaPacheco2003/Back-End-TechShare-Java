@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 import com.techmate.techmate.config.AppProperties;
 import com.techmate.techmate.dto.RegisterRequest;
 import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.entity.UsuarioRole;
+import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.entity.VerificationToken;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.VerificationTokenRepository;
 import com.techmate.techmate.repository.RoleRepository;
+import com.techmate.techmate.repository.UsuarioRoleRepository;
 import com.techmate.techmate.Service.mapper.AuthMapper;
 
 @Service
@@ -22,6 +25,7 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final RoleRepository roleRepository;
+    private final UsuarioRoleRepository usuarioRoleRepository;
     private final EmailService emailService;
     private final EmailTemplateService emailTemplateService;
     private final AuthMapper authMapper;
@@ -30,6 +34,7 @@ public class AuthService {
     public AuthService(UsuarioRepository usuarioRepository,
             VerificationTokenRepository verificationTokenRepository,
             RoleRepository roleRepository,
+            UsuarioRoleRepository usuarioRoleRepository,
             EmailService emailService,
             EmailTemplateService emailTemplateService,
             AuthMapper authMapper,
@@ -37,6 +42,7 @@ public class AuthService {
         this.usuarioRepository = usuarioRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.roleRepository = roleRepository;
+        this.usuarioRoleRepository = usuarioRoleRepository;
         this.emailService = emailService;
         this.emailTemplateService = emailTemplateService;
         this.authMapper = authMapper;
@@ -50,7 +56,19 @@ public class AuthService {
 
         Usuario usuario = authMapper.toEntity(registerRequest);
 
+        // Guardar el usuario primero para obtener su ID
         usuarioRepository.save(usuario);
+        
+        // Asignar automáticamente el rol "user" (ID: 2) a todos los nuevos usuarios
+        Role userRole = roleRepository.findById(2)
+            .orElseThrow(() -> new RuntimeException("Rol 'user' no encontrado en la base de datos"));
+        
+        UsuarioRole usuarioRole = new UsuarioRole();
+        usuarioRole.setUsuario(usuario);
+        usuarioRole.setRole(userRole);
+        usuarioRoleRepository.save(usuarioRole);
+        
+        log.info("Rol 'user' asignado automáticamente al usuario: {}", usuario.getEmail());
 
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken(token, usuario);

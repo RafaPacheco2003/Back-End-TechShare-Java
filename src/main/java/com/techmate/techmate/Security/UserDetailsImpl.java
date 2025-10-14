@@ -10,9 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.entity.UsuarioRole;
-import com.techmate.techmate.repository.UsuarioRoleRepository;
-
-import lombok.AllArgsConstructor;
 
 /**
  * Implementación de la interfaz UserDetails para integrar la autenticación
@@ -20,20 +17,46 @@ import lombok.AllArgsConstructor;
  * 
  * Esta clase convierte la información de la entidad Usuario en un formato 
  * que Spring Security entiende para realizar la autenticación y autorización.
+ * 
+ * IMPORTANTE: Esta clase NO almacena la entidad Usuario completa para evitar
+ * problemas de lazy loading y ConcurrentModificationException con Hibernate.
+ * En su lugar, extrae solo los datos primitivos necesarios para la autenticación.
  */
-@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-    private final Usuario usuario;
-    private final UsuarioRoleRepository usuarioRoleRepository; // Repositorio para buscar los roles asociados al usuario.
+    // Datos primitivos extraídos del usuario (evita problemas con lazy loading)
+    private final Integer userId;
+    private final String email;
+    private final String password;
+    private final String userName;
+    private final boolean enabled;
+    private final List<String> roleNames; // Lista de nombres de roles del usuario (ej: "ADMIN")
+    
+    public UserDetailsImpl(Usuario usuario, List<String> roleNames) {
+        // Extraer datos primitivos del usuario para evitar mantener referencia a entidad con lazy collections
+        this.userId = usuario.getId();
+        this.email = usuario.getEmail();
+        this.password = usuario.getPassword();
+        this.userName = usuario.getUser_name();
+        this.enabled = usuario.isEnabled();
+        this.roleNames = roleNames != null ? roleNames : List.of();
+    }
 
     /**
      * Método para obtener el objeto Usuario completo.
+     * 
+     * NOTA: Este método ahora retorna un Usuario básico reconstruido con solo
+     * los datos que tenemos, sin colecciones lazy que puedan causar problemas.
      *
-     * @return el objeto Usuario asociado a este UserDetails.
+     * @return un objeto Usuario básico con los datos de autenticación.
      */
     public Usuario getUsuario() {
-        return this.usuario;
+        Usuario u = new Usuario();
+        u.setId(this.userId);
+        u.setEmail(this.email);
+        u.setUser_name(this.userName);
+        u.setEnabled(this.enabled);
+        return u;
     }
 
     /**
@@ -42,7 +65,7 @@ public class UserDetailsImpl implements UserDetails {
      * @return ID del usuario (tipo Integer).
      */
     public Integer getId() {
-        return usuario.getId();
+        return this.userId;
     }
 
     /**
@@ -54,14 +77,10 @@ public class UserDetailsImpl implements UserDetails {
      * @return Lista de IDs de roles asociados.
      */
     public List<Integer> getIdRoles() {
-        List<UsuarioRole> usuarioRoles = usuarioRoleRepository.findByUsuarioId(usuario.getId());
-
-        return usuarioRoles.stream()
-                .map(UsuarioRole::getId) // Suponiendo que `getId()` devuelve el ID del rol asociado.
-                .collect(Collectors.toList());
-    }
-
-    /**
+        // No disponemos de los IDs de role directamente aquí; devolvemos lista vacía.
+        // Si se requiere el id de roles, cambiar a pasar una estructura que contenga el id.
+        return List.of();
+    }    /**
      * Método para obtener los roles del usuario en forma de `GrantedAuthority`.
      *
      * @return Colección de roles (autoridades) asociadas al usuario.
@@ -75,13 +94,24 @@ public class UserDetailsImpl implements UserDetails {
      *
      * Este método convierte cada rol del usuario a un `GrantedAuthority`,
      * necesario para la autorización en Spring Security.
+     * 
+     * IMPORTANTE: Spring Security espera que los roles tengan el prefijo "ROLE_"
+     * cuando se usa .hasRole("ADMIN"). Por eso convertimos "admin" a "ROLE_ADMIN".
      *
      * @return Colección de objetos `GrantedAuthority` basados en los roles del usuario.
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return usuarioRoleRepository.findByUsuarioId(usuario.getId()).stream()
-                .map(usuarioRole -> new SimpleGrantedAuthority(usuarioRole.getRole().getNombre()))
+        // Convertimos cada nombre de rol a GrantedAuthority con prefijo ROLE_
+        return roleNames.stream()
+                .filter(r -> r != null && !r.isBlank())
+                .map(r -> {
+                    String normalized = r.trim().toUpperCase();
+                    if (!normalized.startsWith("ROLE_")) {
+                        normalized = "ROLE_" + normalized;
+                    }
+                    return new SimpleGrantedAuthority(normalized);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -94,7 +124,7 @@ public class UserDetailsImpl implements UserDetails {
      */
     @Override
     public String getPassword() {
-        return usuario.getPassword();
+        return this.password;
     }
 
     /**
@@ -104,7 +134,7 @@ public class UserDetailsImpl implements UserDetails {
      */
     @Override
     public String getUsername() {
-        return usuario.getEmail();
+        return this.email;
     }
 
     
@@ -115,7 +145,7 @@ public class UserDetailsImpl implements UserDetails {
      * @return Nombre del usuario.
      */
     public String getNombre() {
-        return usuario.getUser_name();
+        return this.userName;
     }
 
     // Otros métodos requeridos por UserDetails para la autenticación.
@@ -136,6 +166,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true; // Devuelve true, asumiendo que la cuenta está habilitada.
+        return this.enabled; // Usa el valor real del campo isEnabled del usuario
     }
 }

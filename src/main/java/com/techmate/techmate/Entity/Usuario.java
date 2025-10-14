@@ -28,7 +28,7 @@ public class Usuario {
 
     private boolean isEnabled = false;  // Auto-mapea a is_enabled
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "usuario_role", // Nombre de la tabla intermedia
             joinColumns = @JoinColumn(name = "usuario_id"), // Columna que se refiere a Usuario
             inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role

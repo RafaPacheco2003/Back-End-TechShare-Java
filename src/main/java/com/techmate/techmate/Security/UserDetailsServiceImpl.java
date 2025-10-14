@@ -1,11 +1,14 @@
 package com.techmate.techmate.security;
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.techmate.techmate.entity.Usuario;
+import com.techmate.techmate.entity.UsuarioRole;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
 
@@ -53,9 +56,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 // Si no se encuentra el usuario, lanza una excepción indicando que el usuario no existe.
                 .orElseThrow(() -> new UsernameNotFoundException("El usuario con email " + email + " no existe"));
         
-        // Retorna una instancia de UserDetailsImpl que envuelve al usuario encontrado.
-        // UserDetailsImpl es una implementación de UserDetails que adapta el objeto Usuario.
-        return new UserDetailsImpl(usuario, usuarioRoleRepository);
+        // Obtenemos los nombres de roles directamente con query optimizada (evita ConcurrentModificationException)
+        List<String> roleNames = usuarioRoleRepository.findRoleNamesByUsuarioId(usuario.getId());
+
+        // Retorna una instancia de UserDetailsImpl que contiene datos primitivos y lista de nombres de roles
+        return new UserDetailsImpl(usuario, roleNames);
     }
 
     public String getUsuarioUsernamById(int usernameId){

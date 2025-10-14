@@ -56,10 +56,24 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         AuthCredentials authCredentials;
 
         try {
-            // Leemos el cuerpo JSON y lo mapeamos a POJO. Esto permite que el
-            // frontend envíe { "email": "x", "password": "y" }.
-            // ObjectMapper lanza IOException si el payload no es JSON válido.
-            authCredentials = new ObjectMapper().readValue(request.getReader(), AuthCredentials.class);
+            // Leemos todo el cuerpo como String (para poder limpiar BOM y whitespace)
+            StringBuilder sb = new StringBuilder();
+            String line;
+            var reader = request.getReader();
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            String payload = sb.toString();
+            if (payload == null) payload = "";
+            // Quitar BOM u otros caracteres invisibles al inicio que rompen el parser
+            payload = payload.replace("\uFEFF", "").trim();
+
+            if (payload.isEmpty()) {
+                log.warn("Attempted authentication with empty payload");
+                throw new AuthenticationServiceException("Empty authentication request payload");
+            }
+
+            authCredentials = new ObjectMapper().readValue(payload, AuthCredentials.class);
         } catch (IOException e) {
             log.warn("Attempted authentication with invalid payload: {}", e.getMessage());
             // Devolver un error que Spring Security podrá transformar en 401/400 según configuración

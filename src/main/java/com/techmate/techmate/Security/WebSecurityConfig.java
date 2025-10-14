@@ -92,6 +92,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
+                        // Debug endpoints removed - do not expose debug utilities in production
+                        // Ensure admin endpoints stay protected. If you need to allow specific
+                        // public admin reads for development, add explicit rules here with care.
                         // Recursos estáticos y uploads
                         .requestMatchers("/admin/categories/images/**", "/admin/materials/images/**", "/admin/subcategories/images/**", "/uploaded-images/**").permitAll()
                         // Rutas de administración requieren rol ADMIN
