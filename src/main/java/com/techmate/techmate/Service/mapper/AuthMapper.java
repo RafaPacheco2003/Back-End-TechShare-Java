@@ -15,6 +15,8 @@ public class AuthMapper {
         u.setLast_name(req.getLast_name());
         u.setEmail(req.getEmail());
         u.setPassword(req.getPassword()); // Caller should encode
+        u.setBirthDate(req.getBirthDate()); // Fecha de nacimiento
+        u.setGender(req.getGender()); // Género
         // roles are handled by service if needed
         return u;
     }

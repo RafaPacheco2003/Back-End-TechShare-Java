@@ -34,6 +34,8 @@ CREATE TABLE usuario (
     last_name VARCHAR(100),
     user_name VARCHAR(100) UNIQUE,
     password VARCHAR(255) NOT NULL,
+    birth_date DATE NULL,
+    gender ENUM('Mujer', 'Hombre', 'Otro') NULL,
     is_enabled BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP

@@ -3,6 +3,7 @@ package com.techmate.techmate.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,13 @@ public class Usuario {
     private String email;
     
     private String password;
+    
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
 
     private boolean isEnabled = false;  // Auto-mapea a is_enabled
 
@@ -41,6 +49,8 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Borrow> borrows;
 
-    
-
+    // Enum para género
+    public enum Gender {
+        Mujer, Hombre, Otro
+    }
 }
