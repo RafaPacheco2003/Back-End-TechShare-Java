@@ -29,6 +29,8 @@ public class UserDetailsImpl implements UserDetails {
     private final String email;
     private final String password;
     private final String userName;
+    private final String firstName;
+    private final String lastName;
     private final boolean enabled;
     private final List<String> roleNames; // Lista de nombres de roles del usuario (ej: "ADMIN")
     
@@ -38,6 +40,8 @@ public class UserDetailsImpl implements UserDetails {
         this.email = usuario.getEmail();
         this.password = usuario.getPassword();
         this.userName = usuario.getUser_name();
+        this.firstName = usuario.getFirst_name();
+        this.lastName = usuario.getLast_name();
         this.enabled = usuario.isEnabled();
         this.roleNames = roleNames != null ? roleNames : List.of();
     }
@@ -146,6 +150,33 @@ public class UserDetailsImpl implements UserDetails {
      */
     public String getNombre() {
         return this.userName;
+    }
+
+    /**
+     * Obtiene el primer nombre del usuario.
+     *
+     * @return Primer nombre del usuario.
+     */
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    /**
+     * Obtiene el apellido del usuario.
+     *
+     * @return Apellido del usuario.
+     */
+    public String getLastName() {
+        return this.lastName;
+    }
+
+    /**
+     * Obtiene el email del usuario.
+     *
+     * @return Email del usuario.
+     */
+    public String getEmail() {
+        return this.email;
     }
 
     // Otros métodos requeridos por UserDetails para la autenticación.

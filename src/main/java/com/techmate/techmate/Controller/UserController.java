@@ -25,8 +25,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    
-
     // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Integer id) {
