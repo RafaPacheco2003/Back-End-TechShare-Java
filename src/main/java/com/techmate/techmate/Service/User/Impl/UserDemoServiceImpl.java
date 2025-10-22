@@ -35,7 +35,6 @@ public class UserDemoServiceImpl implements UserDemoService {
 
         // Verificar si el ID es válido
         if (userId != null) {
-            System.out.println("Buscando usuario con ID: " + userId); // Verificación del ID
             Optional<Usuario> usuarioOptional = userRepository.findById(userId);
 
             // Si el usuario existe, lo convertimos a DTO

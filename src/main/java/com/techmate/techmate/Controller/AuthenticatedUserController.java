@@ -2,6 +2,8 @@ package com.techmate.techmate.Controller;
 
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,8 @@ import com.techmate.techmate.security.UserDetailsImpl;
 @RequestMapping("/user")
 public class AuthenticatedUserController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticatedUserController.class);
+
     /**
      * Obtiene la información del usuario autenticado actualmente
      * @return datos del usuario con su nombre, email y roles
@@ -29,15 +33,11 @@ public class AuthenticatedUserController {
     public ResponseEntity<CurrentUserDTO> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        // Debug logging
-        System.out.println("=== DEBUG /user/me ===");
-        System.out.println("Authentication object: " + authentication);
-        System.out.println("Is authenticated: " + (authentication != null ? authentication.isAuthenticated() : "null"));
-        System.out.println("Principal class: " + (authentication != null && authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
-        System.out.println("Principal: " + (authentication != null ? authentication.getPrincipal() : "null"));
+        log.debug("GET /user/me - Authentication object: {}", authentication);
+        log.debug("Is authenticated: {}", authentication != null ? authentication.isAuthenticated() : "null");
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            System.out.println("ERROR: Usuario no autenticado");
+            log.warn("Unauthorized access attempt to /user/me");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado");
         }
 
@@ -49,16 +49,16 @@ public class AuthenticatedUserController {
             currentUser.setUserName(userDetails.getUsername());
             currentUser.setFirstName(userDetails.getFirstName());
             currentUser.setLastName(userDetails.getLastName());
-            currentUser.setEmail(userDetails.getEmail());
+            currentUser.setEmail(userDetails.getUsername()); // Email es en realidad el username
             currentUser.setRoles(userDetails.getAuthorities().stream()
                     .map(auth -> auth.getAuthority())
                     .collect(Collectors.toList()));
             
-            System.out.println("SUCCESS: Returning user data for: " + userDetails.getUsername());
+            log.info("User info returned for: {}", userDetails.getUsername());
             return ResponseEntity.ok(currentUser);
         }
         
-        System.out.println("ERROR: Principal no es UserDetailsImpl");
+        log.error("Principal is not UserDetailsImpl");
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al obtener usuario");
     }
 }

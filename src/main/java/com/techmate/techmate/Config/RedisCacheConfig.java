@@ -2,7 +2,6 @@ package com.techmate.techmate.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +56,6 @@ public class RedisCacheConfig {
     @Bean
     public RedisCacheManager cacheManager(
             RedisConnectionFactory connectionFactory,
-            CacheProperties cacheProperties,
             ObjectMapper cacheObjectMapper
     ) {
         // Configuración por defecto

@@ -122,9 +122,18 @@ public class TokenUtils {
             Object idClaim = claims.get("id");
             if (idClaim != null) {
                 try {
-                    return (Integer) idClaim;
-                } catch (ClassCastException e) {
-                    return Integer.parseInt(idClaim.toString());
+                    // Manejar Integer, Long, String o Number
+                    if (idClaim instanceof Integer) {
+                        return (Integer) idClaim;
+                    } else if (idClaim instanceof Long) {
+                        return ((Long) idClaim).intValue();
+                    } else if (idClaim instanceof Number) {
+                        return ((Number) idClaim).intValue();
+                    } else {
+                        return Integer.parseInt(idClaim.toString());
+                    }
+                } catch (NumberFormatException | ClassCastException e) {
+                    throw new RuntimeException("ID en token no es un número válido: " + idClaim, e);
                 }
             }
         }

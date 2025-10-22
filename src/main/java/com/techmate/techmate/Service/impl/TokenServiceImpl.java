@@ -17,9 +17,23 @@ public class TokenServiceImpl implements TokenService {
     public Integer getUserIdFromToken(String token) {
         Claims claims = TokenUtils.decodeToken(token);
         if (claims != null) {
-            Integer userId = (Integer) claims.get("id");
-            System.out.println("User ID from token: " + userId); // Verificación del ID
-            return userId;
+            Object idClaim = claims.get("id");
+            if (idClaim != null) {
+                try {
+                    // Manejar Integer, Long, String o Number
+                    if (idClaim instanceof Integer) {
+                        return (Integer) idClaim;
+                    } else if (idClaim instanceof Long) {
+                        return ((Long) idClaim).intValue();
+                    } else if (idClaim instanceof Number) {
+                        return ((Number) idClaim).intValue();
+                    } else {
+                        return Integer.parseInt(idClaim.toString());
+                    }
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
         }
         return null;
     }

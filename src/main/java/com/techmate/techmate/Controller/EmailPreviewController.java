@@ -11,9 +11,11 @@ import com.techmate.techmate.Service.EmailTemplateService;
 /**
  * Controlador temporal para preview de emails
  * SOLO PARA DESARROLLO - Eliminar en producción
+ * 
+ * ⚠️ DESHABILITADO EN PRODUCCIÓN
  */
-@RestController
-@RequestMapping("/api/dev")
+// @RestController
+// @RequestMapping("/api/dev")
 public class EmailPreviewController {
 
     private final EmailTemplateService emailTemplateService;

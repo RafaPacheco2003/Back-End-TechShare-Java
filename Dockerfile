@@ -57,7 +57,10 @@ RUN chmod +x /usr/local/bin/wait-for-db.sh
 
 # Crear directorios necesarios
 RUN mkdir -p /app/uploaded-images /app/logs && \
-    chown -R spring:spring /app
+    chmod -R 755 /app/uploaded-images && \
+    chmod -R 755 /app/logs && \
+    chown -R spring:spring /app && \
+    chmod -R u+rwx,g+rx,o+rx /app/logs /app/uploaded-images
 
 # Cambiar a usuario no-root
 USER spring:spring
@@ -65,14 +68,15 @@ USER spring:spring
 # Exponer puerto
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+# Health check - Temporalmente deshabilitado para debug
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+#     CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Variables de entorno por defecto
-ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+# Agregado: -XX:+PrintFlagsFinal para ver flags reales
+# Agregado: -XX:+PrintGCDetails para ver garbage collection
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+PrintFlagsFinal"
 ENV SPRING_PROFILES_ACTIVE=prod
 
 # Entrypoint con configuración JVM
 ENTRYPOINT ["/usr/local/bin/wait-for-db.sh"]
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

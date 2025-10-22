@@ -150,12 +150,25 @@ public class MovementsServiceImpl implements MovementsService {
 
             if (claims != null) {
                 String email = claims.getSubject(); // Obtener el email del token
-                Integer userId = (Integer) claims.get("id"); // Obtener el ID del usuario
+                Object idClaim = claims.get("id");
+                Integer userId = null;
                 
-
-                // Aquí puedes utilizar la información decodificada
-                System.out.println("Email: " + email);
-                System.out.println("User ID: " + userId);
+                // Validar y convertir ID de forma segura
+                if (idClaim != null) {
+                    if (idClaim instanceof Integer) {
+                        userId = (Integer) idClaim;
+                    } else if (idClaim instanceof Long) {
+                        userId = ((Long) idClaim).intValue();
+                    } else if (idClaim instanceof Number) {
+                        userId = ((Number) idClaim).intValue();
+                    } else {
+                        try {
+                            userId = Integer.parseInt(idClaim.toString());
+                        } catch (NumberFormatException e) {
+                            throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "ID de usuario inválido en token");
+                        }
+                    }
+                }
                 
             } else {
             throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "Token no válido");

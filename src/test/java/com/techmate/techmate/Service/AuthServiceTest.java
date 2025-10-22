@@ -59,11 +59,17 @@ class AuthServiceTest {
         when(emailTemplateService.generateVerificationEmail(anyString(), anyString()))
             .thenReturn("<html>Test Email</html>");
         
+        // Mock roleRepository para retornar rol 'user' con ID 2
+        com.techmate.techmate.entity.Role userRole = new com.techmate.techmate.entity.Role();
+        userRole.setRoleId(2);
+        userRole.setNombre("user");
+        when(roleRepository.findById(2)).thenReturn(Optional.of(userRole));
+        when(roleRepository.findByNombre("user")).thenReturn(Optional.of(userRole));
+        
     authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, usuarioRoleRepository, emailService, emailTemplateService, authMapper, appProperties);
     }
-
     @Test
-    void registerUser_success() {
+    void registerUser_success() throws jakarta.mail.MessagingException {
         RegisterRequest req = new RegisterRequest();
         req.setUser_name("jdoe");
         req.setFirst_name("John");
@@ -79,7 +85,7 @@ class AuthServiceTest {
         assertTrue(res.contains("Usuario registrado"));
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
         verify(verificationTokenRepository, times(1)).save(any(VerificationToken.class));
-        verify(emailService, times(1)).sendEmail(anyString(), anyString(), anyString());
+        verify(emailService, times(1)).sendHtmlEmail(anyString(), anyString(), anyString());
     }
 
     @Test
