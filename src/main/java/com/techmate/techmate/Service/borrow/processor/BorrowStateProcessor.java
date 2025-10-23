@@ -91,7 +91,7 @@ public class BorrowStateProcessor {
                 processRejection(borrow);
                 break;
                 
-            case BORROWED:
+            case LOANED:
                 processBorrowing(borrow);
                 break;
                 
@@ -143,7 +143,7 @@ public class BorrowStateProcessor {
         }
         
         // Actualizar estado y fechas
-        borrow.setStatus(Status.BORROWED);
+    borrow.setStatus(Status.LOANED);
         borrow.setStartDate(new Date());
     }
     

@@ -1,5 +1,6 @@
 package com.techmate.techmate.Validation.Impl;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,8 @@ import java.util.List;
  * @since 2025-10-02
  */
 @Component
-public class EnhancedImageValidationStrategy {
+@Primary
+public class EnhancedImageValidationStrategy implements com.techmate.techmate.Validation.ImageValidationStrategy {
 
     // Tamaño máximo de archivo: 10 MB
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB en bytes
@@ -60,6 +62,7 @@ public class EnhancedImageValidationStrategy {
      * @param image El archivo MultipartFile a validar
      * @throws IllegalArgumentException Si la imagen no cumple con los requisitos
      */
+    @Override
     public void validate(MultipartFile image) {
         // 1. Verificar que el archivo no sea nulo
         if (image == null) {

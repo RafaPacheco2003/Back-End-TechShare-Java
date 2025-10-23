@@ -22,6 +22,6 @@ public interface UsuarioRoleRepository extends JpaRepository<UsuarioRole, Intege
     List<UsuarioRole> findByRole(Role role);
     
     // Query optimizada para obtener solo los nombres de roles (evita lazy loading)
-    @Query("SELECT r.nombre FROM UsuarioRole ur JOIN ur.role r WHERE ur.usuario.id = :usuarioId")
+    @Query("SELECT r.name FROM UsuarioRole ur JOIN ur.role r WHERE ur.usuario.id = :usuarioId")
     List<String> findRoleNamesByUsuarioId(@Param("usuarioId") Integer usuarioId);
 }

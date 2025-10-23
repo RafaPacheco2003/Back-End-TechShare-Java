@@ -1,9 +1,7 @@
 package com.techmate.techmate.security;
 
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import com.techmate.techmate.dto.RegisterRequest;
 import com.techmate.techmate.Service.AuthService;
@@ -12,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 public class AuthController {
@@ -28,16 +25,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(
-            @Valid @RequestBody RegisterRequest registerRequest,
-            BindingResult bindingResult) {
+            @RequestBody RegisterRequest registerRequest) {
         
-        // Validar errores de validación
-        if (bindingResult.hasErrors()) {
-            String errors = bindingResult.getFieldErrors().stream()
-                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                    .collect(Collectors.joining(", "));
-            log.warn("Registration validation failed: {}", errors);
-            return ResponseEntity.badRequest().body(Map.of("error", errors));
+        // Validar que el objeto no sea nulo
+        if (registerRequest == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Request body cannot be empty"));
         }
         
         try {

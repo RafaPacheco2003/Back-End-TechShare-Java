@@ -77,9 +77,9 @@ public interface MaterialsRepository extends JpaRepository<Materials, Integer> {
      * Busca materiales por categoría con JOIN FETCH.
      */
     @Query("SELECT m FROM Materials m " +
-           "LEFT JOIN FETCH m.subCategory sc " +
-           "LEFT JOIN FETCH sc.category c " +
-           "WHERE c.categoryId = :categoryId")
+        "LEFT JOIN FETCH m.subCategory sc " +
+        "LEFT JOIN FETCH sc.category c " +
+        "WHERE c.id = :categoryId")
     List<Materials> findByCategoryIdOptimized(@Param("categoryId") Integer categoryId);
     
     /**

@@ -14,12 +14,15 @@ public class SubCategories {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int subCategoryId;  // Auto-mapea a sub_category_id
+        @Column(name = "id")
+        private int id;  // Auto-mapea a id
 
     @NotBlank(message = "El nombre no puede estar vacío")
-    private String name;  // Auto-mapea a 'name'
+        @Column(name = "name")
+        private String name;  // Auto-mapea a 'name'
 
-    private String imagePath;  // Auto-mapea a 'image_path'
+        @Column(name = "image_path")
+        private String imagePath;  // Auto-mapea a 'image_path'
 
     @NotNull(message = "La categoría no puede ser nula")
     @ManyToOne
@@ -28,5 +31,9 @@ public class SubCategories {
 
     @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Materials> materials;
+
+    // Compatibility getters/setters for legacy code/tests
+    public int getSubCategoryId() { return this.id; }
+    public void setSubCategoryId(int id) { this.id = id; }
 
 }

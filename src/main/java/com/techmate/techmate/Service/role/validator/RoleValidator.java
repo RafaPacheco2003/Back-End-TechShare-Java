@@ -14,7 +14,7 @@ public class RoleValidator {
     }
 
     public void validateUniqueName(String name) {
-        if (name != null && roleRepository.findByNombre(name).isPresent()) {
+        if (name != null && roleRepository.findByName(name).isPresent()) {
             throw new RuntimeException("Ya existe un rol con el nombre: " + name);
         }
     }

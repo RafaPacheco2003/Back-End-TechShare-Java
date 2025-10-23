@@ -126,7 +126,7 @@ public class BorrowServiceImpl implements BorrowService {
         Borrow borrow = new Borrow();
         borrow.setBorrowId(borrowDTO.getBorrowId());
         borrow.setDate(borrowDTO.getDate());
-        borrow.setStatus(Status.PROCESS);  // Asignar un estado inicial adecuado
+    borrow.setStatus(Status.PENDING);  // Asignar un estado inicial adecuado
         borrow.setAmount(borrowDTO.getAmount());
     
         // Asignación de detalles
@@ -198,8 +198,8 @@ public class BorrowServiceImpl implements BorrowService {
         .orElseThrow(() -> new BusinessException("BORROW_NOT_FOUND", "Préstamo no encontrado con ID: " + borrowId));
     
         // Verificar el estado actual del préstamo
-        if (borrow.getStatus() != Status.PROCESS && borrow.getStatus() != Status.BORROWED) {
-            throw new Exception("Solo se puede modificar el estado de un préstamo en estado PROCESS o BORROWED");
+        if (borrow.getStatus() != Status.PENDING && borrow.getStatus() != Status.LOANED) {
+            throw new Exception("Solo se puede modificar el estado de un préstamo en estado PENDING o LOANED");
         }
     
         // Establecer el adminId en el préstamo
@@ -212,9 +212,9 @@ public class BorrowServiceImpl implements BorrowService {
                 borrow.setStatus(Status.REJECTED);
                 borrow.setEndDate(new Date());
                 break;
-    
-            case BORROWED:
-                if (borrow.getStatus() == Status.PROCESS) {
+
+            case LOANED:
+                if (borrow.getStatus() == Status.PENDING) {
                     for (DetailsBorrow detail : borrow.getDetails()) {
                         Integer materialId = detail.getMaterials().getMaterialsId();
                         int qty = detail.getQuantity();
@@ -223,7 +223,7 @@ public class BorrowServiceImpl implements BorrowService {
                         reduceStockOrFallback(materialId, qty);
                     }
                     borrow.setStartDate(new Date()); // Actualizar la fecha de inicio
-                    borrow.setStatus(Status.BORROWED);
+                    borrow.setStatus(Status.LOANED);
                     
                     // Publicar evento de préstamo creado
                     publishBorrowCreatedEvent(borrow);
@@ -231,8 +231,8 @@ public class BorrowServiceImpl implements BorrowService {
                 break;
     
             case RETURNED:
-                if (borrow.getStatus() != Status.BORROWED) {
-                    throw new Exception("El préstamo debe estar en estado BORROWED para ser devuelto");
+                if (borrow.getStatus() != Status.LOANED) {
+                    throw new Exception("El préstamo debe estar en estado LOANED para ser devuelto");
                 }
                 for (DetailsBorrow detail : borrow.getDetails()) {
                     Integer materialId = detail.getMaterials().getMaterialsId();
@@ -267,13 +267,13 @@ public class BorrowServiceImpl implements BorrowService {
 
         switch (status.toUpperCase()) {
             case "PROCESS":
-                statusBorrow = Status.PROCESS;
+                statusBorrow = Status.PENDING;
                 break;
             case "REJECTED":
                 statusBorrow = Status.REJECTED;
                 break;
-            case "BORROWED":
-                statusBorrow = Status.BORROWED;
+            case "LOANED":
+                statusBorrow = Status.LOANED;
                 break;
             case "RETURNED":
                 statusBorrow = Status.RETURNED;

@@ -1,7 +1,8 @@
 package com.techmate.techmate.Service.impl;
 
 
-import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class MovementsServiceImpl implements MovementsService {
+
+    private static final Logger log = LoggerFactory.getLogger(MovementsServiceImpl.class);
 
     private final MovementsRepository movementsRepository;
     private final UsuarioRepository usuarioRepository;
@@ -108,14 +111,20 @@ public class MovementsServiceImpl implements MovementsService {
 
         // Convertir la cadena de texto a enum MoveType usando un switch-case
         switch (type.toUpperCase()) {
+            case "STOCK_ADD":
             case "IN":
-                moveType = MoveType.IN;
+                moveType = MoveType.STOCK_ADD;
                 break;
+            case "RETURN":
             case "OUT":
-                moveType = MoveType.OUT;
+                moveType = MoveType.RETURN;
                 break;
+            case "LOAN":
+                moveType = MoveType.LOAN;
+                break;
+            case "ADJUSTMENT":
             case "ADJUST":
-                moveType = MoveType.ADJUST;
+                moveType = MoveType.ADJUSTMENT;
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de movimiento inválido: " + type);
@@ -148,10 +157,10 @@ public class MovementsServiceImpl implements MovementsService {
             String token = bearerToken.replace("Bearer ", "");
             Claims claims = TokenUtils.decodeToken(token);
 
-            if (claims != null) {
-                String email = claims.getSubject(); // Obtener el email del token
-                Object idClaim = claims.get("id");
-                Integer userId = null;
+                if (claims != null) {
+                    String email = claims.getSubject(); // Obtener el email del token
+                    Object idClaim = claims.get("id");
+                    Integer userId = null;
                 
                 // Validar y convertir ID de forma segura
                 if (idClaim != null) {
@@ -170,9 +179,12 @@ public class MovementsServiceImpl implements MovementsService {
                     }
                 }
                 
-            } else {
-            throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "Token no válido");
-            }
+                    // Log para evitar avisos de variables no usadas y para trazabilidad
+                    if (email != null) log.debug("Token email: {}", email);
+                    if (userId != null) log.debug("Token userId: {}", userId);
+                } else {
+                    throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "Token no válido");
+                }
         } else {
             throw new com.techmate.techmate.exception.BusinessException("MISSING_TOKEN", "No se proporcionó un token");
         }

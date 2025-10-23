@@ -7,17 +7,25 @@
 -- PASO 1: Eliminar todas las tablas viejas (con nombres en camelCase)
 -- Esto es seguro porque estamos en una migración Flyway controlada
 
+SET FOREIGN_KEY_CHECKS=0;
+
+-- Borrar tablas dependientes primero (idempotente)
+-- No hacemos DROP de FKs por nombre (puede variar entre instalaciones); en su lugar
+-- desactivamos comprobaciones y eliminamos las tablas en el orden correcto.
 DROP TABLE IF EXISTS usuario_role;
 DROP TABLE IF EXISTS user_roles;
-DROP TABLE IF EXISTS materials;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS favorites;
+DROP TABLE IF EXISTS materials;
 DROP TABLE IF EXISTS sub_categories;
 DROP TABLE IF EXISTS subCategories;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS usuario;
+
+-- Reactivar comprobaciones de FK
+SET FOREIGN_KEY_CHECKS=1;
 
 -- PASO 2: Crear tablas en snake_case (FORMA CORRECTA)
 
@@ -50,7 +58,7 @@ CREATE TABLE users (
 -- Tabla: categories
 CREATE TABLE categories (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
     description VARCHAR(255),
     image_path VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -61,7 +69,6 @@ CREATE TABLE categories (
 -- Tabla: sub_categories (ANTES "subCategories" - AHORA NORMALIZADA)
 CREATE TABLE sub_categories (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    sub_category_id INT NOT NULL AUTO_INCREMENT UNIQUE,
     category_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     description VARCHAR(255),
@@ -69,8 +76,7 @@ CREATE TABLE sub_categories (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
     UNIQUE KEY uk_name_category (name, category_id),
-    INDEX idx_category (category_id),
-    INDEX idx_sub_category_id (sub_category_id)
+    INDEX idx_category (category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: materials
@@ -80,20 +86,22 @@ CREATE TABLE materials (
     description VARCHAR(500),
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL DEFAULT 0,
-    sub_category_id INT NOT NULL,
+    sub_category_id INT NULL DEFAULT NULL,
     image_path VARCHAR(255),
     created_by INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (sub_category_id) REFERENCES sub_categories(sub_category_id) ON DELETE RESTRICT,
+    -- Permitimos NULL por defecto y en cascada de borrado dejamos NULL para evitar problemas
+    -- durante migraciones/recreaciones del esquema.
+    FOREIGN KEY (sub_category_id) REFERENCES sub_categories(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_sub_category (sub_category_id),
     INDEX idx_created_by (created_by),
     FULLTEXT INDEX ft_search (name, description)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: usuario_role (relación muchos-a-muchos: ESTRUCTURA CORRECTA)
-CREATE TABLE usuario_role (
+-- Tabla: user_role (relación muchos-a-muchos: ESTRUCTURA CORRECTA)
+CREATE TABLE user_role (
     id INT NOT NULL AUTO_INCREMENT UNIQUE,
     user_id INT NOT NULL,
     role_id INT NOT NULL,
@@ -166,6 +174,10 @@ INSERT INTO sub_categories (category_id, name, description) VALUES
 (2, 'Memoria', 'RAM, SSD, HDD'),
 (3, 'Cables', 'Cables USB, HDMI, Ethernet'),
 (3, 'Conectores', 'Conectores y adaptadores');
+
+-- NOTA IMPORTANTE: Si se agregan inserts en 'materials', incluir siempre el campo sub_category_id y ponerlo como NULL si no aplica.
+-- Ejemplo correcto:
+-- INSERT INTO materials (name, description, price, stock, sub_category_id, image_path, created_by) VALUES ('Material X', 'Desc', 10.0, 5, NULL, 'img.png', 1);
 
 -- PASO 4: Verificaciones finales
 -- Asegurar que todo se creó correctamente en snake_case

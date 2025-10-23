@@ -160,12 +160,13 @@ public class WebSecurityConfig {
             // Producción: usar origen específico desde env var
             config.addAllowedOrigin(originEnv);
         } else {
-            // Desarrollo: permitir localhost en varios puertos
-            config.addAllowedOrigin("http://localhost:3000");
-            config.addAllowedOrigin("http://localhost:8080");
+            // Desarrollo: permitir localhost/127.0.0.1 en cualquier puerto usando allowedOriginPatterns
+            // Esto evita problemas donde el servidor devuelve un origen distinto al solicitado
+            // (por ejemplo "http://localhost"), y permite que el navegador acepte la cabecera
+            // Access-Control-Allow-Origin cuando el frontend corre en http://localhost:3000.
+            config.setAllowedOriginPatterns(java.util.List.of("http://localhost:*", "http://127.0.0.1:*"));
+            // También mantenemos algunos orígenes explícitos por compatibilidad
             config.addAllowedOrigin("http://localhost");
-            config.addAllowedOrigin("http://127.0.0.1:3000");
-            config.addAllowedOrigin("http://127.0.0.1:8080");
             config.addAllowedOrigin("http://127.0.0.1");
         }
 

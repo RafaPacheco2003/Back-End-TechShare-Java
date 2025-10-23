@@ -29,24 +29,33 @@ public class Movements {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int movementsId;  // Auto-mapea a movements_id
+    @Column(name = "id")
+    private int id;
+
+    // Compatibility getters/setters for legacy code/tests referencing movementsId
+    public int getMovementsId() { return this.id; }
+    public void setMovementsId(int id) { this.id = id; }
 
     @Enumerated(EnumType.STRING)
-    private MoveType moveType;  // Auto-mapea a move_type
+    @Column(name = "type")
+    private MoveType moveType;  // Auto-mapea a type (movement_type)
 
-    private int quantity;  // Auto-mapea a quantity
+    @Column(name = "quantity")
+    private int quantity;
 
-    private String comment;  // Auto-mapea a comment
+    @Column(name = "comment")
+    private String comment;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date date;  // Auto-mapea a date
+    @Column(name = "date")
+    private Date date;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "user_id")
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "materials_id")
+    @JoinColumn(name = "material_id")
     private Materials materials;
 
     // Getters y setters

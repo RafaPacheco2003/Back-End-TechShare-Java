@@ -34,9 +34,5 @@ fi
 echo "Starting application..."
 echo "DEBUG: About to launch Java with JAVA_OPTS=$JAVA_OPTS"
 
-# Launch Java with a timeout of 120 seconds in case of startup deadlock
-# If Java doesn't complete initialization within 120s, kill it
-(timeout 120 java $JAVA_OPTS -jar app.jar) &
-APP_PID=$!
-wait $APP_PID
-exit $?
+# Launch Java application directly (no timeout wrapper)
+exec java $JAVA_OPTS -jar app.jar

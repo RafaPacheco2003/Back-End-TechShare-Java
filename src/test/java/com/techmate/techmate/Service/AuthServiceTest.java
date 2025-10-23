@@ -61,10 +61,10 @@ class AuthServiceTest {
         
         // Mock roleRepository para retornar rol 'user' con ID 2
         com.techmate.techmate.entity.Role userRole = new com.techmate.techmate.entity.Role();
-        userRole.setRoleId(2);
-        userRole.setNombre("user");
-        when(roleRepository.findById(2)).thenReturn(Optional.of(userRole));
-        when(roleRepository.findByNombre("user")).thenReturn(Optional.of(userRole));
+    userRole.setRoleId(2);
+    userRole.setNombre("user");
+    when(roleRepository.findById(2)).thenReturn(Optional.of(userRole));
+    when(roleRepository.findByName("user")).thenReturn(Optional.of(userRole));
         
     authService = new AuthService(usuarioRepository, verificationTokenRepository, roleRepository, usuarioRoleRepository, emailService, emailTemplateService, authMapper, appProperties);
     }

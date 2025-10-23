@@ -16,7 +16,7 @@ public class MovementsMapperTest {
     void toResponse_mapsAllFields() {
         MovementsDTO dto = new MovementsDTO();
         dto.setMovementsId(42);
-    dto.setMoveType(MoveType.IN);
+    dto.setMoveType(MoveType.STOCK_ADD);
         dto.setQuantity(5);
         Date now = new Date();
         dto.setDate(now);

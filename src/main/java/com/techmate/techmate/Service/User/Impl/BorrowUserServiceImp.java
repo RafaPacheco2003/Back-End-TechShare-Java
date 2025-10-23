@@ -41,7 +41,7 @@ public class BorrowUserServiceImp implements BorrowUserService {
         Borrow borrow = new Borrow();
         borrow.setBorrowId(borrowDTO.getBorrowId());
         borrow.setDate(borrowDTO.getDate());
-        borrow.setStatus(Status.PROCESS);
+    borrow.setStatus(Status.PENDING);
         borrow.setAmount(borrowDTO.getAmount());
         borrow.setDetails(borrowDTO.getDetails().stream()
                 .map(detailDTO -> convertDetailsBorrowToEntity(detailDTO, borrow))

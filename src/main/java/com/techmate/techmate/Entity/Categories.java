@@ -33,17 +33,22 @@ public class Categories {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int categoryId;  // Auto-mapea a category_id
+    @Column(name = "id")
+    private int id;  // Auto-mapea a id
 
     @NotBlank(message = "El nombre de la categoría no puede estar vacío.")
     @Size(min = 3, max = 100, message = "El nombre de la categoría debe tener entre 3 y 100 caracteres.")
-    @Column(unique = true)  // Mantener unique constraint
+    @Column(name = "name", unique = true)
     private String name;
 
     private String imagePath;  // Auto-mapea a image_path
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubCategories> subCategories;
+
+    // Compatibility getters/setters for legacy code/tests
+    public int getCategoryId() { return this.id; }
+    public void setCategoryId(int id) { this.id = id; }
 
     
 }

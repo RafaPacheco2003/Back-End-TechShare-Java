@@ -84,8 +84,8 @@ public class CategoriesServiceImp implements CategoriesService {
     public CategoriesDTO createCategory(CategoriesDTO categoriesDTO, MultipartFile image) {
         // Verificar si ya existe una categoría con el mismo nombre
         categoriesValidator.validateUniqueName(categoriesDTO.getName());
-        String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
-        imageValidationStrategy.validate(imagePath); // Validación de la extensión
+    // Validar la imagen completa usando la estrategia (ahora acepta MultipartFile)
+    imageValidationStrategy.validate(image);
 
         // Guardar la imagen y obtener la ruta
         String savedImagePath = imageStorageStrategy.saveImage(image); // Asegúrate de que este método acepte
@@ -133,11 +133,10 @@ public class CategoriesServiceImp implements CategoriesService {
             }
 
             // Validar la nueva imagen usando la estrategia de validación
-            String newImagePath = image.getOriginalFilename();
-            imageValidationStrategy.validate(newImagePath); // Validar extensión o formato
+            imageValidationStrategy.validate(image);
 
             // Guardar la nueva imagen y establecer su ruta en la entidad
-            newImagePath = imageStorageStrategy.saveImage(image);
+            String newImagePath = imageStorageStrategy.saveImage(image);
             categories.setImagePath(newImagePath); // Actualizar la ruta de la imagen
         }
 

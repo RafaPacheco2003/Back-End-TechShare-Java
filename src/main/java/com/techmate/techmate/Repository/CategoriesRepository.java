@@ -1,6 +1,8 @@
 package com.techmate.techmate.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.techmate.techmate.entity.Categories;
@@ -34,5 +36,6 @@ Categories findByName(String name);
      * @return El nombre de la categoría correspondiente al {@code categoryId}.
      *         Si no se encuentra la categoría, el valor devuelto será {@code null}.
      */
-    String findNameByCategoryId(int categoryId);
+    @Query("SELECT c.name FROM Categories c WHERE c.id = :categoryId")
+    String findNameByCategoryId(@Param("categoryId") int categoryId);
 }

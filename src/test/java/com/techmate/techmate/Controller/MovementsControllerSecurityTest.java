@@ -56,7 +56,7 @@ class MovementsControllerSecurityTest {
         dto.setMovementsId(42);
         dto.setQuantity(7);
 
-        MovementResponse resp = new MovementResponse(42, MoveType.IN, 7, new java.util.Date(), "", 1, "Admin", 2, "Mat");
+    MovementResponse resp = new MovementResponse(42, MoveType.STOCK_ADD, 7, new java.util.Date(), "", 1, "Admin", 2, "Mat");
 
         when(movementsService.getMovementsByID(42)).thenReturn(dto);
         when(movementsMapper.toResponse(eq(dto))).thenReturn(resp);
@@ -70,7 +70,7 @@ class MovementsControllerSecurityTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.movementsId").value(42))
+                .andExpect(jsonPath("$.movements_id").value(42))
                 .andExpect(jsonPath("$.quantity").value(7));
     }
 
@@ -79,10 +79,10 @@ class MovementsControllerSecurityTest {
         MovementsDTO created = new MovementsDTO();
         created.setMovementsId(99);
         created.setQuantity(2);
-        created.setMoveType(MoveType.OUT);
+    created.setMoveType(MoveType.LOAN);
         created.setMaterialsId(5);
 
-        MovementResponse resp = new MovementResponse(99, MoveType.OUT, 2, new java.util.Date(), "ok", 7, "Admin", 5, "Mat5");
+    MovementResponse resp = new MovementResponse(99, MoveType.LOAN, 2, new java.util.Date(), "ok", 7, "Admin", 5, "Mat5");
 
         // generate token and configure movementsService mock to accept it
         String token = authUtils.createTokenWithRoles(7, "u@example.com", "u7", "ADMIN");
@@ -99,7 +99,7 @@ class MovementsControllerSecurityTest {
                 .param("comment", "ok")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.movementsId").value(99))
-                .andExpect(jsonPath("$.moveType").value("OUT"));
+                .andExpect(jsonPath("$.movements_id").value(99))
+                .andExpect(jsonPath("$.move_type").value("OUT"));
     }
 }

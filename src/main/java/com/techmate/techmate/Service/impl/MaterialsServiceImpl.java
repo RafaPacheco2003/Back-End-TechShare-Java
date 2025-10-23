@@ -190,11 +190,8 @@ public class MaterialsServiceImpl implements MaterialsService {
 
         // VALIDACIÓN 2 Y ALMACENAMIENTO: Imagen (si se proporciona)
         if (image != null && !image.isEmpty()) {
-            // Obtener nombre original para validar extensión
-            String imagePath = image.getOriginalFilename();
-            
-            // Validar extensión (.jpg, .png, .gif, etc.)
-            imageValidationStrategy.validate(imagePath);
+            // Validar imagen (extensión, tamaño, etc.) usando el MultipartFile
+            imageValidationStrategy.validate(image);
 
             // Guardar imagen en storage (filesystem, S3, etc.)
             // Retorna ruta relativa: "uuid-1234.jpg"
@@ -251,8 +248,8 @@ public class MaterialsServiceImpl implements MaterialsService {
 
         // Manejo de la imagen (si se proporciona una nueva)
         if (image != null && !image.isEmpty()) {
-            String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
-            imageValidationStrategy.validate(imagePath); // Validar la extensión
+            // Validar la nueva imagen (si se proporciona)
+            imageValidationStrategy.validate(image);
 
             // Guardar la imagen y actualizar la ruta
             String savedImagePath = imageStorageStrategy.saveImage(image);

@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
     // Manejar la actualización de roles
     Set<Role> updatedRoles = usuarioDTO.getRoles().stream()
-        .map(roleName -> roleRepository.findByNombre(roleName)
+        .map(roleName -> roleRepository.findByName(roleName)
             .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + roleName)))
         .collect(Collectors.toSet());
 

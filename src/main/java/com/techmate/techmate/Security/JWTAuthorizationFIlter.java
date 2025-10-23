@@ -25,8 +25,19 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Permitimos peticiones OPTIONS sin autenticar para soportar CORS preflight
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+
+        // Endpoints públicos que no requieren autenticación JWT
+        String path = request.getRequestURI();
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) ||
+            ("POST".equalsIgnoreCase(request.getMethod()) && ("/login".equals(path) || "/register".equals(path))) ||
+            "/verify".equals(path) || "/auth/verify".equals(path) ||
+            path.startsWith("/actuator/") ||
+            path.startsWith("/swagger-ui") ||
+            path.startsWith("/v3/api-docs") ||
+            path.startsWith("/admin/categories/images/") ||
+            path.startsWith("/admin/materials/images/") ||
+            path.startsWith("/admin/subcategories/images/") ||
+            path.startsWith("/uploaded-images/")) {
             filterChain.doFilter(request, response);
             return;
         }

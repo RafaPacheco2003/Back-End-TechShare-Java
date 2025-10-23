@@ -1,10 +1,11 @@
 package com.techmate.techmate.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.techmate.techmate.entity.VerificationToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
+@Repository
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Integer> {
     VerificationToken findByToken(String token);
-    
-} 
+    void deleteByToken(String token);
+}

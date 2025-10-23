@@ -31,10 +31,10 @@ public class BorrowSystemHealthIndicator implements HealthIndicator {
     public Health health() {
         try {
             // Contar préstamos activos (BORROWED = préstamos activos en uso)
-            long activeBorrows = borrowRepository.countByStatus(Status.BORROWED);
+            long activeBorrows = borrowRepository.countByStatus(Status.LOANED);
             
             // Contar préstamos pendientes (PROCESS = en proceso de aprobación)
-            long pendingBorrows = borrowRepository.countByStatus(Status.PROCESS);
+            long pendingBorrows = borrowRepository.countByStatus(Status.PENDING);
             
             // Total de préstamos en el sistema
             long totalBorrows = borrowRepository.count();

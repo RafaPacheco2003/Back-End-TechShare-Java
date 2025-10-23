@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "role_materials")
+@Table(name = "role_material")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,19 +22,19 @@ public class RoleMaterials {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_materials_id")
-    private int roleMaterialsId;
+    @Column(name = "id")
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
     @ManyToOne
-    @JoinColumn(name = "materials_id", nullable = false)
+    @JoinColumn(name = "material_id", nullable = false)
     private Materials materials;
 
     public RoleMaterials(Integer id, Role role, Materials materials) {
-        this.roleMaterialsId = id;
+        this.id = id;
         this.role = role;
         this.materials = materials;
     }

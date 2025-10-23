@@ -58,7 +58,7 @@ class MaterialsControllerTest {
 
         mockMvc.perform(get("/admin/materials/1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.materialsId").value(1))
+                .andExpect(jsonPath("$.materials_id").value(1))
                 .andExpect(jsonPath("$.name").value("Test Material"));
     }
 
@@ -92,7 +92,7 @@ class MaterialsControllerTest {
                 .param("stock", "10")
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.materialsId").value(2))
+                .andExpect(jsonPath("$.materials_id").value(2))
                 .andExpect(jsonPath("$.name").value("New Material"));
     }
 }

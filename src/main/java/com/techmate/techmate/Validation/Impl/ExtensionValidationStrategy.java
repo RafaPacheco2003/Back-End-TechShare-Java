@@ -1,26 +1,29 @@
 package com.techmate.techmate.Validation.Impl;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.techmate.techmate.Validation.ImageValidationStrategy;
 
-@Component // O @Service, si lo prefieres
+@Component
 public class ExtensionValidationStrategy implements ImageValidationStrategy {
 
     @Override
-    public void validate(String imagePath) {
+    public void validate(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("El archivo de imagen es requerido");
+        }
 
-
-        //Is verified if the imagePath is empty
-        if(imagePath == null || imagePath.trim().isEmpty()){
-            throw new IllegalArgumentException("El campo imagePath no puede estar vacio");
+        String filename = image.getOriginalFilename();
+        if (filename == null || filename.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del archivo es inválido");
         }
 
         String[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
         boolean isValid = false;
-        
+        String lower = filename.toLowerCase();
         for (String extension : validExtensions) {
-            if (imagePath.toLowerCase().endsWith(extension)) {
+            if (lower.endsWith(extension)) {
                 isValid = true;
                 break;
             }
@@ -28,8 +31,8 @@ public class ExtensionValidationStrategy implements ImageValidationStrategy {
 
         if (!isValid) {
             throw new IllegalArgumentException(
-                    "El campo imagePath debe tener una extensión válida (jpg, jpeg, png, gif).");
+                    "El archivo debe tener una extensión válida (jpg, jpeg, png, gif).");
         }
     }
-    
+
 }

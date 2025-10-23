@@ -37,12 +37,14 @@ import java.util.Map;
 public class RedisCacheConfig {
     
     /**
-     * ObjectMapper configurado para serializar/deserializar entidades con campos de fecha.
+     * Construye un ObjectMapper configurado solo para uso interno en el cache (no lo registra
+     * como bean para evitar que Spring Boot lo use como el mapper global de la aplicación).
      */
-    @Bean
-    public ObjectMapper cacheObjectMapper() {
+    private ObjectMapper createCacheObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        // Solo activar typing para el mapper usado por Redis (necesario para GenericJackson2JsonRedisSerializer
+        // si se cachean tipos polimórficos). No exponer este mapper como bean global.
         mapper.activateDefaultTyping(
             mapper.getPolymorphicTypeValidator(),
             ObjectMapper.DefaultTyping.NON_FINAL
@@ -55,8 +57,7 @@ public class RedisCacheConfig {
      */
     @Bean
     public RedisCacheManager cacheManager(
-            RedisConnectionFactory connectionFactory,
-            ObjectMapper cacheObjectMapper
+        RedisConnectionFactory connectionFactory
     ) {
         // Configuración por defecto
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
@@ -66,7 +67,7 @@ public class RedisCacheConfig {
             )
             .serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(
-                    new GenericJackson2JsonRedisSerializer(cacheObjectMapper)
+                    new GenericJackson2JsonRedisSerializer(createCacheObjectMapper())
                 )
             )
             .disableCachingNullValues(); // No cachear valores null

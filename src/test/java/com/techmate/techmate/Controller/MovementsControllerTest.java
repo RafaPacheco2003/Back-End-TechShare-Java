@@ -49,9 +49,9 @@ class MovementsControllerTest {
         MovementsDTO dto = new MovementsDTO();
         dto.setMovementsId(1);
         dto.setQuantity(5);
-        dto.setMoveType(MoveType.IN);
+    dto.setMoveType(MoveType.STOCK_ADD);
 
-        MovementResponse resp = new MovementResponse(1, MoveType.IN, 5, new java.util.Date(), "", 1, "Admin", 2, "MaterialName");
+    MovementResponse resp = new MovementResponse(1, MoveType.STOCK_ADD, 5, new java.util.Date(), "", 1, "Admin", 2, "MaterialName");
 
         when(movementsService.getMovementsByID(1)).thenReturn(dto);
         when(movementsMapper.toResponse(eq(dto))).thenReturn(resp);
@@ -59,7 +59,7 @@ class MovementsControllerTest {
         // call path /admin/movement/1 and include request param id=1 to satisfy the controller signature
         mockMvc.perform(get("/admin/movement/1").param("id", "1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.movementsId").value(1))
+                .andExpect(jsonPath("$.movements_id").value(1))
                 .andExpect(jsonPath("$.quantity").value(5));
     }
 
@@ -67,16 +67,16 @@ class MovementsControllerTest {
     void createMovement_handlesParamsAndReturnsCreated() throws Exception {
         MovementsDTO reqDto = new MovementsDTO();
         reqDto.setQuantity(3);
-        reqDto.setMoveType(MoveType.OUT);
+    reqDto.setMoveType(MoveType.LOAN);
         reqDto.setMaterialsId(2);
 
         MovementsDTO created = new MovementsDTO();
         created.setMovementsId(10);
         created.setQuantity(3);
-        created.setMoveType(MoveType.OUT);
+    created.setMoveType(MoveType.LOAN);
         created.setMaterialsId(2);
 
-        MovementResponse resp = new MovementResponse(10, MoveType.OUT, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
+    MovementResponse resp = new MovementResponse(10, MoveType.LOAN, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
 
         String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
         when(movementsService.getUserIdFromToken(token)).thenReturn(5);
@@ -97,7 +97,7 @@ class MovementsControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .principal(mockAuth)) // Add the mocked Authentication
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.movementsId").value(10))
-                .andExpect(jsonPath("$.moveType").value("OUT"));
+                .andExpect(jsonPath("$.movements_id").value(10))
+                .andExpect(jsonPath("$.move_type").value("OUT"));
     }
 }

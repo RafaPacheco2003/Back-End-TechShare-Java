@@ -52,7 +52,7 @@ public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
            "LEFT JOIN FETCH m.subCategory " +
            "LEFT JOIN FETCH b.usuario " +
            "LEFT JOIN FETCH b.admin " +
-           "WHERE b.borrowId = :id")
+           "WHERE b.id = :id")
     Optional<Borrow> findByIdOptimized(@Param("id") Integer id);
     
     /**
@@ -60,12 +60,12 @@ public interface BorrowRepository extends JpaRepository<Borrow, Integer> {
      * countQuery separada para evitar joins innecesarios en el COUNT.
      */
     @Query(value = "SELECT DISTINCT b FROM Borrow b " +
-                   "LEFT JOIN FETCH b.details d " +
-                   "LEFT JOIN FETCH d.materials m " +
-                   "LEFT JOIN FETCH m.subCategory " +
-                   "LEFT JOIN FETCH b.usuario " +
-                   "LEFT JOIN FETCH b.admin",
-           countQuery = "SELECT COUNT(DISTINCT b) FROM Borrow b")
+                 "LEFT JOIN FETCH b.details d " +
+                 "LEFT JOIN FETCH d.materials m " +
+                 "LEFT JOIN FETCH m.subCategory " +
+                 "LEFT JOIN FETCH b.usuario " +
+                 "LEFT JOIN FETCH b.admin",
+          countQuery = "SELECT COUNT(DISTINCT b) FROM Borrow b")
     Page<Borrow> findAllOptimizedPaginated(Pageable pageable);
     
     /**

@@ -1,6 +1,7 @@
 package com.techmate.techmate.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -9,22 +10,26 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "usuario")
+@Table(name = "users")
 @Data
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    private String user_name;  // Ya está en snake_case, mapea directo
+    @Column(name = "username", unique = true)
+    private String user_name;  // mapea a username
     
-    private String first_name;  // Ya está en snake_case, mapea directo
+    @Column(name = "first_name")
+    private String first_name;
     
-    private String last_name;  // Ya está en snake_case, mapea directo
+    @Column(name = "last_name")
+    private String last_name;
     
+    @Column(name = "email", unique = true)
     private String email;
     
+    @Column(name = "password")
     private String password;
     
     @Column(name = "birth_date")
@@ -34,12 +39,13 @@ public class Usuario {
     @Column(name = "gender")
     private Gender gender;
 
+    @Column(name = "is_enabled")
     private boolean isEnabled = false;  // Auto-mapea a is_enabled
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "usuario_role", // Nombre de la tabla intermedia
-            joinColumns = @JoinColumn(name = "usuario_id"), // Columna que se refiere a Usuario
-            inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role
+    @JoinTable(name = "user_role", // Nombre de la tabla intermedia normalizado
+        joinColumns = @JoinColumn(name = "user_id"), // Columna que se refiere a Usuario (users.id)
+        inverseJoinColumns = @JoinColumn(name = "role_id") // Columna que se refiere a Role (roles.id)
     )
     private Set<Role> roles = new HashSet<>();
 

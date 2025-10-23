@@ -89,8 +89,8 @@ public class SubCategoriesServiceImpl implements SubCategoriesService {
             
         }
 
-        String imagePath = image.getOriginalFilename(); // Obtener el nombre original de la imagen
-        imageValidationStrategy.validate(imagePath); // Validación de la extensión
+    // Validar la imagen completa usando la estrategia (ahora acepta MultipartFile)
+    imageValidationStrategy.validate(image);
 
         // Guardar la imagen y obtener la ruta
         String savedImagePath = imageStorageStrategy.saveImage(image); // Asegúrate de que este método acepte
@@ -138,11 +138,10 @@ public class SubCategoriesServiceImpl implements SubCategoriesService {
                 }
 
                 // Validar la nueva imagen usando la estrategia de validación
-                String newImagePath = image.getOriginalFilename();
-                imageValidationStrategy.validate(newImagePath); // Validar extensión o formato
+                imageValidationStrategy.validate(image);
 
                 // Guardar la nueva imagen y establecer su ruta en la entidad
-                newImagePath = imageStorageStrategy.saveImage(image);
+                String newImagePath = imageStorageStrategy.saveImage(image);
                 subCategory.setImagePath(newImagePath); // Actualizar la ruta de la imagen
             }
 

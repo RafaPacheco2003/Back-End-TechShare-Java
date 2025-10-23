@@ -47,11 +47,11 @@ public class BorrowStateValidator {
         
         // Aplicar reglas de transición según estado actual
         switch (currentStatus) {
-            case PROCESS:
-                return validateFromProcess(newStatus);
+            case PENDING:
+                return validateFromPending(newStatus);
                 
-            case BORROWED:
-                return validateFromBorrowed(newStatus);
+            case LOANED:
+                return validateFromLoaned(newStatus);
                 
             case REJECTED:
             case RETURNED:
@@ -71,7 +71,7 @@ public class BorrowStateValidator {
      * @return true si se puede rechazar
      */
     public boolean validateCanReject(Status currentStatus) {
-        return currentStatus == Status.PROCESS;
+        return currentStatus == Status.PENDING;
     }
     
     /**
@@ -81,7 +81,7 @@ public class BorrowStateValidator {
      * @return true si se puede aprobar
      */
     public boolean validateCanBorrow(Status currentStatus) {
-        return currentStatus == Status.PROCESS;
+        return currentStatus == Status.PENDING;
     }
     
     /**
@@ -91,7 +91,7 @@ public class BorrowStateValidator {
      * @return true si se puede devolver
      */
     public boolean validateCanReturn(Status currentStatus) {
-        return currentStatus == Status.BORROWED;
+        return currentStatus == Status.LOANED;
     }
     
     // ==================== MÉTODOS PRIVADOS ====================
@@ -99,14 +99,14 @@ public class BorrowStateValidator {
     /**
      * Valida transiciones desde estado PROCESS.
      */
-    private boolean validateFromProcess(Status newStatus) {
+    private boolean validateFromPending(Status newStatus) {
         switch (newStatus) {
-            case BORROWED:
+            case LOANED:
             case REJECTED:
                 return true;
             default:
                 throw new IllegalArgumentException(
-                    String.format("Transición inválida de PROCESS a %s. Solo se permite BORROWED o REJECTED.", 
+                    String.format("Transición inválida de PENDING a %s. Solo se permite LOANED o REJECTED.", 
                         newStatus));
         }
     }
@@ -114,13 +114,13 @@ public class BorrowStateValidator {
     /**
      * Valida transiciones desde estado BORROWED.
      */
-    private boolean validateFromBorrowed(Status newStatus) {
+    private boolean validateFromLoaned(Status newStatus) {
         switch (newStatus) {
             case RETURNED:
                 return true;
             default:
                 throw new IllegalArgumentException(
-                    String.format("Transición inválida de BORROWED a %s. Solo se permite RETURNED.", 
+                    String.format("Transición inválida de LOANED a %s. Solo se permite RETURNED.", 
                         newStatus));
         }
     }

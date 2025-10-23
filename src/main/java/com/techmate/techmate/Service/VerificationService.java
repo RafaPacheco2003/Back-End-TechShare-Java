@@ -25,14 +25,14 @@ public class VerificationService {
         if (verificationToken == null) {
             return new VerificationResponse(false, "Token inválido.");
         }
-
         Usuario usuario = verificationToken.getUsuario();
         Calendar cal = Calendar.getInstance();
         if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             return new VerificationResponse(false, "Token caducado.");
         }
 
-        usuario.setEnabled(true);
+    // Activar la cuenta: usamos el setter generado por Lombok para el campo isEnabled
+    usuario.setEnabled(true);
         usuarioRepository.save(usuario);
 
         return new VerificationResponse(true, "Cuenta verificada con éxito. Ahora puedes iniciar sesión.");

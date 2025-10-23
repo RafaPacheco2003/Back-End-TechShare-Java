@@ -45,7 +45,7 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
            "LEFT JOIN FETCH m.materials mat " +
            "LEFT JOIN FETCH mat.subCategory " +
            "LEFT JOIN FETCH m.usuario " +
-           "WHERE m.movementsId = :id")
+        "WHERE m.id = :id")
     Optional<Movements> findByIdOptimized(@Param("id") Integer id);
     
     /**

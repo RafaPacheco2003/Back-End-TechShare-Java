@@ -18,9 +18,10 @@ public class UserValidator {
     public void validateRolesExist(Set<String> roles) {
         if (roles == null) return;
         for (String r : roles) {
-            if (roleRepository.findByNombre(r).isEmpty()) {
+            if (roleRepository.findByName(r).isEmpty()) {
                 throw new IllegalArgumentException("Rol no encontrado: " + r);
             }
+            
         }
     }
 }
