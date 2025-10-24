@@ -26,7 +26,7 @@ import com.techmate.techmate.Service.RoleService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://10.64.135.200:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/role")
 public class RoleController {
@@ -42,13 +42,16 @@ public class RoleController {
             return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
         } catch (AccessDeniedException e) {
             // Manejar el error de acceso denegado (403)
-            return new ResponseEntity<>("No tienes permisos suficientes para realizar esta operación.", HttpStatus.FORBIDDEN); // 403 Forbidden
+            return new ResponseEntity<>("No tienes permisos suficientes para realizar esta operación.",
+                    HttpStatus.FORBIDDEN); // 403 Forbidden
         } catch (Exception e) {
             // Devolver el mensaje de error general
-            return new ResponseEntity<>("Error al crear el rol: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+            return new ResponseEntity<>("Error al crear el rol: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); // 500
+                                                                                                                       // Internal
+                                                                                                                       // Server
+                                                                                                                       // Error
         }
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<RoleDTO> getRoleByID(@PathVariable("id") Integer id) {
@@ -82,8 +85,6 @@ public class RoleController {
         }
     }
 
-    
-
     @GetMapping("/all")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         try {
@@ -93,11 +94,11 @@ public class RoleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
         }
     }
+
     @DeleteMapping("/delete/{roleId}")
     public ResponseEntity<String> cleanupRoleAssociations(@PathVariable int roleId) {
         roleService.cleanupRoleAssociations(roleId);
         return ResponseEntity.ok("Las asociaciones para el rol con ID " + roleId + " fueron eliminadas correctamente.");
     }
-    
 
 }

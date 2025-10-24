@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://10.64.135.200:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/materials")
 public class MaterialsController {

@@ -35,7 +35,7 @@ import jakarta.validation.constraints.Size;
  * con las categorías en el sistema.
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://10.64.135.200:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("admin/categories")
 @Validated
 public class CategoriesController {

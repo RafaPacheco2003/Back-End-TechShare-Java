@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://10.64.135.200:3000") // Permitir solicitudes desde tu frontend
 @RequestMapping("/borrow")
 public class BorrowUserController {
 
@@ -69,7 +69,8 @@ public class BorrowUserController {
     private List<DetailsBorrowDTO> convertJsonToDetailsList(String detailsJson) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(detailsJson, new TypeReference<List<DetailsBorrowDTO>>() {});
+            return objectMapper.readValue(detailsJson, new TypeReference<List<DetailsBorrowDTO>>() {
+            });
         } catch (Exception e) {
             throw new RuntimeException("Error al convertir el JSON a la lista de detalles.", e);
         }

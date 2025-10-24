@@ -14,7 +14,7 @@ import com.techmate.techmate.Service.MovementsService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
-@CrossOrigin(origins = "http://localhost:3000") // Permitir solicitudes desde tu frontend
+@CrossOrigin(origins = "http://10.64.135.200:3000") // Permitir solicitudes desde tu frontend
 @RestController
 @RequestMapping("/admin/movement")
 public class MovementsController {
@@ -28,59 +28,60 @@ public class MovementsController {
     }
 
     @PostMapping("/create")
-public ResponseEntity<?> createMovement(
-        @RequestParam("quantity") Integer quantity,
-        @RequestParam("moveType") MoveType moveType,
-        @RequestParam("id_material") Integer idMaterial,
-        @RequestParam(value = "comment", required = false) String comment, // Agregar comentario opcional
-        HttpServletRequest request) {
+    public ResponseEntity<?> createMovement(
+            @RequestParam("quantity") Integer quantity,
+            @RequestParam("moveType") MoveType moveType,
+            @RequestParam("id_material") Integer idMaterial,
+            @RequestParam(value = "comment", required = false) String comment, // Agregar comentario opcional
+            HttpServletRequest request) {
 
-    MovementsDTO movementsDTO = new MovementsDTO();
-    movementsDTO.setQuantity(quantity);
-    movementsDTO.setMoveType(moveType);
-    movementsDTO.setMaterialsId(idMaterial);
-    movementsDTO.setDate(new Date());
-    movementsDTO.setComment(comment); // Establecer el comentario
+        MovementsDTO movementsDTO = new MovementsDTO();
+        movementsDTO.setQuantity(quantity);
+        movementsDTO.setMoveType(moveType);
+        movementsDTO.setMaterialsId(idMaterial);
+        movementsDTO.setDate(new Date());
+        movementsDTO.setComment(comment); // Establecer el comentario
 
-    String token = request.getHeader("Authorization");
-    Integer userId = null;
+        String token = request.getHeader("Authorization");
+        Integer userId = null;
 
-    if (token != null && token.startsWith("Bearer ")) {
-        token = token.substring(7);
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+
+            try {
+                // Extraer el ID de usuario del token
+                userId = movementsService.getUserIdFromToken(token);
+                System.out.println("ID de usuario extraído del token: " + userId);
+
+                // Extraer y mostrar roles desde el token
+                Optional<List<Integer>> rolesOptional = movementsService.getRolesFromToken(token);
+                if (rolesOptional.isPresent()) {
+                    List<Integer> roles = rolesOptional.get();
+                    System.out.println("Roles extraídos del token: " + roles);
+                } else {
+                    System.out.println("No se encontraron roles en el token.");
+                }
+
+            } catch (RuntimeException e) {
+                System.out.println("Error al extraer el ID del token: " + e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Error al extraer el ID del token: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Token no proporcionado o formato incorrecto");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token no proporcionado o formato incorrecto");
+        }
 
         try {
-            // Extraer el ID de usuario del token
-            userId = movementsService.getUserIdFromToken(token);
-            System.out.println("ID de usuario extraído del token: " + userId);
-
-            // Extraer y mostrar roles desde el token
-            Optional<List<Integer>> rolesOptional = movementsService.getRolesFromToken(token);
-            if (rolesOptional.isPresent()) {
-                List<Integer> roles = rolesOptional.get();
-                System.out.println("Roles extraídos del token: " + roles);
-            } else {
-                System.out.println("No se encontraron roles en el token.");
-            }
-
-        } catch (RuntimeException e) {
-            System.out.println("Error al extraer el ID del token: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al extraer el ID del token: " + e.getMessage());
+            MovementsDTO createdMovement = movementsService.createMovementsDTO(movementsDTO, userId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdMovement);
+        } catch (Exception e) {
+            e.printStackTrace(); // Mostrar más detalles del error en consola
+            // Aquí puedes personalizar el mensaje de error que deseas devolver
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el movimiento: " + e.getMessage());
         }
-    } else {
-        System.out.println("Token no proporcionado o formato incorrecto");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token no proporcionado o formato incorrecto");
     }
-
-    try {
-        MovementsDTO createdMovement = movementsService.createMovementsDTO(movementsDTO, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdMovement);
-    } catch (Exception e) {
-        e.printStackTrace(); // Mostrar más detalles del error en consola
-        // Aquí puedes personalizar el mensaje de error que deseas devolver
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el movimiento: " + e.getMessage());
-    }
-}
-
 
     // Obtener un movimiento por ID
     @GetMapping("/{id}")
