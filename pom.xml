@@ -222,6 +222,13 @@
                 </configuration>
             </plugin>
             
+            <!-- Flyway Maven plugin: enable `mvn flyway:info` locally to inspect migrations -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>10.21.0</version>
+            </plugin>
+            
             <!-- Plugin de Surefire para configurar memoria de las pruebas -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
