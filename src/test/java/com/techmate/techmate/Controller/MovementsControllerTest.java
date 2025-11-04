@@ -67,16 +67,16 @@ class MovementsControllerTest {
     void createMovement_handlesParamsAndReturnsCreated() throws Exception {
         MovementsDTO reqDto = new MovementsDTO();
         reqDto.setQuantity(3);
-    reqDto.setMoveType(MoveType.LOAN);
+    reqDto.setMoveType(MoveType.BORROW);
         reqDto.setMaterialsId(2);
 
         MovementsDTO created = new MovementsDTO();
         created.setMovementsId(10);
         created.setQuantity(3);
-    created.setMoveType(MoveType.LOAN);
+    created.setMoveType(MoveType.BORROW);
         created.setMaterialsId(2);
 
-    MovementResponse resp = new MovementResponse(10, MoveType.LOAN, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
+    MovementResponse resp = new MovementResponse(10, MoveType.BORROW, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
 
         String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
         when(movementsService.getUserIdFromToken(token)).thenReturn(5);

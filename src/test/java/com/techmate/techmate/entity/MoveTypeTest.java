@@ -12,7 +12,7 @@ public class MoveTypeTest {
 
     @Test
     public void serializeLoan_shouldReturnOUT() throws Exception {
-        String json = mapper.writeValueAsString(MoveType.LOAN);
+        String json = mapper.writeValueAsString(MoveType.BORROW);
         // JSON string with quotes
         assertEquals("\"OUT\"", json);
     }
@@ -20,7 +20,7 @@ public class MoveTypeTest {
     @Test
     public void deserializeOut_shouldReturnLoan() throws Exception {
         MoveType t = mapper.readValue("\"OUT\"", MoveType.class);
-        assertEquals(MoveType.LOAN, t);
+        assertEquals(MoveType.BORROW, t);
     }
 
     @Test

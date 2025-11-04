@@ -27,7 +27,7 @@ public class MoveTypeJacksonIntegrationTest {
     @Test
     public void jacksonSerializesToSnakeCaseAndMoveTypeLegacyToken() throws Exception {
         Payload p = new Payload();
-        p.setMoveType(MoveType.LOAN);
+        p.setMoveType(MoveType.BORROW);
         p.setMaterialsId(2);
 
         String json = objectMapper.writeValueAsString(p);
@@ -40,7 +40,7 @@ public class MoveTypeJacksonIntegrationTest {
         // Deserialización desde la API legacy
         String input = "{\"move_type\":\"OUT\",\"materials_id\":2}";
         Payload des = objectMapper.readValue(input, Payload.class);
-        assertEquals(MoveType.LOAN, des.getMoveType());
+        assertEquals(MoveType.BORROW, des.getMoveType());
         assertEquals(2, des.getMaterialsId());
     }
 }

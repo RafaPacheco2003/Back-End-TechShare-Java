@@ -79,10 +79,10 @@ class MovementsControllerSecurityTest {
         MovementsDTO created = new MovementsDTO();
         created.setMovementsId(99);
         created.setQuantity(2);
-    created.setMoveType(MoveType.LOAN);
+    created.setMoveType(MoveType.BORROW);
         created.setMaterialsId(5);
 
-    MovementResponse resp = new MovementResponse(99, MoveType.LOAN, 2, new java.util.Date(), "ok", 7, "Admin", 5, "Mat5");
+    MovementResponse resp = new MovementResponse(99, MoveType.BORROW, 2, new java.util.Date(), "ok", 7, "Admin", 5, "Mat5");
 
         // generate token and configure movementsService mock to accept it
         String token = authUtils.createTokenWithRoles(7, "u@example.com", "u7", "ADMIN");

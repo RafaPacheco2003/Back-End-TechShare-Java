@@ -149,15 +149,15 @@ public class AuthService {
             throw new IllegalArgumentException("Token de verificación inválido");
         }
 
-        Optional<VerificationToken> opt = verificationTokenRepository.findByToken(token);
-        if (opt.isEmpty()) {
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
+        if (verificationToken == null) {
             throw new IllegalArgumentException("Token de verificación no encontrado o inválido");
         }
 
-        VerificationToken verificationToken = opt.get();
+
         
         // Verificar si el token ha expirado
-        if (verificationToken.isExpired()) {
+        if (verificationToken.getExpiryDate().before(new java.util.Date())) {
             throw new IllegalArgumentException("Token de verificación expirado");
         }
 

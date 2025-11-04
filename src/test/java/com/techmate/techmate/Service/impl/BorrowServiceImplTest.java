@@ -182,7 +182,7 @@ class BorrowServiceImplTest {
         when(borrowRepository.save(any(Borrow.class))).thenReturn(testBorrow);
 
         // When: Admin aprueba el préstamo
-    borrowService.updateBorrowStatus(1, Status.LOANED, 200);
+    borrowService.updateBorrowStatus(1, Status.BORROWED, 200);
 
     // Then: Estado cambia a LOANED and stock se reduce
         verify(borrowRepository).findById(1);
@@ -193,7 +193,7 @@ class BorrowServiceImplTest {
         // Verificar que el stock se redujo correctamente
         assertThat(testMaterial.getBorrowable_stock()).isEqualTo(12); // 15 - 3 = 12
         assertThat(testBorrow.getStartDate()).isNotNull();
-    assertThat(testBorrow.getStatus()).isEqualTo(Status.LOANED);
+    assertThat(testBorrow.getStatus()).isEqualTo(Status.BORROWED);
     }
 
     @Test
@@ -220,7 +220,7 @@ class BorrowServiceImplTest {
     @DisplayName("🔄 Devolver préstamo: BORROWED → RETURNED")
     void updateBorrowStatus_BorrowedToReturned_Success() throws Exception {
     // Given: Préstamo en estado LOANED (ya se había aprobado)
-    testBorrow.setStatus(Status.LOANED);
+    testBorrow.setStatus(Status.BORROWED);
         testBorrow.setStartDate(new Date());
         testMaterial.setBorrowable_stock(12); // Ya se había reducido de 15 a 12
         
@@ -251,7 +251,7 @@ class BorrowServiceImplTest {
         when(usuarioRepository.findById(200)).thenReturn(Optional.of(testAdmin));
 
         // When & Then: Debe lanzar excepción por stock insuficiente
-    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.LOANED, 200))
+    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.BORROWED, 200))
             .isInstanceOf(com.techmate.techmate.exception.BorrowBusinessException.class)
             .hasMessageContaining("Stock insuficiente");
         
@@ -267,7 +267,7 @@ class BorrowServiceImplTest {
         when(borrowRepository.findById(999)).thenReturn(Optional.empty());
 
         // When & Then: Debe lanzar excepción
-    assertThatThrownBy(() -> borrowService.updateBorrowStatus(999, Status.LOANED, 200))
+    assertThatThrownBy(() -> borrowService.updateBorrowStatus(999, Status.BORROWED, 200))
             .isInstanceOf(com.techmate.techmate.exception.BusinessException.class)
             .hasMessageContaining("Préstamo no encontrado");
     }
@@ -280,7 +280,7 @@ class BorrowServiceImplTest {
         when(usuarioRepository.findById(999)).thenReturn(Optional.empty());
 
         // When & Then: Debe lanzar excepción
-    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.LOANED, 999))
+    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.BORROWED, 999))
             .isInstanceOf(com.techmate.techmate.exception.BusinessException.class)
             .hasMessageContaining("Administrador no encontrado");
     }
@@ -295,7 +295,7 @@ class BorrowServiceImplTest {
         when(borrowRepository.findById(1)).thenReturn(Optional.of(testBorrow));
 
         // When & Then: No se puede modificar préstamo devuelto
-    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.LOANED, 200))
+    assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.BORROWED, 200))
             .isInstanceOf(Exception.class)
             .hasMessageContaining("Solo se puede modificar el estado");
     }
@@ -373,9 +373,9 @@ class BorrowServiceImplTest {
     @DisplayName("🔍 Filtrar préstamos por estado: BORROWED")
     void getBorrowByStatus_BorrowedStatus_Success() {
     // Given: Préstamos con estado LOANED
-    testBorrow.setStatus(Status.LOANED);
+    testBorrow.setStatus(Status.BORROWED);
         List<Borrow> borrows = Arrays.asList(testBorrow);
-    when(borrowRepository.findByStatus(Status.LOANED)).thenReturn(borrows);
+    when(borrowRepository.findByStatus(Status.BORROWED)).thenReturn(borrows);
 
         // When: Filtrar por estado BORROWED
     List<BorrowDTO> result = borrowService.getBorrowByStatus("LOANED");
@@ -383,9 +383,9 @@ class BorrowServiceImplTest {
     // Then: Retorna solo préstamos prestados
     assertThat(result).isNotNull();
     assertThat(result).hasSize(1);
-    assertThat(result.get(0).getStatus()).isEqualTo(Status.LOANED);
+    assertThat(result.get(0).getStatus()).isEqualTo(Status.BORROWED);
         
-    verify(borrowRepository).findByStatus(Status.LOANED);
+    verify(borrowRepository).findByStatus(Status.BORROWED);
     }
 
     @Test
@@ -445,7 +445,7 @@ class BorrowServiceImplTest {
         
         // Test para cada estado válido del enum Status
     String[] validStatuses = {"PROCESS", "REJECTED", "LOANED", "RETURNED"};
-    Status[] expectedStatuses = {Status.PENDING, Status.REJECTED, Status.LOANED, Status.RETURNED};
+    Status[] expectedStatuses = {Status.PENDING, Status.REJECTED, Status.BORROWED, Status.RETURNED};
         
         for (int i = 0; i < validStatuses.length; i++) {
             when(borrowRepository.findByStatus(expectedStatuses[i])).thenReturn(borrows);
@@ -508,7 +508,7 @@ class BorrowServiceImplTest {
     borrowProcess.setDetails(new ArrayList<>());
         
         Borrow borrowBorrowed = new Borrow();
-    borrowBorrowed.setStatus(Status.LOANED);
+    borrowBorrowed.setStatus(Status.BORROWED);
         borrowBorrowed.setBorrowId(102);
     borrowBorrowed.setDetails(new ArrayList<>());
         
@@ -519,7 +519,7 @@ class BorrowServiceImplTest {
 
         // When: Consultar cada estado
     when(borrowRepository.findByStatus(Status.PENDING)).thenReturn(Arrays.asList(borrowProcess));
-    when(borrowRepository.findByStatus(Status.LOANED)).thenReturn(Arrays.asList(borrowBorrowed));
+    when(borrowRepository.findByStatus(Status.BORROWED)).thenReturn(Arrays.asList(borrowBorrowed));
         when(borrowRepository.findByStatus(Status.RETURNED)).thenReturn(Arrays.asList(borrowReturned));
         when(borrowRepository.findByStatus(Status.REJECTED)).thenReturn(Arrays.asList());
 
