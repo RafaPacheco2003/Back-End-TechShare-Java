@@ -50,6 +50,10 @@ public class Movements {
     @JoinColumn(name = "user_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resource_id", nullable = false, insertable = false, updatable = false)
+    private Materials materials;
+
     // Legacy fields for backward compatibility (not mapped to DB)
     @Transient
     private int quantity;
@@ -59,9 +63,6 @@ public class Movements {
     
     @Transient
     private Date date;
-    
-    @Transient
-    private Materials materials;
 
     // Compatibility getters/setters for legacy code
     public int getMovementsId() { 

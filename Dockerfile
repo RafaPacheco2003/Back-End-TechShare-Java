@@ -51,9 +51,22 @@ WORKDIR /app
 # Copiar el JAR desde el stage de build
 COPY --from=builder /build/target/*.jar app.jar
 
-# Copiar el script de espera
-COPY wait-for-db.sh /usr/local/bin/wait-for-db.sh
-RUN chmod +x /usr/local/bin/wait-for-db.sh
+# Crear el script de espera directamente en Linux con printf (evita CRLF)
+RUN printf '#!/bin/sh\n\
+# wait-for-db.sh\n\
+HOST=${SPRING_DATASOURCE_HOST:-db}\n\
+PORT=${SPRING_DATASOURCE_PORT:-3306}\n\
+echo "Waiting for MySQL at $HOST:$PORT..."\n\
+for i in $(seq 1 60); do\n\
+  if nc -z -w2 "$HOST" "$PORT" 2>/dev/null; then\n\
+    echo "MySQL is ready!"\n\
+    exec java $JAVA_OPTS -jar /app/app.jar\n\
+  fi\n\
+  echo "Attempt $i/60..."\n\
+  sleep 2\n\
+done\n\
+echo "Timeout waiting for MySQL" >&2\n\
+exit 1\n' > /usr/local/bin/wait-for-db.sh && chmod +x /usr/local/bin/wait-for-db.sh
 
 # Crear directorios necesarios
 RUN mkdir -p /app/uploaded-images /app/logs && \
