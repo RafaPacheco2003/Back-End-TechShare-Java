@@ -29,7 +29,7 @@ public class AuthController {
         
         // Validar que el objeto no sea nulo
         if (registerRequest == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Request body cannot be empty"));
+            return ResponseEntity.badRequest().body(Map.of("error", "El cuerpo de la solicitud no puede estar vacío"));
         }
         
         try {
@@ -42,12 +42,12 @@ public class AuthController {
             // Si no se envían roles, asignar rol de usuario por defecto (ID 2)
             if (registerRequest.getRoles() == null || registerRequest.getRoles().isEmpty()) {
                 registerRequest.setRoles(Set.of(2)); // Rol de usuario normal
-                log.info("No roles provided, assigning default role (USER)");
+                log.info("No se proporcionaron roles, asignando rol por defecto (USUARIO)");
             } else {
                 // Validar roles permitidos (prevenir escalada de privilegios)
                 if (registerRequest.getRoles().stream().anyMatch(roleId -> roleId > 2)) {
-                    log.warn("Attempt to register with unauthorized role: {}", registerRequest.getRoles());
-                    return ResponseEntity.badRequest().body(Map.of("error", "Invalid role selection"));
+                    log.warn("Intento de registro con rol no autorizado: {}", registerRequest.getRoles());
+                    return ResponseEntity.badRequest().body(Map.of("error", "Selección de rol inválida"));
                 }
             }
             
@@ -59,11 +59,56 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("message", msg));
             
         } catch (IllegalArgumentException e) {
-            log.warn("Registration failed: {}", e.getMessage());
+            log.warn("Registro fallido: {}", e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            log.error("Unexpected error during registration", e);
-            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
+            log.error("Error inesperado durante el registro", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
+        }
+    }
+
+    /**
+     * Reenvía el email de verificación cuando el token ha expirado o se requiere uno nuevo.
+     * Recibe JSON: { "email": "user@example.com" }
+     */
+    @PostMapping("/auth/resend")
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
+        if (body == null || !body.containsKey("email") || body.get("email") == null || body.get("email").isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El correo electrónico es requerido"));
+        }
+        String email = body.get("email").toLowerCase().trim();
+        try {
+            String msg = authService.resendVerification(email);
+            return ResponseEntity.ok(Map.of("message", msg));
+        } catch (IllegalArgumentException e) {
+            log.warn("Reenvío de verificación fallido: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error inesperado durante reenvío de verificación", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
+        }
+    }
+
+    /**
+     * Verifica la cuenta del usuario usando el token enviado por email.
+     * GET /auth/verify?token=xxx
+     */
+    @GetMapping("/auth/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Token de verificación requerido"));
+        }
+        
+        try {
+            String msg = authService.verifyEmail(token);
+            log.info("Email verificado exitosamente con token: {}", token.substring(0, Math.min(10, token.length())) + "...");
+            return ResponseEntity.ok(msg);
+        } catch (IllegalArgumentException e) {
+            log.warn("Verificación fallida: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error inesperado durante verificación de email", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
         }
     }
     

@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.techmate.techmate.Service.UserService;
 import com.techmate.techmate.dto.UsuarioDTO;
+import com.techmate.techmate.security.AuthorizationUtils;
 
 @RestController
 @RequestMapping("/admin/user")
@@ -25,9 +26,23 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * Verifica que el usuario sea admin antes de procesar la solicitud.
+     * Si no es admin, lanza una excepción 403 Forbidden.
+     */
+    private void checkAdminAccess() {
+        if (!AuthorizationUtils.isUserAdmin()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Acceso denegado. Se requieren permisos de administrador."
+            );
+        }
+    }
+
     // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Integer id) {
+        checkAdminAccess();
         return userService.findUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -36,13 +51,14 @@ public class UserController {
 
     @GetMapping("/all")
     public ResponseEntity<List<UsuarioDTO>> getAllUser() {
-
+        checkAdminAccess();
         List<UsuarioDTO> usuarios = userService.getAllUser();
         return ResponseEntity.ok(usuarios);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> updateUser(@PathVariable Integer id, @RequestBody UsuarioDTO usuarioDTO) {
+        checkAdminAccess();
         return userService.updateUser(id, usuarioDTO)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(

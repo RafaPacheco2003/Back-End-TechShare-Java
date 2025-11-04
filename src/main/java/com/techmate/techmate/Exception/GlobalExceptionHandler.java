@@ -23,36 +23,57 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest request) {
-        log.warn("Resource not found: {}", ex.getMessage());
-        
-        ApiErrorResponse body = ApiErrorResponse.builder()
-                .timestamp(java.time.LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .validationErrors(Collections.emptyList())
-                .build();
-        
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    /**
+     * Mapea nombres de campo en snake_case a etiquetas amigables en español
+     */
+    private static final java.util.Map<String, String> FIELD_LABELS = new java.util.HashMap<String, String>() {{
+        put("user_name", "Nombre de usuario");
+        put("first_name", "Nombre");
+        put("last_name", "Apellido");
+        put("email", "Correo electrónico");
+        put("password", "Contraseña");
+        put("birthDate", "Fecha de nacimiento");
+        put("gender", "Género");
+        put("roles", "Roles");
+    }};
+
+    /**
+     * Traduce un nombre de campo a una etiqueta amigable
+     */
+    private String translateFieldName(String fieldName) {
+        return FIELD_LABELS.getOrDefault(fieldName, fieldName);
     }
+
+    @ExceptionHandler(NotFoundException.class)
+        public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException ex, HttpServletRequest request) {
+                log.warn("Recurso no encontrado: {}", ex.getMessage());
+        
+                ApiErrorResponse body = ApiErrorResponse.builder()
+                                .timestamp(java.time.LocalDateTime.now())
+                                .status(HttpStatus.NOT_FOUND.value())
+                                .error("No encontrado")
+                                .message(ex.getMessage())
+                                .path(request.getRequestURI())
+                                .validationErrors(Collections.emptyList())
+                                .build();
+        
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleMethodArgNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors()
                 .stream()
-                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .map(fe -> translateFieldName(fe.getField()) + ": " + fe.getDefaultMessage())
                 .collect(Collectors.toList());
         
-        log.warn("Validation failed for request to {}: {}", request.getRequestURI(), errors);
+        log.warn("Validación fallida para la petición {}: {}", request.getRequestURI(), errors);
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation failed")
+                .error("Petición inválida")
+                .message("Validación fallida")
                 .path(request.getRequestURI())
                 .code("VALIDATION_ERROR")
                 .validationErrors(errors)
@@ -65,16 +86,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         List<String> errors = ex.getConstraintViolations()
                 .stream()
-                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .map(cv -> translateFieldName(cv.getPropertyPath().toString()) + ": " + cv.getMessage())
                 .collect(Collectors.toList());
         
-        log.warn("Constraint violation on {}: {}", request.getRequestURI(), errors);
+        log.warn("Violación de restricciones en {}: {}", request.getRequestURI(), errors);
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation failed")
+                .error("Petición inválida")
+                .message("Validación fallida")
                 .path(request.getRequestURI())
                 .code("VALIDATION_ERROR")
                 .validationErrors(errors)
@@ -85,12 +106,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiErrorResponse> handleInsufficientStock(InsufficientStockException ex, HttpServletRequest request) {
-        log.warn("Insufficient stock: {}", ex.getMessage());
+        log.warn("Stock insuficiente: {}", ex.getMessage());
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())
-                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .error("Conflicto")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .code("INSUFFICIENT_STOCK")
@@ -102,12 +123,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex, HttpServletRequest request) {
-        log.warn("Business exception [{}]: {}", ex.getCode(), ex.getMessage());
+        log.warn("Excepción de negocio [{}]: {}", ex.getCode(), ex.getMessage());
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+                .error("Entidad no procesable")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .code(ex.getCode())
@@ -119,12 +140,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        log.warn("Access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        log.warn("Acceso denegado en {}: {}", request.getRequestURI(), ex.getMessage());
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .error("Prohibido")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .code("ACCESS_DENIED")
@@ -136,12 +157,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiErrorResponse> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
-        log.warn("Authentication failed on {}: {}", request.getRequestURI(), ex.getMessage());
+        log.warn("Autenticación fallida en {}: {}", request.getRequestURI(), ex.getMessage());
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .error("No autorizado")
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .code("UNAUTHENTICATED")
@@ -153,12 +174,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        log.warn("Malformed JSON on {}: {}", request.getRequestURI(), ex.getMessage());
+        log.warn("JSON malformado en {}: {}", request.getRequestURI(), ex.getMessage());
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .error("Petición inválida")
                 .message("JSON inválido o cuerpo no parseable")
                 .path(request.getRequestURI())
                 .code("MALFORMED_JSON")
@@ -168,14 +189,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(org.springframework.web.server.ResponseStatusException ex, HttpServletRequest request) {
+        log.warn("Excepción de estado de respuesta [{}] en {}: {}", ex.getStatusCode(), request.getRequestURI(), ex.getReason());
+        
+        ApiErrorResponse body = ApiErrorResponse.builder()
+                .timestamp(java.time.LocalDateTime.now())
+                .status(ex.getStatusCode().value())
+                .error(ex.getStatusCode().toString())
+                .message(ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString())
+                .path(request.getRequestURI())
+                .code("RESPONSE_STATUS_ERROR")
+                .validationErrors(Collections.emptyList())
+                .build();
+        
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
-        log.error("Unhandled exception on {} {}", request.getMethod(), request.getRequestURI(), ex);
+        log.error("Excepción no manejada en {} {}", request.getMethod(), request.getRequestURI(), ex);
         
         ApiErrorResponse body = ApiErrorResponse.builder()
                 .timestamp(java.time.LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .error("Error interno del servidor")
                 .message("Ha ocurrido un error interno")
                 .path(request.getRequestURI())
                 .code("INTERNAL_ERROR")

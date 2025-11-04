@@ -84,7 +84,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         Map<String, String> payload = new HashMap<>();
         payload.put("error", message);
-        new ObjectMapper().writeValue(response.getWriter(), payload);
+    com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), payload);
     }
 
 }

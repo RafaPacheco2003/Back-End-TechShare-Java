@@ -24,6 +24,28 @@ public class WebConfig implements WebMvcConfigurer {
         AppProperties.Cors corsConfig = appProperties.getCors();
         String[] origins = corsConfig.getAllowedOrigins().toArray(new String[0]);
         
+        // CORS para autenticación (login, register, verify)
+        registry.addMapping("/login")
+                .allowedOrigins(origins)
+                .allowedMethods("POST", "OPTIONS")
+                .allowedHeaders(corsConfig.getAllowedHeaders())
+                .allowCredentials(corsConfig.isAllowCredentials())
+                .maxAge(corsConfig.getMaxAge());
+        
+        registry.addMapping("/register")
+                .allowedOrigins(origins)
+                .allowedMethods("POST", "OPTIONS")
+                .allowedHeaders(corsConfig.getAllowedHeaders())
+                .allowCredentials(corsConfig.isAllowCredentials())
+                .maxAge(corsConfig.getMaxAge());
+        
+        registry.addMapping("/verify")
+                .allowedOrigins(origins)
+                .allowedMethods("GET", "POST", "OPTIONS")
+                .allowedHeaders(corsConfig.getAllowedHeaders())
+                .allowCredentials(corsConfig.isAllowCredentials())
+                .maxAge(corsConfig.getMaxAge());
+        
         // CORS para endpoints de API y admin
         registry.addMapping("/api/**")
                 .allowedOrigins(origins)

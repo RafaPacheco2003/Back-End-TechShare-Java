@@ -17,6 +17,7 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    
     @Column(name = "username", unique = true)
     private String user_name;  // mapea a username
     
@@ -40,7 +41,7 @@ public class Usuario {
     private Gender gender;
 
     @Column(name = "is_enabled")
-    private boolean isEnabled = false;  // Auto-mapea a is_enabled
+    private boolean isEnabled = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_role", // Nombre de la tabla intermedia normalizado
@@ -49,10 +50,12 @@ public class Usuario {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Movements> movements;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    // TRANSIENT: Relación deshabilitada porque la entidad DetailsBorrow no existe en la BD
+    // y causa errores al cargar la tabla 'borrow'. Se puede restaurar cuando se normalice el esquema.
+    @Transient
     private List<Borrow> borrows;
 
     // Enum para género

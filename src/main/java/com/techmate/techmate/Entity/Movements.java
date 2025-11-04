@@ -1,12 +1,12 @@
 package com.techmate.techmate.entity;
 
-
 import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,8 +15,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
-// otros imports
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,31 +32,76 @@ public class Movements {
     @Column(name = "id")
     private int id;
 
-    // Compatibility getters/setters for legacy code/tests referencing movementsId
-    public int getMovementsId() { return this.id; }
-    public void setMovementsId(int id) { this.id = id; }
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private MoveType moveType;  // Auto-mapea a type (movement_type)
+    @Column(name = "movement_type")
+    private MoveType moveType;
 
-    @Column(name = "quantity")
-    private int quantity;
+    @Column(name = "resource_id")
+    private Integer resourceId;
 
-    @Column(name = "comment")
-    private String comment;
+    @Column(name = "notes")
+    private String notes;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "movement_date")
+    private Date movementDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "material_id")
+    // Legacy fields for backward compatibility (not mapped to DB)
+    @Transient
+    private int quantity;
+    
+    @Transient
+    private String comment;
+    
+    @Transient
+    private Date date;
+    
+    @Transient
     private Materials materials;
 
-    // Getters y setters
+    // Compatibility getters/setters for legacy code
+    public int getMovementsId() { 
+        return this.id; 
+    }
+    
+    public void setMovementsId(int id) { 
+        this.id = id; 
+    }
+    
+    public Materials getMaterials() {
+        return this.materials;
+    }
+    
+    public void setMaterials(Materials materials) {
+        this.materials = materials;
+    }
+    
+    public int getQuantity() {
+        return this.quantity;
+    }
+    
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    
+    public String getComment() {
+        return this.comment;
+    }
+    
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+    
+    public Date getDate() {
+        return this.date != null ? this.date : this.movementDate;
+    }
+    
+    public void setDate(Date date) {
+        this.date = date;
+        this.movementDate = date;
+    }
 }

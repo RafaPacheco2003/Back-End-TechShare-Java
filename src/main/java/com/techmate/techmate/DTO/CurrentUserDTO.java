@@ -11,9 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 public class CurrentUserDTO {
     private Integer id;
-    private String userName;
-    private String firstName;
-    private String lastName;
+    private String user_name;
+    private String first_name;
+    private String last_name;
     private String email;
     private List<String> roles;
 }

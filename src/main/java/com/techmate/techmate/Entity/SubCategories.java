@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "sub_categories")  // ✅ Normalizado a snake_case
+@Table(name = "sub_categories")
 public class SubCategories {
 
     @Id

@@ -185,13 +185,17 @@
     <!-- PROD Profile: JSON logs only (sin console) -->
     <springProfile name="prod">
         <root level="INFO">
+            <appender-ref ref="CONSOLE"/>  <!-- Temporal para debugging -->
             <appender-ref ref="ASYNC_JSON"/>
             <appender-ref ref="ASYNC_ERROR"/>
         </root>
         <!-- Menos verbose en producción -->
         <logger name="org.hibernate.SQL" level="WARN"/>
+        <!-- DEBUG temporal para autenticación -->
         <logger name="org.springframework.web" level="INFO"/>
+        <logger name="org.springframework.security" level="DEBUG"/>
         <logger name="com.techmate.techmate" level="INFO"/>
+        <logger name="com.techmate.techmate.security" level="DEBUG"/>
     </springProfile>
     
     <!-- Default (no profile): Console + JSON -->

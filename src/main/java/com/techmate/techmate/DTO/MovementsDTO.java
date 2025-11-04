@@ -20,28 +20,28 @@ public class MovementsDTO {
     
     private int movementsId;
     
-    @NotNull(message = "Movement type is required")
+    @NotNull(message = "El tipo de movimiento es obligatorio")
     private MoveType moveType;
    
-    @NotNull(message = "Quantity is required")
-    @Min(value = 1, message = "Quantity must be at least 1")
-    @Max(value = 10000, message = "Quantity cannot exceed 10000")
+    @NotNull(message = "La cantidad es obligatoria")
+    @Min(value = 1, message = "La cantidad debe ser al menos 1")
+    @Max(value = 10000, message = "La cantidad no puede exceder 10000")
     private int quantity;
     
-    @NotNull(message = "Date is required")
-    @PastOrPresent(message = "Date cannot be in the future")
+    @NotNull(message = "La fecha es obligatoria")
+    @PastOrPresent(message = "La fecha no puede ser futura")
     private Date date;
     
-    @Size(max = 500, message = "Comment cannot exceed 500 characters")
+    @Size(max = 500, message = "El comentario no puede exceder 500 caracteres")
     private String comment;
 
-    @Positive(message = "Admin ID must be positive")
+    @Positive(message = "El ID del administrador debe ser positivo")
     private int adminId;
     
     private String adminName; // Calculado, no necesita validación
 
-    @NotNull(message = "Material ID is required")
-    @Positive(message = "Material ID must be positive")
+    @NotNull(message = "El ID del material es obligatorio")
+    @Positive(message = "El ID del material debe ser positivo")
     private int materialsId;
     
     private String materialsName; // Calculado, no necesita validación

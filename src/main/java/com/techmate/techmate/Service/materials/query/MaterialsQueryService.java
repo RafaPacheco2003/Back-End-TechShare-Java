@@ -38,7 +38,7 @@ public class MaterialsQueryService {
 
     public MaterialsDTO getById(int id) {
         Materials m = materialsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Materials not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + id));
         return materialsMapper.toDTO(m);
     }
 }

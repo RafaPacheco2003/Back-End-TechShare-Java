@@ -79,12 +79,26 @@ public class TokenUtils {
             List<String> roles = (List<String>) claims.get("roles");
             if (roles == null) roles = List.of();
             
+            // Obtener datos adicionales del token
+            Integer userId = ((Number) claims.get("id")).intValue();
+            String userName = (String) claims.get("user_name");
+            
+            // Crear un objeto Usuario básico desde los claims
+            com.techmate.techmate.entity.Usuario usuario = new com.techmate.techmate.entity.Usuario();
+            usuario.setId(userId);
+            usuario.setEmail(email);
+            usuario.setUser_name(userName);
+            usuario.setEnabled(true); // Asumimos que si el token es válido, el usuario está habilitado
+            
+            // Crear UserDetailsImpl con los datos del token
+            UserDetailsImpl userDetails = new UserDetailsImpl(usuario, roles);
+            
             // Convertir roles a authorities
             var authorities = roles.stream()
                                    .map(role -> new SimpleGrantedAuthority(role))
                                    .collect(Collectors.toList());
 
-            return new UsernamePasswordAuthenticationToken(email, null, authorities);
+            return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         } catch (JwtException e) {
             return null; // Retorna null si hay un error con el token
         }

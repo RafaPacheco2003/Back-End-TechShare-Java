@@ -21,6 +21,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.techmate.techmate.dto.ApiErrorResponse;
+import org.springframework.http.HttpStatus;
 
 /**
  * Filtro de autenticación JWT.
@@ -70,14 +72,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             if (payload.isEmpty()) {
                 log.warn("Attempted authentication with empty payload");
-                throw new AuthenticationServiceException("Empty authentication request payload");
+                throw new AuthenticationServiceException("La solicitud de autenticación está vacía");
             }
 
-            authCredentials = new ObjectMapper().readValue(payload, AuthCredentials.class);
+            authCredentials = com.techmate.techmate.config.JacksonConfig.objectMapper().readValue(payload, AuthCredentials.class);
         } catch (IOException e) {
             log.warn("Attempted authentication with invalid payload: {}", e.getMessage());
             // Devolver un error que Spring Security podrá transformar en 401/400 según configuración
-            throw new AuthenticationServiceException("Invalid authentication request payload");
+            throw new AuthenticationServiceException("Solicitud de autenticación inválida");
         }
 
         UsernamePasswordAuthenticationToken usernamePAT = new UsernamePasswordAuthenticationToken(
@@ -86,6 +88,27 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 List.of());
 
         return getAuthenticationManager().authenticate(usernamePAT);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException failed) throws IOException, ServletException {
+    log.warn("Autenticación fallida para la petición {}: {}", request.getRequestURI(), failed.getMessage());
+
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType("application/json;charset=UTF-8");
+
+    ApiErrorResponse body = ApiErrorResponse.builder()
+        .timestamp(java.time.LocalDateTime.now())
+        .status(HttpStatus.UNAUTHORIZED.value())
+        .error("No autorizado")
+        .message(failed.getMessage() != null ? failed.getMessage() : "Autenticación fallida")
+        .path(request.getRequestURI())
+        .code("UNAUTHENTICATED")
+        .validationErrors(java.util.List.of())
+        .build();
+
+    com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), body);
     }
 
     @Override
@@ -105,7 +128,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             response.setContentType("application/json;charset=UTF-8");
             Map<String, Object> payload = new HashMap<>();
             payload.put("error", "Cuenta no verificada");
-            new ObjectMapper().writeValue(response.getWriter(), payload);
+            com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), payload);
             return;
         }
 
@@ -131,12 +154,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         Map<String, Object> resp = new HashMap<>();
         resp.put("token", "Bearer " + token);
-        resp.put("userId", userId);
-        resp.put("username", userDetails.getUsername());
-        resp.put("userName", userName);
+        resp.put("user_id", userId);
+        resp.put("user_name", userName);
+        resp.put("email", userDetails.getUsername());
         resp.put("roles", roleList);
 
-        new ObjectMapper().writeValue(response.getWriter(), resp);
+    com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), resp);
 
         log.info("Usuario {} autenticado correctamente, id={}, roles={}", userDetails.getUsername(), userId, roleList);
 

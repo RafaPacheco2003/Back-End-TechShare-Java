@@ -119,8 +119,8 @@ public class MovementsServiceImpl implements MovementsService {
             case "OUT":
                 moveType = MoveType.RETURN;
                 break;
-            case "LOAN":
-                moveType = MoveType.LOAN;
+            case "BORROW":
+                moveType = MoveType.BORROW;
                 break;
             case "ADJUSTMENT":
             case "ADJUST":

@@ -19,7 +19,7 @@ public class MovementStockManager {
                 materials.setBorrowable_stock(materials.getBorrowable_stock() + movements.getQuantity());
                 materials.setStock(materials.getStock() + movements.getQuantity());
                 break;
-            case LOAN:
+            case BORROW:
                 if (materials.getStock() < movements.getQuantity()) {
                     throw new IllegalArgumentException("Stock insuficiente para el material");
                 }

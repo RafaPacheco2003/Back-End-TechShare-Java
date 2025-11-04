@@ -177,6 +177,12 @@
         <artifactId>logstash-logback-encoder</artifactId>
         <version>7.4</version>
     </dependency>
+
+    <!-- Jackson module to support Java 8 Date/Time (LocalDateTime) serialization -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
     
     <!-- Spring Boot Starter Data Redis -->
     <dependency>

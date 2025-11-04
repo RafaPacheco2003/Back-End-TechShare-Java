@@ -18,7 +18,7 @@ public class MoveTypeConverter implements Converter<String, MoveType> {
         // Legacy mappings
         switch (s) {
             case "OUT":
-                return MoveType.LOAN;
+                return MoveType.BORROW;
             case "IN":
                 return MoveType.RETURN;
             // allow underscores or dashes and direct enum names

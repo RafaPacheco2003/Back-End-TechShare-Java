@@ -1,10 +1,9 @@
 package com.techmate.techmate.Service;
 
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.techmate.techmate.config.AppProperties;
 import com.techmate.techmate.dto.RegisterRequest;
@@ -17,6 +16,8 @@ import com.techmate.techmate.repository.VerificationTokenRepository;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
 import com.techmate.techmate.Service.mapper.AuthMapper;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -49,6 +50,7 @@ public class AuthService {
         this.appProperties = appProperties;
     }
 
+    @Transactional
     public String registerUser(RegisterRequest registerRequest) {
         if (usuarioRepository.findOneByEmail(registerRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("El usuario ya existe");
@@ -58,56 +60,115 @@ public class AuthService {
 
         // Guardar el usuario primero para obtener su ID
         usuarioRepository.save(usuario);
-        
-        // Asignar automáticamente el rol "user" (ID: 2) a todos los nuevos usuarios
-        Role userRole = roleRepository.findById(2)
-            .orElseThrow(() -> new RuntimeException("Rol 'user' no encontrado en la base de datos"));
-        
+
+        // Buscar rol por nombre (case-insensitive) y crear si no existe
+        Role userRole = roleRepository.findByNameIgnoreCase("USER")
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setName("USER");
+                    return roleRepository.save(r);
+                });
+
         UsuarioRole usuarioRole = new UsuarioRole();
         usuarioRole.setUsuario(usuario);
         usuarioRole.setRole(userRole);
         usuarioRoleRepository.save(usuarioRole);
-        
-        log.info("Rol 'user' asignado automáticamente al usuario: {}", usuario.getEmail());
+
+        log.info("Rol 'USER' asignado automáticamente al usuario: {}", usuario.getEmail());
 
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken(token, usuario);
         verificationTokenRepository.save(verificationToken);
-        
+
         String verificationUrl = appProperties.getVerification().getUrl() + token;
-        
+
         // Generar plantilla HTML profesional para el email
         String userName = usuario.getFirst_name() != null ? usuario.getFirst_name() : usuario.getUser_name();
-        
+
         try {
-            log.info("Generando email de verificación para usuario: {}", userName);
-            String htmlContent = emailTemplateService.generateVerificationEmail(
-                userName, 
-                verificationUrl
-            );
-            
-            log.info("Enviando email HTML a: {}", usuario.getEmail());
-            emailService.sendHtmlEmail(
-                usuario.getEmail(), 
-                "Verificación de cuenta - TechShare", 
-                htmlContent
-            );
-            log.info("Email enviado exitosamente a: {}", usuario.getEmail());
+            log.info("Encolando email de verificación (async) para usuario: {}", userName);
+            String htmlContent = emailTemplateService.generateVerificationEmail(userName, verificationUrl);
+            // send asynchronously; EmailService swallows/logs errors
+            emailService.sendHtmlEmail(usuario.getEmail(), "Verificación de cuenta - TechShare", htmlContent);
         } catch (Exception e) {
-            log.error("Error al enviar email HTML, intentando fallback a texto plano", e);
+            // If template generation fails, try a simple text email asynchronously
+            log.error("Fallo generando plantilla de email, encolando fallback de texto", e);
             try {
-                emailService.sendEmail(
-                    usuario.getEmail(), 
-                    "Verificación de cuenta",
-                    "Por favor, verifica tu cuenta haciendo clic en el siguiente enlace: " + verificationUrl
-                );
-                log.info("Email de texto plano enviado exitosamente a: {}", usuario.getEmail());
-            } catch (Exception fallbackException) {
-                log.error("Error crítico: No se pudo enviar email ni en HTML ni en texto plano", fallbackException);
-                throw new RuntimeException("No se pudo enviar el email de verificación. Por favor, contacta al administrador.", fallbackException);
+                emailService.sendEmail(usuario.getEmail(), "Verificación de cuenta", "Por favor, verifica tu cuenta: " + verificationUrl);
+            } catch (Exception ex) {
+                // EmailService is async and resilient; log and continue. Do NOT throw to avoid 500 to client.
+                log.error("No se pudo encolar email de verificación para {}", usuario.getEmail(), ex);
             }
         }
 
         return "Usuario registrado con éxito. Revisa tu correo para verificar tu cuenta.";
+    }
+
+    @Transactional
+    public String resendVerification(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email inválido");
+        }
+        String normalized = email.toLowerCase().trim();
+        Optional<Usuario> opt = usuarioRepository.findOneByEmail(normalized);
+        if (opt.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+
+        Usuario usuario = opt.get();
+        if (usuario.isEnabled()) {
+            return "La cuenta ya está verificada.";
+        }
+
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken(token, usuario);
+        verificationTokenRepository.save(verificationToken);
+
+        String verificationUrl = appProperties.getVerification().getUrl() + token;
+
+        String userName = usuario.getFirst_name() != null ? usuario.getFirst_name() : usuario.getUser_name();
+        try {
+            log.info("Encolando email de verificación (resend) para usuario: {}", userName);
+            String htmlContent = emailTemplateService.generateVerificationEmail(userName, verificationUrl);
+            emailService.sendHtmlEmail(usuario.getEmail(), "Verificación de cuenta - TechShare", htmlContent);
+        } catch (Exception e) {
+            log.error("Fallo generando plantilla de email en resend, encolando fallback de texto", e);
+            try {
+                emailService.sendEmail(usuario.getEmail(), "Verificación de cuenta", "Por favor, verifica tu cuenta: " + verificationUrl);
+            } catch (Exception ex) {
+                log.error("No se pudo encolar email de verificación (resend) para {}", usuario.getEmail(), ex);
+            }
+        }
+
+        return "Correo de verificación reenviado. Revisa tu bandeja de entrada.";
+    }
+
+    @Transactional
+    public String verifyEmail(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("Token de verificación inválido");
+        }
+
+        Optional<VerificationToken> opt = verificationTokenRepository.findByToken(token);
+        if (opt.isEmpty()) {
+            throw new IllegalArgumentException("Token de verificación no encontrado o inválido");
+        }
+
+        VerificationToken verificationToken = opt.get();
+        
+        // Verificar si el token ha expirado
+        if (verificationToken.isExpired()) {
+            throw new IllegalArgumentException("Token de verificación expirado");
+        }
+
+        Usuario usuario = verificationToken.getUsuario();
+        usuario.setEnabled(true);
+        usuarioRepository.save(usuario);
+
+        // Eliminar el token usado
+        verificationTokenRepository.delete(verificationToken);
+
+        log.info("Cuenta verificada exitosamente para usuario: {}", usuario.getEmail());
+        return "Cuenta verificada exitosamente";
     }
 }

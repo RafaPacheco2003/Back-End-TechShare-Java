@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MoveType {
-    LOAN,
+    BORROW,
     RETURN,
     STOCK_ADD,
     ADJUSTMENT;
@@ -13,7 +13,7 @@ public enum MoveType {
     public String toJson() {
         // Use legacy short codes for external JSON API
         switch (this) {
-            case LOAN:
+            case BORROW:
                 return "OUT";
             case RETURN:
                 return "IN";
@@ -28,7 +28,7 @@ public enum MoveType {
         String s = value.trim().toUpperCase();
         switch (s) {
             case "OUT":
-                return LOAN;
+                return BORROW;
             case "IN":
                 return RETURN;
             default:

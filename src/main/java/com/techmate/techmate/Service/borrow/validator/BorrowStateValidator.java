@@ -50,7 +50,7 @@ public class BorrowStateValidator {
             case PENDING:
                 return validateFromPending(newStatus);
                 
-            case LOANED:
+            case BORROWED:
                 return validateFromLoaned(newStatus);
                 
             case REJECTED:
@@ -91,7 +91,7 @@ public class BorrowStateValidator {
      * @return true si se puede devolver
      */
     public boolean validateCanReturn(Status currentStatus) {
-        return currentStatus == Status.LOANED;
+        return currentStatus == Status.BORROWED;
     }
     
     // ==================== MÉTODOS PRIVADOS ====================
@@ -101,12 +101,12 @@ public class BorrowStateValidator {
      */
     private boolean validateFromPending(Status newStatus) {
         switch (newStatus) {
-            case LOANED:
+            case BORROWED:
             case REJECTED:
                 return true;
             default:
                 throw new IllegalArgumentException(
-                    String.format("Transición inválida de PENDING a %s. Solo se permite LOANED o REJECTED.", 
+                    String.format("Transición inválida de PENDING a %s. Solo se permite BORROWED o REJECTED.", 
                         newStatus));
         }
     }
@@ -120,7 +120,7 @@ public class BorrowStateValidator {
                 return true;
             default:
                 throw new IllegalArgumentException(
-                    String.format("Transición inválida de LOANED a %s. Solo se permite RETURNED.", 
+                    String.format("Transición inválida de BORROWED a %s. Solo se permite RETURNED.", 
                         newStatus));
         }
     }

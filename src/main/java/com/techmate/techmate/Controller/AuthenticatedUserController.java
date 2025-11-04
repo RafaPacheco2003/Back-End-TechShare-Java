@@ -46,10 +46,10 @@ public class AuthenticatedUserController {
             
             CurrentUserDTO currentUser = new CurrentUserDTO();
             currentUser.setId(userDetails.getId());
-            currentUser.setUserName(userDetails.getUsername());
-            currentUser.setFirstName(userDetails.getFirstName());
-            currentUser.setLastName(userDetails.getLastName());
-            currentUser.setEmail(userDetails.getUsername()); // Email es en realidad el username
+            currentUser.setUser_name(userDetails.getNombre()); // Usar getNombre() para el nombre de usuario, no el email
+            currentUser.setFirst_name(userDetails.getFirstName());
+            currentUser.setLast_name(userDetails.getLastName());
+            currentUser.setEmail(userDetails.getUsername()); // Email es el username (email del usuario)
             currentUser.setRoles(userDetails.getAuthorities().stream()
                     .map(auth -> auth.getAuthority())
                     .collect(Collectors.toList()));
@@ -58,7 +58,11 @@ public class AuthenticatedUserController {
             return ResponseEntity.ok(currentUser);
         }
         
-        log.error("Principal is not UserDetailsImpl");
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al obtener usuario");
+        // Si el principal no es la implementación esperada, puede deberse a que
+        // la autenticación no se resolvió como un usuario (p.ej. token inválido
+        // o anonymous). Devolver 401 para que el cliente SPA pueda manejarlo
+        // (mostrar modal / redirigir al login) en lugar de un 500 internamente.
+        log.warn("Principal is not UserDetailsImpl - returning 401");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado");
     }
 }

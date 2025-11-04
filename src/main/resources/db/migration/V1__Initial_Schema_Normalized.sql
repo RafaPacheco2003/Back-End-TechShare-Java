@@ -1,28 +1,22 @@
--- =============================================================================
--- V1__Initial_Schema_Normalized.sql
--- Migración INICIAL que crea todo en snake_case desde cero
--- Esta migración REEMPLAZA el esquema caótico anterior
--- =============================================================================
 
--- PASO 1: Eliminar todas las tablas viejas (con nombres en camelCase)
--- Esto es seguro porque estamos en una migración Flyway controlada
 
 SET FOREIGN_KEY_CHECKS=0;
 
--- Borrar tablas dependientes primero (idempotente)
--- No hacemos DROP de FKs por nombre (puede variar entre instalaciones); en su lugar
--- desactivamos comprobaciones y eliminamos las tablas en el orden correcto.
-DROP TABLE IF EXISTS usuario_role;
+-- Normalized names
+-- eliminar versiones previas (normalizadas/legacy)
 DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS favorites;
 DROP TABLE IF EXISTS materials;
 DROP TABLE IF EXISTS sub_categories;
-DROP TABLE IF EXISTS subCategories;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS users;
+-- Legacy names (si existen, intentamos eliminarlas antes de crear las nuevas tablas)
+DROP TABLE IF EXISTS usuario_role;
 DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS role;
 
 -- Reactivar comprobaciones de FK
 SET FOREIGN_KEY_CHECKS=1;
@@ -38,8 +32,7 @@ CREATE TABLE roles (
     INDEX idx_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: users (antes "usuario")
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(120) NOT NULL UNIQUE,
@@ -47,12 +40,15 @@ CREATE TABLE users (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     profile_image_url VARCHAR(255),
-    is_active BOOLEAN DEFAULT TRUE,
+    is_enabled BOOLEAN DEFAULT TRUE,
+    birth_date DATE DEFAULT NULL,
+    -- Guardamos género como ENUM para mantener compatibilidad con datos legacy
+    gender ENUM('Mujer','Hombre','Otro') DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_username (username),
     INDEX idx_email (email),
-    INDEX idx_active (is_active)
+    INDEX idx_enabled (is_enabled)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: categories
@@ -100,17 +96,20 @@ CREATE TABLE materials (
     FULLTEXT INDEX ft_search (name, description)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla: user_role (relación muchos-a-muchos: ESTRUCTURA CORRECTA)
-CREATE TABLE user_role (
-    id INT NOT NULL AUTO_INCREMENT UNIQUE,
+-- La entidad `UsuarioRole` existe en el código y espera una columna 'id' auto_increment.
+-- Para evitar que Hibernate intente alterar la tabla y falle, creamos la tabla con
+-- una columna id auto_increment como clave primaria y añadimos una restricción
+-- UNIQUE sobre (user_id, role_id) para preservar unicidad de pares.
+CREATE TABLE IF NOT EXISTS user_role (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, role_id),
+    UNIQUE KEY uk_user_role (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    INDEX idx_id (id),
-    INDEX idx_role (role_id)
+    INDEX idx_role (role_id),
+    INDEX idx_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla: reviews
@@ -145,19 +144,32 @@ CREATE TABLE favorites (
 
 -- PASO 3: Insertar datos iniciales de ejemplo
 
--- Roles por defecto
-INSERT INTO roles (name, description) VALUES 
-('ADMIN', 'Administrador del sistema'),
-('USER', 'Usuario regular'),
-('VENDOR', 'Vendedor de materiales');
+-- Insertar roles con IDs fijos (asegura compatibilidad con código que busca por id)
+INSERT INTO roles (id, name, description, created_at)
+VALUES
+(1, 'ADMIN', 'Administrador del sistema', NOW()),
+(2, 'USER', 'Usuario regular', NOW()),
+(3, 'VENDOR', 'Vendedor de materiales', NOW())
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description);
 
--- Admin usuario por defecto (contraseña: admin123 hasheada)
-INSERT INTO users (username, email, password, first_name, last_name, is_active) VALUES 
-('admin', 'admin@techshare.com', '$2a$10$slYQmyNdGzin7olVN3p5Be7DIP5Ctkyy6WO0/LewKpDt3xbS3QTZG', 'Admin', 'User', TRUE);
+-- Insertar usuario admin si no existe (mismo hash que antes)
+INSERT INTO users (username, email, password, first_name, last_name, is_enabled)
+SELECT 'admin', 'admin@techshare.com', '$2a$10$slYQmyNdGzin7olVN3p5Be7DIP5Ctkyy6WO0/LewKpDt3xbS3QTZG', 'Admin', 'User', TRUE
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin');
 
 -- Admin role para el usuario admin
-INSERT INTO usuario_role (user_id, role_id) 
-SELECT u.id, r.id FROM users u, roles r WHERE u.username = 'admin' AND r.name = 'ADMIN';
+-- Asignar rol ADMIN al usuario admin si no está asignado
+INSERT INTO user_role (user_id, role_id)
+SELECT u.id, r.id
+FROM users u
+JOIN roles r ON r.name = 'ADMIN'
+WHERE u.username = 'admin'
+    AND NOT EXISTS (
+        SELECT 1 FROM user_role ur WHERE ur.user_id = u.id AND ur.role_id = r.id
+    );
 
 -- Categorías iniciales
 INSERT INTO categories (name, description) VALUES 

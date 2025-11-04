@@ -4,7 +4,7 @@ public enum Status {
     PENDING,
     APPROVED,
     REJECTED,
-    LOANED,
+    BORROWED,
     RETURNED,
     LATE
 }

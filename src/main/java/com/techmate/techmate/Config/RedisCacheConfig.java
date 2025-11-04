@@ -3,6 +3,8 @@ package com.techmate.techmate.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +43,7 @@ public class RedisCacheConfig {
      * como bean para evitar que Spring Boot lo use como el mapper global de la aplicación).
      */
     private ObjectMapper createCacheObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = com.techmate.techmate.config.JacksonConfig.objectMapper();
         mapper.registerModule(new JavaTimeModule());
         // Solo activar typing para el mapper usado por Redis (necesario para GenericJackson2JsonRedisSerializer
         // si se cachean tipos polimórficos). No exponer este mapper como bean global.
@@ -56,6 +58,7 @@ public class RedisCacheConfig {
      * RedisCacheManager configurado con TTLs personalizados por cache.
      */
     @Bean
+    @ConditionalOnMissingBean(CacheManager.class)
     public RedisCacheManager cacheManager(
         RedisConnectionFactory connectionFactory
     ) {

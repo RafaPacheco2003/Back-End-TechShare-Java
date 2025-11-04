@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.CategoriesService;
@@ -23,6 +24,7 @@ import com.techmate.techmate.dto.CategoryRequest;
 import com.techmate.techmate.dto.CategoryResponse;
 import com.techmate.techmate.dto.ErrorResponse;
 import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
+import com.techmate.techmate.security.AuthorizationUtils;
 
 import jakarta.validation.Valid;
 
@@ -52,11 +54,25 @@ public class CategoriesController {
         this.appProperties = appProperties;
     }
 
+    /**
+     * Verifica que el usuario sea admin antes de procesar la solicitud.
+     * Si no es admin, lanza una excepción 403 Forbidden.
+     */
+    private void checkAdminAccess() {
+        if (!AuthorizationUtils.isUserAdmin()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Acceso denegado. Se requieren permisos de administrador."
+            );
+        }
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createCategory(
         @Valid @ModelAttribute CategoryRequest categoriesRequest,
             @RequestParam("image") MultipartFile image,
             BindingResult bindingResult) {
+        checkAdminAccess();
 
         if (bindingResult.hasErrors()) {
             // Filtrar solo los errores relevantes
@@ -85,6 +101,7 @@ public class CategoriesController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable("id") Integer id) {
+        checkAdminAccess();
         
         CategoriesDTO category = categoriesService.getCategoryById(id);
         if (category == null) {
@@ -105,6 +122,7 @@ public class CategoriesController {
         @Valid @ModelAttribute CategoryRequest categoriesRequest,
             @RequestParam(value = "image", required = false) MultipartFile image,
             BindingResult bindingResult) { // Agregamos BindingResult
+        checkAdminAccess();
 
         if (bindingResult.hasErrors()) {
             // Filtrar solo los errores relevantes
@@ -135,6 +153,7 @@ public class CategoriesController {
 
     @GetMapping("/all")
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+        checkAdminAccess();
         
         List<CategoryResponse> categories = categoriesService.getAllCategories().stream()
             .map(category -> categoriesMapper.toResponse(category, appProperties.getServerUrl()))
@@ -148,6 +167,7 @@ public class CategoriesController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable("id") Integer id) {
+        checkAdminAccess();
         
         // Delegar la eliminación al servicio directamente
         categoriesService.deleteCategory(id);

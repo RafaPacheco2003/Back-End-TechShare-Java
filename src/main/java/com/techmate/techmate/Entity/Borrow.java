@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "loan")
+@Table(name = "borrow")
 @Data
 public class Borrow {
 
@@ -16,47 +16,39 @@ public class Borrow {
     private Integer id;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "issue_date")
+    @Column(name = "borrow_date")
     private Date date;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "start_date")
-    private Date startDate;  // Auto-mapea a start_date
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "end_date")
-    private Date endDate;  // Auto-mapea a end_date
+    @Column(name = "due_date")
+    private Date endDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "return_date")
-    private Date returnDate;  // Auto-mapea a return_date
+    private Date returnDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
 
-    @Column(name = "amount")
-    private double amount;  // mapped to amount
+    @Column(name = "resource_id")
+    private Integer resourceId;
 
-   
+    private double amount;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
+    // Legacy compatibility fields (not in DB)
+    @Transient
+    private Date startDate;
+    
+    @Transient
     private Usuario admin;
-
-    @OneToMany(mappedBy = "borrow", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DetailsBorrow> details; // Relación con los detalles del préstamo
-
-    // Método para calcular el monto total
-    public double calculateTotalAmount() {
-        return details.stream()
-                .mapToDouble(DetailsBorrow::getTotalPrice)
-                .sum();
-    }
+    
+    @Transient
+    private List<DetailsBorrow> details;
 
     // Compatibility getters/setters for legacy code that used 'borrowId'
     public Integer getBorrowId() {
@@ -65,5 +57,15 @@ public class Borrow {
 
     public void setBorrowId(Integer borrowId) {
         this.id = borrowId;
+    }
+
+    // Compatibility method for calculating total amount
+    public double calculateTotalAmount() {
+        if (details != null) {
+            return details.stream()
+                    .mapToDouble(DetailsBorrow::getTotalPrice)
+                    .sum();
+        }
+        return 0;
     }
 }

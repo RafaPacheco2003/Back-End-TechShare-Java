@@ -131,11 +131,11 @@ public class BorrowQueryService {
      * @return Lista de préstamos activos
      */
     public List<BorrowDTO> getActiveBorrows() {
-        List<BorrowDTO> pendingBorrows = getBorrowsByStatus("PENDING");
-        List<BorrowDTO> loanedBorrows = getBorrowsByStatus("LOANED");
-        
-        pendingBorrows.addAll(loanedBorrows);
-        return pendingBorrows;
+    List<BorrowDTO> pendingBorrows = getBorrowsByStatus("PENDING");
+    List<BorrowDTO> borrowedBorrows = getBorrowsByStatus("BORROWED");
+
+    pendingBorrows.addAll(borrowedBorrows);
+    return pendingBorrows;
     }
     
     // ==================== MÉTODOS PRIVADOS ====================
@@ -170,7 +170,7 @@ public class BorrowQueryService {
             case "APPROVED":
             case "ACTIVE":
             case "LOANED":
-                return Status.LOANED;
+                return Status.BORROWED;
 
             case "RETURNED":
             case "COMPLETED":
@@ -179,7 +179,7 @@ public class BorrowQueryService {
 
             default:
                 throw new IllegalArgumentException(
-                    String.format("Estado inválido: %s. Estados válidos: PENDING, REJECTED, LOANED, RETURNED", 
+                    String.format("Estado inválido: %s. Estados válidos: PENDING, REJECTED, BORROWED, RETURNED", 
                         statusString));
         }
     }

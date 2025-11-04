@@ -65,7 +65,7 @@ public class BorrowUserController {
     }
 
     private List<DetailsBorrowDTO> convertJsonToDetailsList(String detailsJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    com.fasterxml.jackson.databind.ObjectMapper objectMapper = com.techmate.techmate.config.JacksonConfig.objectMapper();
         try {
             return objectMapper.readValue(detailsJson, new TypeReference<List<DetailsBorrowDTO>>() {});
         } catch (Exception e) {
