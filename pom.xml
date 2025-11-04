@@ -203,8 +203,7 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
-                    <!-- Ensure compilation and API level target for reproducible builds -->
-                    <release>17</release>
+                    <!-- Lombok annotation processing -->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -212,6 +211,10 @@
                             <version>1.18.36</version>
                         </path>
                     </annotationProcessorPaths>
+                    <!-- Enable annotation processing -->
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
