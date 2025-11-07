@@ -142,6 +142,62 @@ CREATE TABLE favorites (
     INDEX idx_material (material_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabla: borrow (Préstamos de materiales)
+CREATE TABLE IF NOT EXISTS borrow (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    resource_id INT NOT NULL,
+    borrow_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    return_date DATE NULL,
+    status ENUM('PENDING', 'BORROWED', 'RETURNED', 'OVERDUE', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (resource_id) REFERENCES materials(id) ON DELETE CASCADE,
+    INDEX idx_user (user_id),
+    INDEX idx_resource (resource_id),
+    INDEX idx_status (status),
+    INDEX idx_borrow_date (borrow_date),
+    INDEX idx_return_date (return_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla: details_borrow (Detalles de los préstamos)
+CREATE TABLE IF NOT EXISTS details_borrow (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    borrow_id INT NOT NULL,
+    material_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (borrow_id) REFERENCES borrow(id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE RESTRICT,
+    INDEX idx_borrow (borrow_id),
+    INDEX idx_material (material_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla: movements (Historial de movimientos de materiales)
+CREATE TABLE IF NOT EXISTS movements (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    resource_id INT NOT NULL,
+    user_id INT NOT NULL,
+    move_type ENUM('BORROW', 'RETURN', 'PURCHASE', 'DONATION', 'ADJUSTMENT') NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (resource_id) REFERENCES materials(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_resource (resource_id),
+    INDEX idx_user (user_id),
+    INDEX idx_move_type (move_type),
+    INDEX idx_movement_date (movement_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- PASO 3: Insertar datos iniciales de ejemplo
 
 -- Insertar roles con IDs fijos (asegura compatibilidad con código que busca por id)
@@ -190,6 +246,62 @@ INSERT INTO sub_categories (category_id, name, description) VALUES
 -- NOTA IMPORTANTE: Si se agregan inserts en 'materials', incluir siempre el campo sub_category_id y ponerlo como NULL si no aplica.
 -- Ejemplo correcto:
 -- INSERT INTO materials (name, description, price, stock, sub_category_id, image_path, created_by) VALUES ('Material X', 'Desc', 10.0, 5, NULL, 'img.png', 1);
+
+-- Tabla: borrow (Préstamos de materiales)
+CREATE TABLE IF NOT EXISTS borrow (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    resource_id INT NOT NULL,
+    borrow_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    return_date DATE NULL,
+    status ENUM('PENDING', 'BORROWED', 'RETURNED', 'OVERDUE', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (resource_id) REFERENCES materials(id) ON DELETE CASCADE,
+    INDEX idx_user (user_id),
+    INDEX idx_resource (resource_id),
+    INDEX idx_status (status),
+    INDEX idx_borrow_date (borrow_date),
+    INDEX idx_return_date (return_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla: details_borrow (Detalles de los préstamos)
+CREATE TABLE IF NOT EXISTS details_borrow (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    borrow_id INT NOT NULL,
+    material_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (borrow_id) REFERENCES borrow(id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE RESTRICT,
+    INDEX idx_borrow (borrow_id),
+    INDEX idx_material (material_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla: movements (Historial de movimientos de materiales)
+CREATE TABLE IF NOT EXISTS movements (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    resource_id INT NOT NULL,
+    user_id INT NOT NULL,
+    move_type ENUM('BORROW', 'RETURN', 'PURCHASE', 'DONATION', 'ADJUSTMENT') NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (resource_id) REFERENCES materials(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_resource (resource_id),
+    INDEX idx_user (user_id),
+    INDEX idx_move_type (move_type),
+    INDEX idx_movement_date (movement_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- PASO 4: Verificaciones finales
 -- Asegurar que todo se creó correctamente en snake_case

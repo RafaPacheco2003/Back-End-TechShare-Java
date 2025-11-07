@@ -47,7 +47,7 @@ public class Borrow {
     @Transient
     private Usuario admin;
     
-    @Transient
+    @OneToMany(mappedBy = "borrow", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetailsBorrow> details;
 
     // Compatibility getters/setters for legacy code that used 'borrowId'
