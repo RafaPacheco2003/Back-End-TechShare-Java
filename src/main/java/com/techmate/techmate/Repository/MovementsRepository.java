@@ -75,7 +75,7 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
            "LEFT JOIN FETCH m.materials mat " +
            "LEFT JOIN FETCH mat.subCategory " +
            "LEFT JOIN FETCH m.usuario " +
-           "WHERE m.date BETWEEN :startDate AND :endDate")
+           "WHERE m.movement_date BETWEEN :startDate AND :endDate")
     List<Movements> findByDateBetweenOptimized(
         @Param("startDate") Date startDate,
         @Param("endDate") Date endDate
@@ -90,14 +90,14 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
                    "LEFT JOIN FETCH m.usuario u " +
                    "WHERE (:moveType IS NULL OR m.moveType = :moveType) " +
                    "AND (:usuarioId IS NULL OR u.id = :usuarioId) " +
-                   "AND (:startDate IS NULL OR m.date >= :startDate) " +
-                   "AND (:endDate IS NULL OR m.date <= :endDate)",
+                   "AND (:startDate IS NULL OR m.movement_date >= :startDate) " +
+                   "AND (:endDate IS NULL OR m.movement_date <= :endDate)",
            countQuery = "SELECT COUNT(DISTINCT m) FROM Movements m " +
                        "LEFT JOIN m.usuario u " +
                        "WHERE (:moveType IS NULL OR m.moveType = :moveType) " +
                        "AND (:usuarioId IS NULL OR u.id = :usuarioId) " +
-                       "AND (:startDate IS NULL OR m.date >= :startDate) " +
-                       "AND (:endDate IS NULL OR m.date <= :endDate)")
+                       "AND (:startDate IS NULL OR m.movement_date >= :startDate) " +
+                       "AND (:endDate IS NULL OR m.movement_date <= :endDate)")
     Page<Movements> findByFiltersOptimized(
         @Param("moveType") MoveType moveType,
         @Param("usuarioId") Integer usuarioId,
@@ -118,14 +118,14 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
      */
     @Query(value = """
         SELECT 
-            DATE_FORMAT(m.date, '%Y-%m') as month,
+            DATE_FORMAT(m.movement_date, '%Y-%m') as month,
             m.move_type as moveType,
             COUNT(m.movements_id) as totalMovements,
             SUM(m.quantity) as totalQuantity,
             COUNT(DISTINCT m.materials_id) as uniqueMaterials
         FROM movements m
-        WHERE m.date BETWEEN :startDate AND :endDate
-        GROUP BY DATE_FORMAT(m.date, '%Y-%m'), m.move_type
+        WHERE m.movement_date BETWEEN :startDate AND :endDate
+        GROUP BY DATE_FORMAT(m.movement_date, '%Y-%m'), m.move_type
         ORDER BY month DESC, moveType
         """, nativeQuery = true)
     List<Object[]> getMonthlyStatistics(
@@ -145,7 +145,7 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
             COUNT(m.movements_id) as movementCount
         FROM movements m
         INNER JOIN materials mat ON m.materials_id = mat.materials_id
-        WHERE m.date BETWEEN :startDate AND :endDate
+        WHERE m.movement_date BETWEEN :startDate AND :endDate
         GROUP BY mat.materials_id, mat.name, m.move_type
         ORDER BY totalQuantity DESC
         LIMIT 50
@@ -166,7 +166,7 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
             SUM(m.quantity) as totalQuantity
         FROM movements m
         INNER JOIN usuario u ON m.usuario_id = u.id
-        WHERE m.date BETWEEN :startDate AND :endDate
+        WHERE m.movement_date BETWEEN :startDate AND :endDate
         GROUP BY u.id, u.name, m.move_type
         ORDER BY totalMovements DESC
         """, nativeQuery = true)
