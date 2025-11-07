@@ -87,8 +87,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas (login, register, verify)
-                .requestMatchers("/login", "/register", "/verify", "/auth/**").permitAll()
+                // Rutas públicas (login, register, verify, auth)
+                .requestMatchers("/login", "/verify", "/api/auth/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
                 // Health checks para monitoring
                 .requestMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                 // Recursos estáticos e imágenes

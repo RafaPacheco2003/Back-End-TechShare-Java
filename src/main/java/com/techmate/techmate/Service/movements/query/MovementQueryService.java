@@ -31,6 +31,6 @@ public class MovementQueryService {
     }
 
     public List<MovementsDTO> getByDateRange(Date start, Date end) {
-        return movementsRepository.findByDateBetween(start, end).stream().map(m -> movementMapper.toDTO(m, null, null)).collect(Collectors.toList());
+        return movementsRepository.findByMovementDateBetween(start, end).stream().map(m -> movementMapper.toDTO(m, null, null)).collect(Collectors.toList());
     }
 }

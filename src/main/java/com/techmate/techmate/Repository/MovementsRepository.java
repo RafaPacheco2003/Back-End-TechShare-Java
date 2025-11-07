@@ -75,7 +75,7 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
            "LEFT JOIN FETCH m.materials mat " +
            "LEFT JOIN FETCH mat.subCategory " +
            "LEFT JOIN FETCH m.usuario " +
-           "WHERE m.movement_date BETWEEN :startDate AND :endDate")
+           "WHERE m.movementDate BETWEEN :startDate AND :endDate")
     List<Movements> findByDateBetweenOptimized(
         @Param("startDate") Date startDate,
         @Param("endDate") Date endDate
@@ -90,14 +90,14 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
                    "LEFT JOIN FETCH m.usuario u " +
                    "WHERE (:moveType IS NULL OR m.moveType = :moveType) " +
                    "AND (:usuarioId IS NULL OR u.id = :usuarioId) " +
-                   "AND (:startDate IS NULL OR m.movement_date >= :startDate) " +
-                   "AND (:endDate IS NULL OR m.movement_date <= :endDate)",
+                   "AND (:startDate IS NULL OR m.movementDate >= :startDate) " +
+                   "AND (:endDate IS NULL OR m.movementDate <= :endDate)",
            countQuery = "SELECT COUNT(DISTINCT m) FROM Movements m " +
                        "LEFT JOIN m.usuario u " +
                        "WHERE (:moveType IS NULL OR m.moveType = :moveType) " +
                        "AND (:usuarioId IS NULL OR u.id = :usuarioId) " +
-                       "AND (:startDate IS NULL OR m.movement_date >= :startDate) " +
-                       "AND (:endDate IS NULL OR m.movement_date <= :endDate)")
+                       "AND (:startDate IS NULL OR m.movementDate >= :startDate) " +
+                       "AND (:endDate IS NULL OR m.movementDate <= :endDate)")
     Page<Movements> findByFiltersOptimized(
         @Param("moveType") MoveType moveType,
         @Param("usuarioId") Integer usuarioId,
@@ -181,5 +181,5 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
     // NOTA: Estos métodos pueden causar N+1, usa los *Optimized cuando sea posible
     
     List<Movements> findByMoveType(MoveType moveType);
-    List<Movements> findByDateBetween(Date startDate, Date endDate);
+    List<Movements> findByMovementDateBetween(Date startDate, Date endDate);
 }

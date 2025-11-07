@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(corsConfig.isAllowCredentials())
                 .maxAge(corsConfig.getMaxAge());
         
-        registry.addMapping("/register")
+        registry.addMapping("/api/auth/**")
                 .allowedOrigins(origins)
                 .allowedMethods("POST", "OPTIONS")
                 .allowedHeaders(corsConfig.getAllowedHeaders())

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/api/auth")
 public class AuthController {
     
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -71,7 +72,7 @@ public class AuthController {
      * Reenvía el email de verificación cuando el token ha expirado o se requiere uno nuevo.
      * Recibe JSON: { "email": "user@example.com" }
      */
-    @PostMapping("/auth/resend")
+    @PostMapping("/resend")
     public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
         if (body == null || !body.containsKey("email") || body.get("email") == null || body.get("email").isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "El correo electrónico es requerido"));
@@ -85,29 +86,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             log.error("Error inesperado durante reenvío de verificación", e);
-            return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
-        }
-    }
-
-    /**
-     * Verifica la cuenta del usuario usando el token enviado por email.
-     * GET /auth/verify?token=xxx
-     */
-    @GetMapping("/auth/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        if (token == null || token.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Token de verificación requerido"));
-        }
-        
-        try {
-            String msg = authService.verifyEmail(token);
-            log.info("Email verificado exitosamente con token: {}", token.substring(0, Math.min(10, token.length())) + "...");
-            return ResponseEntity.ok(msg);
-        } catch (IllegalArgumentException e) {
-            log.warn("Verificación fallida: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            log.error("Error inesperado durante verificación de email", e);
             return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
         }
     }
