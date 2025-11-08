@@ -1,4 +1,4 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import java.util.Date;
 import java.util.List;
@@ -16,7 +16,7 @@ public class BorrowResponse {
     private Date startDate;
     private Date endDate;
     private Date returnDate;
-    private com.techmate.techmate.entity.Status status;
+    private com.techmate.techmate.Entity.Status status;
     private double amount;
 
     private int usuarioId;

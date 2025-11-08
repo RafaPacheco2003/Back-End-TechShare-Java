@@ -2,7 +2,7 @@ package com.techmate.techshare.Service.role.validator;
 
 import org.springframework.stereotype.Component;
 
-import com.techmate.techmate.repository.RoleRepository;
+import com.techmate.techmate.Repository.RoleRepository;
 
 @Component
 public class RoleValidator {

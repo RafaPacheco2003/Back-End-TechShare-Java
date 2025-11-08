@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.techmate.techmate.Service.UserService;
 import com.techmate.techmate.dto.UsuarioDTO;
 import com.techmate.techmate.security.AuthorizationUtils;
+import com.techmate.techmate.service.UserService;
 
 @RestController
 @RequestMapping("/admin/user")

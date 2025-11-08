@@ -1,6 +1,6 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
 
-import com.techmate.techmate.entity.MoveType;
+import com.techmate.techmate.Entity.MoveType;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

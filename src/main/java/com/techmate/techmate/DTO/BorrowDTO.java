@@ -1,9 +1,9 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import java.util.Date;
 import java.util.List;
 
-import com.techmate.techmate.entity.Status;
+import com.techmate.techmate.Entity.Status;
 
 import lombok.Data;
 

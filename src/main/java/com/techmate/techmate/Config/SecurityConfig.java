@@ -1,7 +1,7 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
 
-import com.techmate.techmate.security.JWTAuthenticationFilter;
-import com.techmate.techmate.security.JWTAuthorizationFilter;
+import com.techmate.techmate.Security.JWTAuthenticationFilter;
+import com.techmate.techmate.Security.JWTAuthorizationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;

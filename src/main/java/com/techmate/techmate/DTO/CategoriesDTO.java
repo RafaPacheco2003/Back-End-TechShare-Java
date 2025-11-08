@@ -1,4 +1,4 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

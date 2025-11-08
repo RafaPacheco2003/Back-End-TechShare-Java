@@ -1,4 +1,4 @@
-package com.techmate.techmate.dto.response;
+package com.techmate.techmate.DTO.response;
 
 /**
  * DTO para top materiales más movidos.

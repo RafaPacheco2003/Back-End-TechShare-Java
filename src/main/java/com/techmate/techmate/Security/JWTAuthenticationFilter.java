@@ -1,4 +1,4 @@
-package com.techmate.techmate.security;
+package com.techmate.techmate.Security;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.techmate.techmate.dto.ApiErrorResponse;
+import com.techmate.techmate.DTO.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -75,7 +75,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 throw new AuthenticationServiceException("La solicitud de autenticación está vacía");
             }
 
-            authCredentials = com.techmate.techmate.config.JacksonConfig.objectMapper().readValue(payload, AuthCredentials.class);
+            authCredentials = com.techmate.techmate.Config.JacksonConfig.objectMapper().readValue(payload, AuthCredentials.class);
         } catch (IOException e) {
             log.warn("Attempted authentication with invalid payload: {}", e.getMessage());
             // Devolver un error que Spring Security podrá transformar en 401/400 según configuración
@@ -108,7 +108,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         .validationErrors(java.util.List.of())
         .build();
 
-    com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), body);
+    com.techmate.techmate.Config.JacksonConfig.objectMapper().writeValue(response.getWriter(), body);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             response.setContentType("application/json;charset=UTF-8");
             Map<String, Object> payload = new HashMap<>();
             payload.put("error", "Cuenta no verificada");
-            com.techmate.techmate.config.JacksonConfig.objectMapper().writeValue(response.getWriter(), payload);
+            com.techmate.techmate.Config.JacksonConfig.objectMapper().writeValue(response.getWriter(), payload);
             return;
         }
 

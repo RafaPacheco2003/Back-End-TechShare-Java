@@ -1,4 +1,4 @@
-package com.techmate.techmate.security;
+package com.techmate.techmate.Security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

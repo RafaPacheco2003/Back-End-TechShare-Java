@@ -1,6 +1,6 @@
-package com.techmate.techmate.event;
+package com.techmate.techmate.Event;
 
-import com.techmate.techmate.entity.Materials;
+import com.techmate.techmate.Entity.Materials;
 import lombok.Getter;
 
 /**

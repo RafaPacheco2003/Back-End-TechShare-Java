@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,19 +15,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.Service.CategoriesService;
-import com.techmate.techmate.config.AppProperties;
+import com.techmate.techmate.Config.AppProperties;
 // ...existing code...
-import com.techmate.techmate.dto.CategoriesDTO;
-import com.techmate.techmate.dto.CategoryRequest;
-import com.techmate.techmate.dto.CategoryResponse;
-import com.techmate.techmate.dto.ErrorResponse;
+import com.techmate.techmate.DTO.CategoriesDTO;
+import com.techmate.techmate.DTO.CategoryRequest;
+import com.techmate.techmate.DTO.CategoryResponse;
+import com.techmate.techmate.DTO.ErrorResponse;
 import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
-import com.techmate.techmate.security.AuthorizationUtils;
-
-import jakarta.validation.Valid;
-
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
+import com.techmate.techmate.service.categories.mapper.CategoriesMapper;tegoriesMapper;
 /**
  * La clase {@code CategoriesController} maneja las solicitudes HTTP
  * relacionadas

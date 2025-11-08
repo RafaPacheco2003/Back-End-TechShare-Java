@@ -1,4 +1,4 @@
-package com.techmate.techmate.exception;
+package com.techmate.techmate.Exception;
 
 /**
  * Excepciones de dominio específicas para operaciones de préstamo.

@@ -1,4 +1,4 @@
-package com.techmate.techmate.repository;
+package com.techmate.techmate.Repository;
 
 import java.util.Date;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.techmate.techmate.entity.Borrow;
-import com.techmate.techmate.entity.Status;
+import com.techmate.techmate.Entity.Borrow;
+import com.techmate.techmate.Entity.Status;
 
 /**
  * Repository optimizado para Borrow con queries que previenen N+1.

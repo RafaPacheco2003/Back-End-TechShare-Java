@@ -1,4 +1,4 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

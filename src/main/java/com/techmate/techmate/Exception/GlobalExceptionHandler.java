@@ -1,6 +1,6 @@
-package com.techmate.techmate.exception;
+package com.techmate.techmate.Exception;
 
-import com.techmate.techmate.dto.ApiErrorResponse;
+import com.techmate.techmate.DTO.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

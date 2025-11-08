@@ -1,9 +1,10 @@
-package com.techmate.techmate.security;
+package com.techmate.techmate.Security;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.techmate.techmate.dto.RegisterRequest;
+
+import com.techmate.techmate.DTO.RegisterRequest;
 import com.techmate.techmate.Service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

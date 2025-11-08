@@ -1,6 +1,6 @@
-package com.techmate.techmate.event;
+package com.techmate.techmate.Event;
 
-import com.techmate.techmate.entity.Borrow;
+import com.techmate.techmate.Entity.Borrow;
 import lombok.Getter;
 
 import java.util.Date;

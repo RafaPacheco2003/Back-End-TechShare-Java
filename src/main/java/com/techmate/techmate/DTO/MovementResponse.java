@@ -1,8 +1,8 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import java.util.Date;
 
-import com.techmate.techmate.entity.MoveType;
+import com.techmate.techmate.Entity.MoveType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

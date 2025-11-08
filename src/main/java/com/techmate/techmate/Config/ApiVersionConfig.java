@@ -1,4 +1,4 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;

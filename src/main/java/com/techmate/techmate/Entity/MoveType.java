@@ -1,4 +1,4 @@
-package com.techmate.techmate.entity;
+package com.techmate.techmate.Entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

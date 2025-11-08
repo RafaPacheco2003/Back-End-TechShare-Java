@@ -1,4 +1,4 @@
-package com.techmate.techmate.event;
+package com.techmate.techmate.Event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

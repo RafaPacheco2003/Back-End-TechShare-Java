@@ -1,4 +1,4 @@
-package com.techmate.techmate.security;
+package com.techmate.techmate.Security;
 
 import java.util.List;
 
@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.entity.Usuario;
-import com.techmate.techmate.entity.UsuarioRole;
-import com.techmate.techmate.repository.UsuarioRepository;
-import com.techmate.techmate.repository.UsuarioRoleRepository;
+import com.techmate.techmate.Entity.Usuario;
+import com.techmate.techmate.Entity.UsuarioRole;
+import com.techmate.techmate.Repository.UsuarioRepository;
+import com.techmate.techmate.Repository.UsuarioRoleRepository;
 
 /**
  * Implementación del servicio de autenticación de usuarios para Spring Security.

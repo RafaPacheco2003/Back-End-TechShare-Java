@@ -1,4 +1,4 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;

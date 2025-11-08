@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import com.techmate.techmate.Service.EmailService;
 import com.techmate.techmate.Service.MaterialsService;
 import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
-import com.techmate.techmate.config.AppProperties;
-import com.techmate.techmate.dto.MaterialRequest;
-import com.techmate.techmate.dto.MaterialResponse;
-import com.techmate.techmate.dto.MaterialsDTO;
-import com.techmate.techmate.dto.PageResponse;
+import com.techmate.techmate.Config.AppProperties;
+import com.techmate.techmate.DTO.MaterialRequest;
+import com.techmate.techmate.DTO.MaterialResponse;
+import com.techmate.techmate.DTO.MaterialsDTO;
+import com.techmate.techmate.DTO.PageResponse;
 
 import java.io.File;
 import java.io.IOException;

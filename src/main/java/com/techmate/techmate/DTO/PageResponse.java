@@ -1,4 +1,4 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

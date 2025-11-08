@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.util.stream.Collectors;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.techmate.techmate.Security.UserDetailsImpl;
 import com.techmate.techmate.dto.CurrentUserDTO;
-import com.techmate.techmate.security.UserDetailsImpl;
 
 /**
  * Controlador para endpoints accesibles por cualquier usuario autenticado

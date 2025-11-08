@@ -1,4 +1,4 @@
-package com.techmate.techmate.event;
+package com.techmate.techmate.Event;
 
 import org.springframework.context.ApplicationEvent;
 

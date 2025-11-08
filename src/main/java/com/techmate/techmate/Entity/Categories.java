@@ -1,4 +1,4 @@
-package com.techmate.techmate.entity;
+package com.techmate.techmate.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

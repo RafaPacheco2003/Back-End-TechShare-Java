@@ -1,8 +1,8 @@
-package com.techmate.techmate.dto;
+package com.techmate.techmate.DTO;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import com.techmate.techmate.entity.Usuario.Gender;
+import com.techmate.techmate.Entity.Usuario.Gender;
 import java.time.LocalDate;
 import java.util.Set;
 

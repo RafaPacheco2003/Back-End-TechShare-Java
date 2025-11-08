@@ -1,4 +1,5 @@
-package com.techmate.techmate.config;
+package com.techmate.techmate.Config;
+
 
 import java.util.List;
 

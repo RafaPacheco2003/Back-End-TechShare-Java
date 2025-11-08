@@ -1,9 +1,11 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
-import com.techmate.techmate.Service.EmailService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.techmate.techmate.service.EmailService;
+import com.techmate.techmate.service.EmailService;
 
 @RestController
 public class EmailController {

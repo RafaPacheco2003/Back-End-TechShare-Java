@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.util.*;
 
@@ -10,12 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import com.techmate.techmate.Service.MovementsService;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.dto.MovementResponse;
-import com.techmate.techmate.Service.movements.mapper.MovementsMapper;
 import com.techmate.techmate.entity.MoveType;
 import com.techmate.techmate.security.TokenUtils;
+import com.techmate.techmate.service.MovementsService;
+import com.techmate.techmate.service.movements.mapper.MovementsMapper;
 
 // CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
