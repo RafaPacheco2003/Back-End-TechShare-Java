@@ -303,6 +303,19 @@ CREATE TABLE IF NOT EXISTS movements (
     INDEX idx_movement_date (movement_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabla: verification_token (para verificación de email)
+CREATE TABLE IF NOT EXISTS verification_token (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    expiry_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_user (user_id),
+    INDEX idx_expiry_date (expiry_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- PASO 4: Verificaciones finales
 -- Asegurar que todo se creó correctamente en snake_case
 -- Esto se valida automáticamente por Hibernate en el siguiente deploy
