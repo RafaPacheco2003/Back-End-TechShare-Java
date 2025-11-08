@@ -46,6 +46,39 @@ public class AppProperties {
     @NotBlank
     private String serverUrl = "http://localhost:8080";
 
+    // Getters y Setters (Lombok no está generándolos correctamente)
+    public Cors getCors() {
+        return cors;
+    }
+
+    public void setCors(Cors cors) {
+        this.cors = cors;
+    }
+
+    public Verification getVerification() {
+        return verification;
+    }
+
+    public void setVerification(Verification verification) {
+        this.verification = verification;
+    }
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    public void setStorage(Storage storage) {
+        this.storage = storage;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
     @Data
     public static class Cors {
         /**
@@ -73,6 +106,47 @@ public class AppProperties {
          * Tiempo de cache para preflight requests (en segundos)
          */
         private long maxAge = 3600L;
+
+        // Getters y Setters
+        public List<String> getAllowedOrigins() {
+            return allowedOrigins;
+        }
+
+        public void setAllowedOrigins(List<String> allowedOrigins) {
+            this.allowedOrigins = allowedOrigins;
+        }
+
+        public String[] getAllowedMethods() {
+            return allowedMethods;
+        }
+
+        public void setAllowedMethods(String[] allowedMethods) {
+            this.allowedMethods = allowedMethods;
+        }
+
+        public String[] getAllowedHeaders() {
+            return allowedHeaders;
+        }
+
+        public void setAllowedHeaders(String[] allowedHeaders) {
+            this.allowedHeaders = allowedHeaders;
+        }
+
+        public boolean isAllowCredentials() {
+            return allowCredentials;
+        }
+
+        public void setAllowCredentials(boolean allowCredentials) {
+            this.allowCredentials = allowCredentials;
+        }
+
+        public long getMaxAge() {
+            return maxAge;
+        }
+
+        public void setMaxAge(long maxAge) {
+            this.maxAge = maxAge;
+        }
     }
 
     @Data
@@ -83,6 +157,14 @@ public class AppProperties {
          */
         @NotBlank
         private String url = "http://localhost:3000/verify?token=";
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
     }
 
     @Data
@@ -103,5 +185,29 @@ public class AppProperties {
          * Tipos de archivo permitidos
          */
         private String[] allowedTypes = {"image/jpeg", "image/png", "image/gif", "image/webp"};
+
+        public String getLocation() {
+            return location;
+        }
+
+        public void setLocation(String location) {
+            this.location = location;
+        }
+
+        public Long getMaxFileSize() {
+            return maxFileSize;
+        }
+
+        public void setMaxFileSize(Long maxFileSize) {
+            this.maxFileSize = maxFileSize;
+        }
+
+        public String[] getAllowedTypes() {
+            return allowedTypes;
+        }
+
+        public void setAllowedTypes(String[] allowedTypes) {
+            this.allowedTypes = allowedTypes;
+        }
     }
 }
