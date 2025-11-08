@@ -1,12 +1,11 @@
 // BorrowUserServiceImp.java
-package com.techmate.techmate.Service.User.Impl;
+package com.techmate.techmate.service.User.Impl;
 
 import java.util.stream.Collectors;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.techmate.techmate.Service.User.BorrowUserService;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.dto.DetailsBorrowDTO;
 import com.techmate.techmate.entity.Borrow;
@@ -17,6 +16,7 @@ import com.techmate.techmate.entity.Status;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.repository.*;
 import com.techmate.techmate.security.TokenUtils;
+import com.techmate.techmate.service.User.BorrowUserService;
 
 @Service
 public class BorrowUserServiceImp implements BorrowUserService {
@@ -212,3 +212,4 @@ public class BorrowUserServiceImp implements BorrowUserService {
         return TokenUtils.getRolesFromToken(token);
     }
 }
+

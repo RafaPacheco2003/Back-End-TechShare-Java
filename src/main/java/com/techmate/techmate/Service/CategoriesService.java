@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import java.util.List;
 
@@ -62,3 +62,4 @@ public interface CategoriesService {
      */
     String getCategoryNameById(int categoryId);
 }
+

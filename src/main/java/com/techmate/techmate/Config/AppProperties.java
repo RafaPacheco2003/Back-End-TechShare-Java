@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 
 import java.util.List;
@@ -212,3 +212,4 @@ public class AppProperties {
         }
     }
 }
+

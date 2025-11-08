@@ -1,15 +1,15 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.Service.RoleService;
 import com.techmate.techmate.dto.RoleDTO;
 import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.RoleMaterialsRepository;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
+import com.techmate.techmate.service.RoleService;
 
 import jakarta.transaction.Transactional;
 
@@ -20,19 +20,19 @@ public class RoleServiceImpl implements RoleService {
     private final MaterialsRepository materialsRepository;
     private final RoleMaterialsRepository roleMaterialsRepository;
     private final RoleRepository roleRepository;
-    private final com.techmate.techmate.Service.role.mapper.RoleMapper roleMapper;
-    private final com.techmate.techmate.Service.role.validator.RoleValidator roleValidator;
-    private final com.techmate.techmate.Service.role.query.RoleQueryService roleQueryService;
-    private final com.techmate.techmate.Service.role.manager.RoleAssociationManager roleAssociationManager;
+    private final com.techmate.techmate.service.role.mapper.RoleMapper roleMapper;
+    private final com.techmate.techmate.service.role.validator.RoleValidator roleValidator;
+    private final com.techmate.techmate.service.role.query.RoleQueryService roleQueryService;
+    private final com.techmate.techmate.service.role.manager.RoleAssociationManager roleAssociationManager;
 
     public RoleServiceImpl(UsuarioRoleRepository usuarioRoleRepository,
                            MaterialsRepository materialsRepository,
                            RoleMaterialsRepository roleMaterialsRepository,
                            RoleRepository roleRepository,
-                           com.techmate.techmate.Service.role.mapper.RoleMapper roleMapper,
-                           com.techmate.techmate.Service.role.validator.RoleValidator roleValidator,
-                           com.techmate.techmate.Service.role.query.RoleQueryService roleQueryService,
-                           com.techmate.techmate.Service.role.manager.RoleAssociationManager roleAssociationManager) {
+                           com.techmate.techmate.service.role.mapper.RoleMapper roleMapper,
+                           com.techmate.techmate.service.role.validator.RoleValidator roleValidator,
+                           com.techmate.techmate.service.role.query.RoleQueryService roleQueryService,
+                           com.techmate.techmate.service.role.manager.RoleAssociationManager roleAssociationManager) {
         this.usuarioRoleRepository = usuarioRoleRepository;
         this.materialsRepository = materialsRepository;
         this.roleMaterialsRepository = roleMaterialsRepository;
@@ -99,3 +99,4 @@ public class RoleServiceImpl implements RoleService {
     }
 
 }
+

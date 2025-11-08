@@ -1,9 +1,9 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.Date;
 import java.util.List;
 
-import com.techmate.techmate.Entity.Status;
+import com.techmate.techmate.entity.Status;
 
 import lombok.Data;
 
@@ -31,3 +31,4 @@ public class BorrowDTO {
     // Añadir la lista de detalles del préstamo
     private List<DetailsBorrowDTO> details; // Cambiado aquí
 }
+

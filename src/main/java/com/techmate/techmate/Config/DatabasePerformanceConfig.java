@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import javax.sql.DataSource;
 
@@ -153,3 +153,4 @@ public class DatabasePerformanceConfig {
         );
     }
 }
+

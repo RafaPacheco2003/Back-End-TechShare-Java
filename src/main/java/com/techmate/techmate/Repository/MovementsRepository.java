@@ -183,3 +183,4 @@ public interface MovementsRepository extends JpaRepository<Movements, Integer> {
     List<Movements> findByMoveType(MoveType moveType);
     List<Movements> findByMovementDateBetween(Date startDate, Date endDate);
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.manager;
+package com.techmate.techmate.service.materials.manager;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,3 +45,4 @@ public class MaterialsStockManager {
         materialsRepository.save(m);
     }
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.role.validator;
+package com.techmate.techmate.service.role.validator;
 
 import org.springframework.stereotype.Component;
 
@@ -19,3 +19,4 @@ public class RoleValidator {
         }
     }
 }
+

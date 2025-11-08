@@ -1,4 +1,4 @@
-package com.techmate.techmate.Validation;
+package com.techmate.techmate.validation;
 
 import com.techmate.techmate.repository.MaterialsRepository;
 import jakarta.validation.ConstraintValidator;
@@ -23,3 +23,4 @@ public class UniqueMaterialNameValidator implements ConstraintValidator<UniqueMa
         return !materialsRepository.existsByName(name);
     }
 }
+

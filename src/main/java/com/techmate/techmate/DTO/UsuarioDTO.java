@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.Set;
 import lombok.Data;
@@ -14,3 +14,4 @@ public class UsuarioDTO {
     private Set<String> roles; // Convertido a un Set de Strings para simplificar los roles
 
 }
+

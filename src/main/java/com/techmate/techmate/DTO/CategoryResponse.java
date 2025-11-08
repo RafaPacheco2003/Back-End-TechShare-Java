@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 /**
  * DTO usado para respuestas de categoría que se envían al cliente.

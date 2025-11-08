@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,3 +15,4 @@ public interface UserService {
     // Agregado método de actualización
     Optional<UsuarioDTO> updateUser(Integer id, UsuarioDTO usuarioDTO);
 }
+

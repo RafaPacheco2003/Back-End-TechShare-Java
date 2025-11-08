@@ -1,13 +1,13 @@
-package com.techmate.techmate.Service.role.query;
+package com.techmate.techmate.service.role.query;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.techmate.techmate.Service.role.mapper.RoleMapper;
 import com.techmate.techmate.dto.RoleDTO;
 import com.techmate.techmate.repository.RoleRepository;
+import com.techmate.techmate.service.role.mapper.RoleMapper;
 
 @Component
 public class RoleQueryService {
@@ -28,3 +28,4 @@ public class RoleQueryService {
         return roleRepository.findById(id).map(roleMapper::toDTO).orElse(null);
     }
 }
+

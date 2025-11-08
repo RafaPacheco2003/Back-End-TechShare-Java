@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.mapper;
+package com.techmate.techmate.service.materials.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.techmate.techmate.Service.RoleService;
-import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.dto.MaterialRequest;
 import com.techmate.techmate.dto.MaterialResponse;
 import com.techmate.techmate.dto.MaterialsDTO;
@@ -17,6 +15,8 @@ import com.techmate.techmate.entity.RoleMaterials;
 import com.techmate.techmate.entity.SubCategories;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.SubCategoriesRepository;
+import com.techmate.techmate.service.RoleService;
+import com.techmate.techmate.service.SubCategoriesService;
 
 /**
  * Mapper especializado para Materials (Entity <-> DTO).
@@ -145,3 +145,4 @@ public class MaterialsMapper {
         return materials;
     }
 }
+

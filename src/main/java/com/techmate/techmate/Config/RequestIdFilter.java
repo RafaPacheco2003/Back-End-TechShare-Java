@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -86,3 +86,4 @@ public class RequestIdFilter extends OncePerRequestFilter {
         return request.getRemoteAddr();
     }
 }
+

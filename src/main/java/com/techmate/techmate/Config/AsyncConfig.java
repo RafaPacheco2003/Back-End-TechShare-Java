@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -32,3 +32,4 @@ public class AsyncConfig {
         return executor;
     }
 }
+

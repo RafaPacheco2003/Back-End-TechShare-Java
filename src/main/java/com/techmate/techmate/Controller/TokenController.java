@@ -1,11 +1,12 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 
 
-import com.techmate.techmate.Service.TokenService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.techmate.techmate.service.TokenService;
 
 
 @RestController
@@ -28,4 +29,5 @@ public class TokenController {
         return ResponseEntity.ok(userId);
     }
 }
+
 

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.User;
+package com.techmate.techmate.service.User;
 
 import java.util.*;
 
@@ -19,3 +19,4 @@ public interface BorrowUserService {
     Integer getUserIdFromToken(String token);
     Optional<List<Integer>> getRolesFromToken(String token);
 }
+

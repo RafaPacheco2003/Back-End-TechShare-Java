@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.movements.validator;
+package com.techmate.techmate.service.movements.validator;
 
 import org.springframework.stereotype.Component;
 
@@ -13,3 +13,4 @@ public class MovementValidator {
         }
     }
 }
+

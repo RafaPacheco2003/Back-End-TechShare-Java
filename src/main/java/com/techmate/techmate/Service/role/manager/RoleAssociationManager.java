@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.role.manager;
+package com.techmate.techmate.service.role.manager;
 
 import java.util.List;
 
@@ -38,3 +38,4 @@ public class RoleAssociationManager {
         usuarioRoleRepository.deleteAll(usuarioRoles);
     }
 }
+

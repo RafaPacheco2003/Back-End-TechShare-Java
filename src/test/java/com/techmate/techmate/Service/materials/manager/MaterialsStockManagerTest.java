@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.manager;
+package com.techmate.techmate.service.materials.manager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

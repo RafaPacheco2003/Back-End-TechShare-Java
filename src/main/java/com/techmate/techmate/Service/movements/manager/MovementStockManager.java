@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.movements.manager;
+package com.techmate.techmate.service.movements.manager;
 
 import org.springframework.stereotype.Component;
 
@@ -36,3 +36,4 @@ public class MovementStockManager {
         }
     }
 }
+

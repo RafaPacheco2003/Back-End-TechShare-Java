@@ -36,3 +36,4 @@ public record MovementStatsDTO(
                uniqueMaterials >= 0;
     }
 }
+

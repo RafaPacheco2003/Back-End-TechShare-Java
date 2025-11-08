@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.movements.mapper;
+package com.techmate.techmate.service.movements.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -38,3 +38,4 @@ public class MovementMapper {
         return dto;
     }
 }
+

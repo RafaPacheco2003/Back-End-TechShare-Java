@@ -47,3 +47,4 @@ public class DetailsBorrow {
         return this.borrow != null ? this.borrow.getBorrowId() : null;
     }
 }
+

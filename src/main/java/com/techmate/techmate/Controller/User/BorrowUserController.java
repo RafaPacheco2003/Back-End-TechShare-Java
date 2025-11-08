@@ -1,5 +1,5 @@
 // BorrowUserController.java
-package com.techmate.techmate.Controller.User;
+package com.techmate.techmate.controller.User;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import com.techmate.techmate.Service.User.BorrowUserService;
+import com.techmate.techmate.service.User.BorrowUserService;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.dto.DetailsBorrowDTO;
 
@@ -88,3 +88,4 @@ public class BorrowUserController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
+

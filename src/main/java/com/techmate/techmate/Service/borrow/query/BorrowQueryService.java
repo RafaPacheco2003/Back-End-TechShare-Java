@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.borrow.query;
+package com.techmate.techmate.service.borrow.query;
 
 import org.springframework.stereotype.Component;
 
@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.techmate.techmate.Service.borrow.mapper.BorrowMapper;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.entity.Status;
 import com.techmate.techmate.repository.BorrowRepository;
+import com.techmate.techmate.service.borrow.mapper.BorrowMapper;
 
 /**
  * 🎯 Servicio de consultas especializado para préstamos siguiendo SRP.

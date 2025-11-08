@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
-import com.techmate.techmate.DTO.BorrowDTO;
-import com.techmate.techmate.Service.borrow.mapper.BorrowMapper;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.dto.BorrowResponse;
-import com.techmate.techmate.service.borrow.mapper.BorrowMapper;.mapper.BorrowMapper;
+import com.techmate.techmate.entity.Status;
+import com.techmate.techmate.service.borrow.mapper.BorrowMapper;
+import com.techmate.techmate.service.BorrowService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -76,3 +76,4 @@ public ResponseEntity<?> updateBorrowStatus(
 
 
 }
+

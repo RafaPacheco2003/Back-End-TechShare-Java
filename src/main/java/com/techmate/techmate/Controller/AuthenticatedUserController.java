@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.techmate.techmate.Security.UserDetailsImpl;
+import com.techmate.techmate.security.UserDetailsImpl;
 import com.techmate.techmate.dto.CurrentUserDTO;
 
 /**
@@ -66,3 +66,4 @@ public class AuthenticatedUserController {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado");
     }
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO.response;
+package com.techmate.techmate.dto.response;
 
 /**
  * DTO para estadísticas de movimientos por usuario.

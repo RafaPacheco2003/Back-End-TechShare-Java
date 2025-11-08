@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.validator;
+package com.techmate.techmate.service.materials.validator;
 
 import org.springframework.stereotype.Component;
 
@@ -52,3 +52,4 @@ public class MaterialsValidator {
         }
     }
 }
+

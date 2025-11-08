@@ -2,7 +2,7 @@ package com.techmate.techmate.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.techmate.techmate.Entity.Borrow;
+import com.techmate.techmate.entity.Borrow;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

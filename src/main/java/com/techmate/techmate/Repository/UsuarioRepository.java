@@ -31,3 +31,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer>{
     void enableUserById(@Param("userId") Integer userId);
 
 }
+
+

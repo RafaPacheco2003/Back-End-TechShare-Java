@@ -13,3 +13,5 @@ public interface SubCategoriesRepository extends JpaRepository<SubCategories, In
 
     SubCategories findByName(String name);
 }
+
+

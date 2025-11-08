@@ -1,7 +1,7 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
-import com.techmate.techmate.Service.TokenService;
 import com.techmate.techmate.security.TokenUtils;
+import com.techmate.techmate.service.TokenService;
 
 import io.jsonwebtoken.Claims;
 
@@ -64,3 +64,4 @@ public class TokenServiceImpl implements TokenService {
     }
 
 }
+

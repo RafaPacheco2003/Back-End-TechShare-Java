@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.borrow.validator;
+package com.techmate.techmate.service.borrow.validator;
 
 import org.springframework.stereotype.Component;
 

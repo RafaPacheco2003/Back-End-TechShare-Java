@@ -1,14 +1,14 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Primary;
 
 import java.util.*;
 
-import com.techmate.techmate.Service.BorrowService;
-import com.techmate.techmate.Service.borrow.mapper.BorrowMapper;
-import com.techmate.techmate.Service.borrow.processor.BorrowStateProcessor;
-import com.techmate.techmate.Service.borrow.query.BorrowQueryService;
+import com.techmate.techmate.service.BorrowService;
+import com.techmate.techmate.service.borrow.mapper.BorrowMapper;
+import com.techmate.techmate.service.borrow.processor.BorrowStateProcessor;
+import com.techmate.techmate.service.borrow.query.BorrowQueryService;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.entity.Status;
 import com.techmate.techmate.security.TokenUtils;

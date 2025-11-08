@@ -25,3 +25,5 @@ public interface UsuarioRoleRepository extends JpaRepository<UsuarioRole, Intege
     @Query("SELECT r.name FROM UsuarioRole ur JOIN ur.role r WHERE ur.usuario.id = :usuarioId")
     List<String> findRoleNamesByUsuarioId(@Param("usuarioId") Integer usuarioId);
 }
+
+

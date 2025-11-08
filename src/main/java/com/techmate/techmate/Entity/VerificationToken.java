@@ -1,4 +1,4 @@
-package com.techmate.techmate.Entity;
+package com.techmate.techmate.entity;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -48,3 +48,5 @@ public class VerificationToken {
         return new Date(cal.getTime().getTime());
     }
 }
+
+

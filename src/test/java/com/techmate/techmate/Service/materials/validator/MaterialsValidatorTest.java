@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.validator;
+package com.techmate.techmate.service.materials.validator;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;

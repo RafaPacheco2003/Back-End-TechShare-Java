@@ -9,3 +9,4 @@ public class InsufficientStockException extends BusinessException {
         super("INSUFFICIENT_STOCK", message, cause);
     }
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.movements.query;
+package com.techmate.techmate.service.movements.query;
 
 import java.util.Date;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.techmate.techmate.Service.movements.mapper.MovementMapper;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.entity.MoveType;
 import com.techmate.techmate.repository.MovementsRepository;
+import com.techmate.techmate.service.movements.mapper.MovementMapper;
 
 @Component
 public class MovementQueryService {
@@ -34,3 +34,4 @@ public class MovementQueryService {
         return movementsRepository.findByMovementDateBetween(start, end).stream().map(m -> movementMapper.toDTO(m, null, null)).collect(Collectors.toList());
     }
 }
+

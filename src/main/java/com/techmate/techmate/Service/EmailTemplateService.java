@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import org.springframework.stereotype.Service;
 
@@ -188,3 +188,4 @@ public class EmailTemplateService {
                 """.formatted(userName);
     }
 }
+

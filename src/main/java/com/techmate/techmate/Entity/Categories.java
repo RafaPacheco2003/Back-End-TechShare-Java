@@ -1,4 +1,4 @@
-package com.techmate.techmate.Entity;
+package com.techmate.techmate.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -52,3 +52,4 @@ public class Categories {
 
     
 }
+

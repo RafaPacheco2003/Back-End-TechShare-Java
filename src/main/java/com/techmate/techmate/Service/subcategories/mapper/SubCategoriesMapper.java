@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.subcategories.mapper;
+package com.techmate.techmate.service.subcategories.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -26,3 +26,4 @@ public class SubCategoriesMapper {
         return new SubCategoryResponse(dto.getSubCategoriesId(), dto.getName(), image, dto.getCategoryId(), dto.getCategoryName());
     }
 }
+

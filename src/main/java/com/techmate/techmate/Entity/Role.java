@@ -42,3 +42,4 @@ public class Role {
     // Método para agregar materiales a un rol
    
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Service.MaterialsService;
-import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.service.MaterialsService;
+import com.techmate.techmate.validation.ImageValidationStrategy;
 import com.techmate.techmate.dto.MaterialsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
@@ -20,9 +19,10 @@ import com.techmate.techmate.entity.RoleMaterials;
 import com.techmate.techmate.entity.SubCategories;
 import com.techmate.techmate.event.MaterialLowStockEvent;
 import com.techmate.techmate.exception.BusinessException;
-import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.SubCategoriesRepository;
+import com.techmate.techmate.repository.MaterialsRepository;
 
 /**
  * Implementación del servicio de gestión de materiales.
@@ -64,10 +64,10 @@ public class MaterialsServiceImpl implements MaterialsService {
     private final RoleRepository roleRepository;
     private final ImageValidationStrategy imageValidationStrategy;
     private final ImageStorageStrategy imageStorageStrategy;
-    private final com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper;
-    private final com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator;
-    private final com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager;
-    private final com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService;
+    private final com.techmate.techmate.service.materials.mapper.MaterialsMapper materialsMapper;
+    private final com.techmate.techmate.service.materials.validator.MaterialsValidator materialsValidator;
+    private final com.techmate.techmate.service.materials.manager.MaterialsStockManager materialsStockManager;
+    private final com.techmate.techmate.service.materials.query.MaterialsQueryService materialsQueryService;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -83,10 +83,10 @@ public class MaterialsServiceImpl implements MaterialsService {
             RoleRepository roleRepository,
             ImageValidationStrategy imageValidationStrategy,
             ImageStorageStrategy imageStorageStrategy,
-            com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper,
-            com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator,
-            com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager,
-            com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService,
+            com.techmate.techmate.service.materials.mapper.MaterialsMapper materialsMapper,
+            com.techmate.techmate.service.materials.validator.MaterialsValidator materialsValidator,
+            com.techmate.techmate.service.materials.manager.MaterialsStockManager materialsStockManager,
+            com.techmate.techmate.service.materials.query.MaterialsQueryService materialsQueryService,
             ApplicationEventPublisher eventPublisher) {
         this.materialsRepository = materialsRepository;
         this.subCategoriesRepository = subCategoriesRepository;
@@ -378,3 +378,4 @@ public class MaterialsServiceImpl implements MaterialsService {
     }
 
 }
+

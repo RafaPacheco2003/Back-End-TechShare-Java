@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.mapper;
+package com.techmate.techmate.service.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -21,3 +21,4 @@ public class AuthMapper {
         return u;
     }
 }
+

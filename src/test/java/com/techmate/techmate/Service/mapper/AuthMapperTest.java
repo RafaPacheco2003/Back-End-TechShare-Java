@@ -1,7 +1,6 @@
-package com.techmate.techmate.Service.mapper;
+package com.techmate.techmate.service.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import com.techmate.techmate.dto.RegisterRequest;
 import com.techmate.techmate.entity.Usuario;
 import org.junit.jupiter.api.Test;

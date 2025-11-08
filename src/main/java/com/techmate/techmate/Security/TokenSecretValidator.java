@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;

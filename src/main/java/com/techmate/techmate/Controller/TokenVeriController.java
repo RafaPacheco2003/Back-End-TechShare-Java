@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.techmate.techmate.dto.VerificationResponse;
-import com.techmate.techmate.Service.VerificationService;
+import com.techmate.techmate.service.VerificationService;
 
 @RestController
 @RequestMapping("/auth")  //Agregar prefijo /auth
@@ -64,3 +64,4 @@ public class TokenVeriController {
     }
 
 }
+

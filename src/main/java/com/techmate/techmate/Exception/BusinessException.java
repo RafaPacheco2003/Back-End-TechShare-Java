@@ -1,4 +1,4 @@
-package com.techmate.techmate.Exception;
+package com.techmate.techmate.exception;
 
 /**
  * Excepción de negocio base para la aplicación.

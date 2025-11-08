@@ -1,10 +1,10 @@
-package com.techmate.techmate.ImageStorage.Impl;
+package com.techmate.techmate.imageStorage.Impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,3 +52,4 @@ public class FileSystemImageStorage implements ImageStorageStrategy {
         }
     }
 }
+

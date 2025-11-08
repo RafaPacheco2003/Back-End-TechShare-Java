@@ -1,14 +1,14 @@
-package com.techmate.techmate.Service.categories.query;
+package com.techmate.techmate.service.categories.query;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
 import com.techmate.techmate.dto.CategoriesDTO;
 import com.techmate.techmate.entity.Categories;
 import com.techmate.techmate.repository.CategoriesRepository;
+import com.techmate.techmate.service.categories.mapper.CategoriesMapper;
 
 @Component
 public class CategoriesQueryService {
@@ -30,3 +30,4 @@ public class CategoriesQueryService {
         return categoriesMapper.toDTO(c);
     }
 }
+

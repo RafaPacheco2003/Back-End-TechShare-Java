@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.Service.SubCategoriesService;
-import com.techmate.techmate.Service.subcategories.mapper.SubCategoriesMapper;
 // ImageStorageStrategy not needed in controller after refactor
 import com.techmate.techmate.dto.SubCategoriesDTO;
 import com.techmate.techmate.dto.SubCategoryRequest;
 import com.techmate.techmate.dto.SubCategoryResponse;
+import com.techmate.techmate.service.SubCategoriesService;
+import com.techmate.techmate.service.subcategories.mapper.SubCategoriesMapper;
 
 // CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
@@ -125,3 +125,4 @@ public class SubcategoriesController {
                 .body(imageBytes);
     }
 }
+

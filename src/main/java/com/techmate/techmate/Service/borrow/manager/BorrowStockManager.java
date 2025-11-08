@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.borrow.manager;
+package com.techmate.techmate.service.borrow.manager;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

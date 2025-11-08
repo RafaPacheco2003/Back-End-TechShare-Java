@@ -1,7 +1,7 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
-import com.techmate.techmate.Security.JWTAuthenticationFilter;
-import com.techmate.techmate.Security.JWTAuthorizationFilter;
+import com.techmate.techmate.security.JWTAuthenticationFilter;
+import com.techmate.techmate.security.JWTAuthorizationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Configuración de seguridad con JWT - CSRF deshabilitado
@@ -112,3 +111,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

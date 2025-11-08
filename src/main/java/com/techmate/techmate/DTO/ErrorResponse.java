@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.List;
 
@@ -17,3 +17,4 @@ public class ErrorResponse {
         this.errors = errors;
     }
 }
+

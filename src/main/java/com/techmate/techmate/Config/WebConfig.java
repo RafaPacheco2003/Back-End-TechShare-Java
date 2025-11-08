@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;

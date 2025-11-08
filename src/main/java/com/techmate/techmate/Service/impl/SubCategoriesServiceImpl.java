@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,15 +7,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Service.CategoriesService;
-import com.techmate.techmate.Service.SubCategoriesService;
-import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.validation.ImageValidationStrategy;
 import com.techmate.techmate.dto.SubCategoriesDTO;
 import com.techmate.techmate.entity.Categories;
 import com.techmate.techmate.entity.SubCategories;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 import com.techmate.techmate.repository.CategoriesRepository;
 import com.techmate.techmate.repository.SubCategoriesRepository;
+import com.techmate.techmate.service.CategoriesService;
+import com.techmate.techmate.service.SubCategoriesService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -183,3 +183,4 @@ public class SubCategoriesServiceImpl implements SubCategoriesService {
         return subCategory != null ? subCategory.getName() : null;
     }
 }
+

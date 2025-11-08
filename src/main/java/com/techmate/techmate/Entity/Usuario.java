@@ -1,4 +1,4 @@
-package com.techmate.techmate.Entity;
+package com.techmate.techmate.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
@@ -63,3 +63,4 @@ public class Usuario {
         Mujer, Hombre, Otro
     }
 }
+

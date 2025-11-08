@@ -1,7 +1,7 @@
 package com.techmate.techmate.actuator;
 
-import com.techmate.techmate.Entity.Status;
-import com.techmate.techmate.Repository.BorrowRepository;
+import com.techmate.techmate.entity.Status;
+import com.techmate.techmate.repository.BorrowRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -86,3 +86,4 @@ public class BorrowSystemHealthIndicator implements HealthIndicator {
         }
     }
 }
+

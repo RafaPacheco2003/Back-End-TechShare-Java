@@ -1,10 +1,10 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
 import com.techmate.techmate.dto.MaterialsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.entity.SubCategories;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.RoleMaterialsRepository;
 import com.techmate.techmate.repository.RoleRepository;
@@ -62,19 +62,19 @@ class MaterialsServiceImplTest {
     private ImageStorageStrategy imageStorageStrategy;
 
     @Mock
-    private com.techmate.techmate.Validation.ImageValidationStrategy imageValidationStrategy;
+    private com.techmate.techmate.validation.ImageValidationStrategy imageValidationStrategy;
 
     @Mock
-    private com.techmate.techmate.Service.materials.mapper.MaterialsMapper materialsMapper;
+    private com.techmate.techmate.service.materials.mapper.MaterialsMapper materialsMapper;
 
     @Mock
-    private com.techmate.techmate.Service.materials.validator.MaterialsValidator materialsValidator;
+    private com.techmate.techmate.service.materials.validator.MaterialsValidator materialsValidator;
 
     @Mock
-    private com.techmate.techmate.Service.materials.manager.MaterialsStockManager materialsStockManager;
+    private com.techmate.techmate.service.materials.manager.MaterialsStockManager materialsStockManager;
 
     @Mock
-    private com.techmate.techmate.Service.materials.query.MaterialsQueryService materialsQueryService;
+    private com.techmate.techmate.service.materials.query.MaterialsQueryService materialsQueryService;
 
     @Mock
     private MultipartFile mockImage;

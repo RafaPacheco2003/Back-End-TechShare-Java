@@ -1,11 +1,11 @@
-package com.techmate.techmate.ImageStorage.Impl;
+package com.techmate.techmate.imageStorage.Impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -292,3 +292,4 @@ public class OptimizedImageStorage implements ImageStorageStrategy {
         }
     }
 }
+

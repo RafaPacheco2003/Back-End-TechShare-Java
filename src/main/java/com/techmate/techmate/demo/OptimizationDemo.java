@@ -101,3 +101,4 @@ public class OptimizationDemo implements CommandLineRunner {
         System.out.println("✅ Queries ejecutadas: 2 (1 para datos + 1 para count)\n");
     }
 }
+

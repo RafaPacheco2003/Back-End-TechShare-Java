@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.role.mapper;
+package com.techmate.techmate.service.role.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -24,3 +24,4 @@ public class RoleMapper {
         return role;
     }
 }
+

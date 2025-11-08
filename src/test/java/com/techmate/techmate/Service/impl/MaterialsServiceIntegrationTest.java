@@ -1,11 +1,12 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
-import com.techmate.techmate.Service.MaterialsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.techmate.techmate.service.MaterialsService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

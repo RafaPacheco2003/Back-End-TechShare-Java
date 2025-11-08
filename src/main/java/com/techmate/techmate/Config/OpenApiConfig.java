@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,3 +56,4 @@ public class OpenApiConfig {
 
     // OpenApiCustomiser bean removed: schema registered inside customOpenAPI to avoid runtime dependency issues
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.User.mapper;
+package com.techmate.techmate.service.User.mapper;
 
 import java.util.Set;
 
@@ -22,3 +22,4 @@ public class UserMapper {
         return dto;
     }
 }
+

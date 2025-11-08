@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import java.util.*;
 
@@ -25,5 +25,6 @@ public interface BorrowService {
 
    
 }
+
 
 

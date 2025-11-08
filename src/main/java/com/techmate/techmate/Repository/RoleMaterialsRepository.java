@@ -16,3 +16,5 @@ public interface RoleMaterialsRepository extends JpaRepository<RoleMaterials, In
      // Definir el método personalizado para buscar por material
      List<RoleMaterials> findByMaterials(Materials material);
 }
+
+

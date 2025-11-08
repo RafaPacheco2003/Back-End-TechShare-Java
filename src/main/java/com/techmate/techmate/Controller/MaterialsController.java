@@ -1,17 +1,17 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techmate.techmate.Service.EmailService;
-import com.techmate.techmate.Service.MaterialsService;
-import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
-import com.techmate.techmate.Config.AppProperties;
-import com.techmate.techmate.DTO.MaterialRequest;
-import com.techmate.techmate.DTO.MaterialResponse;
-import com.techmate.techmate.DTO.MaterialsDTO;
-import com.techmate.techmate.DTO.PageResponse;
+import com.techmate.techmate.config.AppProperties;
+import com.techmate.techmate.service.materials.mapper.MaterialsMapper;
+import com.techmate.techmate.service.MaterialsService;
+import com.techmate.techmate.service.EmailService;
+import com.techmate.techmate.dto.MaterialRequest;
+import com.techmate.techmate.dto.MaterialResponse;
+import com.techmate.techmate.dto.MaterialsDTO;
+import com.techmate.techmate.dto.PageResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -229,3 +229,4 @@ public class MaterialsController {
                 .body(imageBytes);
     }
 }
+

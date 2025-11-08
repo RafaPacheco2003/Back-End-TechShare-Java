@@ -1,11 +1,10 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Calendar;
 
-import com.techmate.techmate.Service.VerificationService;
 import com.techmate.techmate.dto.VerificationResponse;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.entity.VerificationToken;

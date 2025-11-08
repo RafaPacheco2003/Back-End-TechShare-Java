@@ -1,4 +1,4 @@
-package com.techmate.techmate.Entity;
+package com.techmate.techmate.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -69,3 +69,4 @@ public class Borrow {
         return 0;
     }
 }
+

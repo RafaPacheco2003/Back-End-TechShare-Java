@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,3 +13,4 @@ public class RoleDTO {
     private String name;
 
 }
+

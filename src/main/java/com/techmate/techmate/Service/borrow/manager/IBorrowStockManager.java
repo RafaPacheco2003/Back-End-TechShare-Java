@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.borrow.manager;
+package com.techmate.techmate.service.borrow.manager;
 
 /**
  * Contrato para la gestión de stock en operaciones de préstamo.
@@ -10,3 +10,4 @@ public interface IBorrowStockManager {
     int getAvailableStock(Integer materialId);
     boolean isMaterialBorrowable(Integer materialId);
 }
+

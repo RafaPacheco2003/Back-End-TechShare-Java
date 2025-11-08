@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -150,3 +150,4 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
                path.startsWith("/api-docs");
     }
 }
+

@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
-import com.techmate.techmate.Service.mapper.AuthMapper;
 import com.techmate.techmate.config.AppProperties;
 import com.techmate.techmate.dto.RegisterRequest;
 import com.techmate.techmate.entity.Usuario;
@@ -14,6 +13,10 @@ import com.techmate.techmate.entity.VerificationToken;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.VerificationTokenRepository;
+import com.techmate.techmate.service.AuthService;
+import com.techmate.techmate.service.EmailService;
+import com.techmate.techmate.service.EmailTemplateService;
+import com.techmate.techmate.service.mapper.AuthMapper;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

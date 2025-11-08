@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.User.validator;
+package com.techmate.techmate.service.User.validator;
 
 import java.util.Set;
 
@@ -25,3 +25,4 @@ public class UserValidator {
         }
     }
 }
+

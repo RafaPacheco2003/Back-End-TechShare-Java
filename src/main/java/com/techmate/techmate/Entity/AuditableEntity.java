@@ -39,3 +39,4 @@ public abstract class AuditableEntity {
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
 }
+

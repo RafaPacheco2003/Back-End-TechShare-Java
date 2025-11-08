@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.User.query;
+package com.techmate.techmate.service.User.query;
 
 import java.util.List;
 import java.util.Set;
@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.techmate.techmate.Service.User.mapper.UserMapper;
 import com.techmate.techmate.dto.UsuarioDTO;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.entity.UsuarioRole;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
+import com.techmate.techmate.service.User.mapper.UserMapper;
 
 @Component
 public class UserQueryService {

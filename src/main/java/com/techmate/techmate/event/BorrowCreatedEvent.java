@@ -1,9 +1,10 @@
-package com.techmate.techmate.Event;
+package com.techmate.techmate.event;
 
-import com.techmate.techmate.Entity.Borrow;
 import lombok.Getter;
 
 import java.util.Date;
+
+import com.techmate.techmate.entity.Borrow;
 
 /**
  * Event fired when a borrow operation is created.
@@ -45,3 +46,4 @@ public class BorrowCreatedEvent extends DomainEvent {
         );
     }
 }
+

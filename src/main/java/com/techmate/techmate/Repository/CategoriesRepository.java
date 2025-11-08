@@ -39,3 +39,4 @@ Categories findByName(String name);
     @Query("SELECT c.name FROM Categories c WHERE c.id = :categoryId")
     String findNameByCategoryId(@Param("categoryId") int categoryId);
 }
+

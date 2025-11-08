@@ -191,3 +191,4 @@ public class UserDetailsImpl implements UserDetails {
         return this.enabled; // Usa el valor real del campo isEnabled del usuario
     }
 }
+

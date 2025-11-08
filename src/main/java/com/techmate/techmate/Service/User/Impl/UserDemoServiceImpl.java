@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.User.Impl;
+package com.techmate.techmate.service.User.Impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.Service.TokenService;
-import com.techmate.techmate.Service.User.UserDemoService;
 import com.techmate.techmate.dto.UsuarioDTO;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.entity.UsuarioRole;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
+import com.techmate.techmate.service.TokenService;
+import com.techmate.techmate.service.User.UserDemoService;
 
 @Service
 public class UserDemoServiceImpl implements UserDemoService {
@@ -69,3 +69,4 @@ public class UserDemoServiceImpl implements UserDemoService {
     }
 
 }
+

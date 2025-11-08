@@ -1,9 +1,9 @@
-package com.techmate.techmate.Validation.Impl;
+package com.techmate.techmate.validation.impl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.validation.ImageValidationStrategy;
 
 @Component
 public class ExtensionValidationStrategy implements ImageValidationStrategy {

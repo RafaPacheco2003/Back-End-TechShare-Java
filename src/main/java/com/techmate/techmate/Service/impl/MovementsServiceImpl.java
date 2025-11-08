@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 
 import org.slf4j.Logger;
@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
-import com.techmate.techmate.Service.MaterialsService;
-import com.techmate.techmate.Service.MovementsService;
+import com.techmate.techmate.service.MaterialsService;
+import com.techmate.techmate.service.MovementsService;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.MoveType;
@@ -35,20 +35,20 @@ public class MovementsServiceImpl implements MovementsService {
     private final UserDetailsServiceImpl userService;
     private final MaterialsRepository materialsRepository;
     private final MaterialsService materialsService;
-    private final com.techmate.techmate.Service.movements.mapper.MovementMapper movementMapper;
-    private final com.techmate.techmate.Service.movements.validator.MovementValidator movementValidator;
-    private final com.techmate.techmate.Service.movements.manager.MovementStockManager movementStockManager;
-    private final com.techmate.techmate.Service.movements.query.MovementQueryService movementQueryService;
+    private final com.techmate.techmate.service.movements.mapper.MovementMapper movementMapper;
+    private final com.techmate.techmate.service.movements.validator.MovementValidator movementValidator;
+    private final com.techmate.techmate.service.movements.manager.MovementStockManager movementStockManager;
+    private final com.techmate.techmate.service.movements.query.MovementQueryService movementQueryService;
 
     public MovementsServiceImpl(MovementsRepository movementsRepository,
                                 UsuarioRepository usuarioRepository,
                                 UserDetailsServiceImpl userService,
                                 MaterialsRepository materialsRepository,
                                 MaterialsService materialsService,
-                                com.techmate.techmate.Service.movements.mapper.MovementMapper movementMapper,
-                                com.techmate.techmate.Service.movements.validator.MovementValidator movementValidator,
-                                com.techmate.techmate.Service.movements.manager.MovementStockManager movementStockManager,
-                                com.techmate.techmate.Service.movements.query.MovementQueryService movementQueryService) {
+                                com.techmate.techmate.service.movements.mapper.MovementMapper movementMapper,
+                                com.techmate.techmate.service.movements.validator.MovementValidator movementValidator,
+                                com.techmate.techmate.service.movements.manager.MovementStockManager movementStockManager,
+                                com.techmate.techmate.service.movements.query.MovementQueryService movementQueryService) {
         this.movementsRepository = movementsRepository;
         this.usuarioRepository = usuarioRepository;
         this.userService = userService;
@@ -201,3 +201,4 @@ public class MovementsServiceImpl implements MovementsService {
     }
 
 }
+

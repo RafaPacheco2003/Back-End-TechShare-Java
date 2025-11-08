@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.borrow.mapper;
+package com.techmate.techmate.service.borrow.mapper;
 
 import org.springframework.stereotype.Component;
 

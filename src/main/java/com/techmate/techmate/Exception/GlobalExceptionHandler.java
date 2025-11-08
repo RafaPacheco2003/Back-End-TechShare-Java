@@ -1,6 +1,5 @@
-package com.techmate.techmate.Exception;
+package com.techmate.techmate.exception;
 
-import com.techmate.techmate.DTO.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.techmate.techmate.dto.ApiErrorResponse;
+
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import jakarta.validation.ConstraintViolationException;
@@ -223,3 +225,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }
+

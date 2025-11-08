@@ -1,10 +1,10 @@
-package com.techmate.techmate.Controller;
+package com.techmate.techmate.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.techmate.techmate.Service.EmailTemplateService;
+import com.techmate.techmate.service.EmailTemplateService;
 
 /**
  * Controlador temporal para preview de emails
@@ -46,3 +46,4 @@ public class EmailPreviewController {
         return emailTemplateService.generateWelcomeEmail(userName);
     }
 }
+

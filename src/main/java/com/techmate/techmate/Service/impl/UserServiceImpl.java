@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,16 +7,16 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.techmate.techmate.Service.UserService;
-import com.techmate.techmate.Service.User.mapper.UserMapper;
-import com.techmate.techmate.Service.User.validator.UserValidator;
 import com.techmate.techmate.dto.UsuarioDTO;
 import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
-import com.techmate.techmate.Service.User.query.UserQueryService;
+import com.techmate.techmate.service.UserService;
+import com.techmate.techmate.service.User.mapper.UserMapper;
+import com.techmate.techmate.service.User.query.UserQueryService;
+import com.techmate.techmate.service.User.validator.UserValidator;
 
 @Service
 public class UserServiceImpl implements UserService {

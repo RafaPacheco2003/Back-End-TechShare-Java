@@ -1,19 +1,19 @@
-package com.techmate.techmate.Service.borrow.processor;
+package com.techmate.techmate.service.borrow.processor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-import com.techmate.techmate.Service.borrow.validator.BorrowStateValidator;
 import com.techmate.techmate.entity.Borrow;
 import com.techmate.techmate.entity.DetailsBorrow;
 import com.techmate.techmate.entity.Status;
 import com.techmate.techmate.entity.Usuario;
-import com.techmate.techmate.Service.borrow.manager.BorrowStockManager;
 import com.techmate.techmate.exception.BusinessException;
 import com.techmate.techmate.repository.BorrowRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
+import com.techmate.techmate.service.borrow.manager.BorrowStockManager;
+import com.techmate.techmate.service.borrow.validator.BorrowStateValidator;
 
 /**
  * 🎯 Procesador de transiciones de estado para préstamos siguiendo SRP + Strategy Pattern.

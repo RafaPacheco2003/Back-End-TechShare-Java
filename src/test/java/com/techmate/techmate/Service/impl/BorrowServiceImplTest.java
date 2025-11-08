@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,10 +52,10 @@ class BorrowServiceImplTest {
     private UsuarioRepository usuarioRepository;
 
     @Mock
-    private com.techmate.techmate.Service.borrow.processor.BorrowStateProcessor borrowStateProcessor;
+    private com.techmate.techmate.service.borrow.processor.BorrowStateProcessor borrowStateProcessor;
 
     @Mock
-    private com.techmate.techmate.Service.borrow.manager.IBorrowStockManager borrowStockManager;
+    private com.techmate.techmate.service.borrow.manager.IBorrowStockManager borrowStockManager;
 
     @Mock
     private org.springframework.context.ApplicationEventPublisher eventPublisher;

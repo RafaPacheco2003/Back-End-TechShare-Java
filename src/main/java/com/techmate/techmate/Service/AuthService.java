@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service;
+package com.techmate.techmate.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +13,11 @@ import com.techmate.techmate.entity.Role;
 import com.techmate.techmate.entity.VerificationToken;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.repository.VerificationTokenRepository;
+import com.techmate.techmate.service.mapper.AuthMapper;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.UsuarioRoleRepository;
-import com.techmate.techmate.Service.mapper.AuthMapper;
+
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -142,33 +144,5 @@ public class AuthService {
 
         return "Correo de verificación reenviado. Revisa tu bandeja de entrada.";
     }
-
-    @Transactional
-    public String verifyEmail(String token) {
-        if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException("Token de verificación inválido");
-        }
-
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
-        if (verificationToken == null) {
-            throw new IllegalArgumentException("Token de verificación no encontrado o inválido");
-        }
-
-
-        
-        // Verificar si el token ha expirado
-        if (verificationToken.getExpiryDate().before(new java.util.Date())) {
-            throw new IllegalArgumentException("Token de verificación expirado");
-        }
-
-        Usuario usuario = verificationToken.getUsuario();
-        usuario.setEnabled(true);
-        usuarioRepository.save(usuario);
-
-        // Eliminar el token usado
-        verificationTokenRepository.delete(verificationToken);
-
-        log.info("Cuenta verificada exitosamente para usuario: {}", usuario.getEmail());
-        return "Cuenta verificada exitosamente";
-    }
 }
+

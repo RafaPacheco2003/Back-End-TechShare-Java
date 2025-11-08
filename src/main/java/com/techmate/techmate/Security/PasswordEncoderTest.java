@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

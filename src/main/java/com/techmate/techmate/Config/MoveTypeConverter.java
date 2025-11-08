@@ -1,6 +1,6 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
-import com.techmate.techmate.Entity.MoveType;
+import com.techmate.techmate.entity.MoveType;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -33,3 +33,4 @@ public class MoveTypeConverter implements Converter<String, MoveType> {
         }
     }
 }
+

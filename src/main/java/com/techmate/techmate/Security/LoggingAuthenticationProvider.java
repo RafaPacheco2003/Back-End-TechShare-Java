@@ -1,4 +1,4 @@
-package com.techmate.techmate.Security;
+package com.techmate.techmate.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

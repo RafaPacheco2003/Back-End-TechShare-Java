@@ -9,3 +9,4 @@ public class NotFoundException extends BusinessException {
         super("NOT_FOUND", message, cause);
     }
 }
+

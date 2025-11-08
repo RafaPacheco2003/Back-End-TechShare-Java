@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.techmate.techmate.Service.borrow.manager.IBorrowStockManager;
 import com.techmate.techmate.dto.BorrowDTO;
 import com.techmate.techmate.dto.DetailsBorrowDTO;
 import com.techmate.techmate.entity.Borrow;
@@ -24,7 +23,9 @@ import com.techmate.techmate.repository.DetailsBorrowRepository;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.security.TokenUtils;
-import com.techmate.techmate.Service.BorrowService;
+import com.techmate.techmate.service.BorrowService;
+import com.techmate.techmate.service.borrow.manager.IBorrowStockManager;
+
 @Service
 public class BorrowServiceImpl implements BorrowService {
     private final BorrowRepository borrowRepository;
@@ -346,3 +347,4 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
 }
+

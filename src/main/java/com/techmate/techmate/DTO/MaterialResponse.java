@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 
 import java.util.List;
 
@@ -55,3 +55,4 @@ public class MaterialResponse {
     public List<String> getRoleNames() { return roleNames; }
     public void setRoleNames(List<String> roleNames) { this.roleNames = roleNames; }
 }
+

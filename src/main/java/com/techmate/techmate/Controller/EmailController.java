@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.techmate.techmate.service.EmailService;
-import com.techmate.techmate.service.EmailService;
 
 @RestController
 public class EmailController {
@@ -22,3 +21,4 @@ public class EmailController {
         return "Email sent successfully!";
     }
 }
+

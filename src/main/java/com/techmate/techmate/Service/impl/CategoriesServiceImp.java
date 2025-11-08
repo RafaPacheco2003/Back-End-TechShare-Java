@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.impl;
+package com.techmate.techmate.service.impl;
 
 import java.util.List;
 
@@ -6,15 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.techmate.techmate.ImageStorage.ImageStorageStrategy;
-import com.techmate.techmate.Service.CategoriesService;
-import com.techmate.techmate.Validation.ImageValidationStrategy;
+import com.techmate.techmate.validation.ImageValidationStrategy;
 import com.techmate.techmate.dto.CategoriesDTO;
 import com.techmate.techmate.entity.Categories;
+import com.techmate.techmate.imageStorage.ImageStorageStrategy;
 import com.techmate.techmate.repository.CategoriesRepository;
-import com.techmate.techmate.Service.categories.mapper.CategoriesMapper;
-import com.techmate.techmate.Service.categories.validator.CategoriesValidator;
-import com.techmate.techmate.Service.categories.query.CategoriesQueryService;
+import com.techmate.techmate.service.CategoriesService;
+import com.techmate.techmate.service.categories.mapper.CategoriesMapper;
+import com.techmate.techmate.service.categories.query.CategoriesQueryService;
+import com.techmate.techmate.service.categories.validator.CategoriesValidator;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -172,3 +172,4 @@ public class CategoriesServiceImp implements CategoriesService {
         return category != null ? category.getName() : null;
     }
 }
+

@@ -23,3 +23,4 @@ public class UsuarioRole {
     @JoinColumn(name = "role_id")
     private Role role;
 }
+

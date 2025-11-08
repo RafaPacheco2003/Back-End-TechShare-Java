@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.movements.mapper;
+package com.techmate.techmate.service.movements.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

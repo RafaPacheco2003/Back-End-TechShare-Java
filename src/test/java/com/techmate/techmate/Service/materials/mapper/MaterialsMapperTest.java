@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.materials.mapper;
+package com.techmate.techmate.service.materials.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -6,8 +6,6 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.Optional;
 
-import com.techmate.techmate.Service.RoleService;
-import com.techmate.techmate.Service.SubCategoriesService;
 import com.techmate.techmate.dto.MaterialsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.Role;
@@ -15,6 +13,9 @@ import com.techmate.techmate.entity.RoleMaterials;
 import com.techmate.techmate.entity.SubCategories;
 import com.techmate.techmate.repository.RoleRepository;
 import com.techmate.techmate.repository.SubCategoriesRepository;
+import com.techmate.techmate.service.RoleService;
+import com.techmate.techmate.service.SubCategoriesService;
+import com.techmate.techmate.service.materials.mapper.MaterialsMapper;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

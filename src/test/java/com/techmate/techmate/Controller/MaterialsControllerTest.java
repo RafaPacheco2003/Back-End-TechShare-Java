@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.techmate.techmate.Service.MaterialsService;
-import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
+import com.techmate.techmate.service.MaterialsService;
+import com.techmate.techmate.service.materials.mapper.MaterialsMapper;
 import com.techmate.techmate.dto.MaterialRequest;
 import com.techmate.techmate.dto.MaterialResponse;
 import com.techmate.techmate.dto.MaterialsDTO;
@@ -24,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = com.techmate.techmate.Controller.MaterialsController.class)
+@WebMvcTest(controllers = com.techmate.techmate.controller.MaterialsController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class MaterialsControllerTest {
 
@@ -38,7 +38,7 @@ class MaterialsControllerTest {
     private MaterialsMapper materialsMapper;
 
     @MockitoBean
-    private com.techmate.techmate.Service.EmailService emailService;
+    private com.techmate.techmate.service.EmailService emailService;
 
     @BeforeEach
     void setUp() {

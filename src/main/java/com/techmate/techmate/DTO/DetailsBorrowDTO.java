@@ -1,4 +1,4 @@
-package com.techmate.techmate.DTO;
+package com.techmate.techmate.dto;
 import lombok.Data;
 
 @Data
@@ -11,3 +11,4 @@ public class DetailsBorrowDTO {
     private Integer materialsId;      // ID del material asociado a este detalle
     private Integer borrowId;         // ID del préstamo asociado a este detalle
 }
+

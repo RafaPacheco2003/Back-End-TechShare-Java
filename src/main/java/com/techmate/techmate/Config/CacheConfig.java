@@ -1,4 +1,4 @@
-package com.techmate.techmate.Config;
+package com.techmate.techmate.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -62,3 +62,4 @@ public class CacheConfig {
             .recordStats();                              // Habilita estadísticas
     }
 }
+

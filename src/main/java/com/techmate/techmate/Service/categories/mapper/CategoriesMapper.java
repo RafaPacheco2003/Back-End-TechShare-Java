@@ -1,4 +1,4 @@
-package com.techmate.techmate.Service.categories.mapper;
+package com.techmate.techmate.service.categories.mapper;
 
 import org.springframework.stereotype.Component;
 
@@ -47,3 +47,4 @@ public class CategoriesMapper {
         return c;
     }
 }
+

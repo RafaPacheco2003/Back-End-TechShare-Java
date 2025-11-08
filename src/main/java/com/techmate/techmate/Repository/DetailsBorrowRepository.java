@@ -9,3 +9,5 @@ import com.techmate.techmate.entity.DetailsBorrow;
 public interface DetailsBorrowRepository extends JpaRepository<DetailsBorrow, Integer> {
     // Métodos adicionales si es necesario
 }
+
+

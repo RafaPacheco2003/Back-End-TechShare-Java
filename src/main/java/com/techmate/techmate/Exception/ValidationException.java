@@ -9,3 +9,4 @@ public class ValidationException extends BusinessException {
         super("VALIDATION_ERROR", message, cause);
     }
 }
+

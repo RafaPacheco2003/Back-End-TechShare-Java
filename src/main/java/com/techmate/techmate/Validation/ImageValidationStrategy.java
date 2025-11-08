@@ -1,4 +1,4 @@
-package com.techmate.techmate.Validation;
+package com.techmate.techmate.validation;
 
 import org.springframework.web.multipart.MultipartFile;
 

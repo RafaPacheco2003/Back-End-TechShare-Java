@@ -1,14 +1,14 @@
-package com.techmate.techmate.Service.materials.query;
+package com.techmate.techmate.service.materials.query;
 
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.techmate.techmate.Service.materials.mapper.MaterialsMapper;
 import com.techmate.techmate.dto.MaterialsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.repository.MaterialsRepository;
+import com.techmate.techmate.service.materials.mapper.MaterialsMapper;
 
 /**
  * Servicio de consultas para Materials (SRP).
@@ -42,3 +42,4 @@ public class MaterialsQueryService {
         return materialsMapper.toDTO(m);
     }
 }
+

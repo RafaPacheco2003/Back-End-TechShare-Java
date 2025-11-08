@@ -1,4 +1,4 @@
-package com.techmate.techmate.Controller.User;
+package com.techmate.techmate.controller.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.techmate.techmate.Service.TokenService;
-import com.techmate.techmate.Service.User.UserDemoService;
+import com.techmate.techmate.service.TokenService;
+import com.techmate.techmate.service.User.UserDemoService;
 import com.techmate.techmate.dto.UsuarioDTO;
 
 @RequestMapping("/user")
@@ -68,3 +68,4 @@ public class UserDemoController {
     
     
 }
+
