@@ -1,7 +1,6 @@
 package com.techmate.techmate.config;
 
 import com.techmate.techmate.security.JWTAuthenticationFilter;
-import com.techmate.techmate.security.JWTAuthorizationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,14 +31,11 @@ public class SecurityConfig {
     
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final JWTAuthorizationFilter jwtAuthorizationFilter;
 
     public SecurityConfig(UserDetailsService userDetailsService, 
-                         PasswordEncoder passwordEncoder,
-                         JWTAuthorizationFilter jwtAuthorizationFilter) {
+                         PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
         log.info("✅ SecurityConfig initialized");
     }
 
@@ -104,8 +99,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
-            .addFilter(jwtAuthFilter)
-            .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilter(jwtAuthFilter);
 
         log.info("✅ SecurityFilterChain configured: CSRF disabled, CORS enabled, JWT active, ROLES enforced");
         return http.build();
