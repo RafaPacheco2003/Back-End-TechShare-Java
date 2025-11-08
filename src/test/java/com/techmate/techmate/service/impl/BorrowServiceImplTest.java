@@ -312,7 +312,7 @@ class BorrowServiceImplTest {
         // When & Then: No se puede devolver sin haber sido prestado
         assertThatThrownBy(() -> borrowService.updateBorrowStatus(1, Status.RETURNED, 200))
             .isInstanceOf(Exception.class)
-            .hasMessageContaining("debe estar en estado LOANED");
+            .hasMessageContaining("debe estar en estado BORROWED");
     }
 
     // 📋 === TESTS DE CONSULTAS Y FILTROS ===

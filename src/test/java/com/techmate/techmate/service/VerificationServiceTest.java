@@ -49,6 +49,9 @@ class VerificationServiceTest {
         // set expiry in the past
         cal.add(Calendar.MINUTE, -10);
         token.setExpiryDate(cal.getTime());
+        
+        Usuario user = new Usuario();
+        token.setUsuario(user);
 
         when(verificationTokenRepository.findByToken(anyString())).thenReturn(token);
 
@@ -67,17 +70,17 @@ class VerificationServiceTest {
         token.setExpiryDate(cal.getTime());
 
         Usuario user = new Usuario();
+        user.setId(1);
         user.setEnabled(false);
         token.setUsuario(user);
 
         when(verificationTokenRepository.findByToken(anyString())).thenReturn(token);
-        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(i -> i.getArgument(0));
+        doNothing().when(usuarioRepository).enableUserById(1);
 
         VerificationResponse res = verificationService.verifyToken("valid-token");
 
         assertTrue(res.isSuccess());
         assertEquals("Cuenta verificada con éxito. Ahora puedes iniciar sesión.", res.getMessage());
-        assertTrue(user.isEnabled());
-        verify(usuarioRepository, times(1)).save(user);
+        verify(usuarioRepository, times(1)).enableUserById(1);
     }
 }

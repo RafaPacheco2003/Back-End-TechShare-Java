@@ -18,9 +18,9 @@ public class JacksonConfig {
     @Bean
     public Jackson2ObjectMapperBuilder jacksonBuilder() {
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-        // Usar LOWER_CAMEL_CASE para no duplicar propiedades
-        // Los campos en Java usarán camelCase (userName, firstName, etc.)
-        builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
+        // Usar SNAKE_CASE para serialización JSON
+        // Los campos en Java usan camelCase (userName, firstName, etc.) pero se serializan como snake_case
+        builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         // Register JavaTimeModule and serialize dates as ISO strings
         builder.modules(new JavaTimeModule());
         builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -30,6 +30,7 @@ public class JacksonConfig {
     // Utility for places that still create ObjectMapper manually.
     public static ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;

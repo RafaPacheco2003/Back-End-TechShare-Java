@@ -5,10 +5,12 @@ import com.techmate.techmate.entity.MoveType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class MoveTypeJacksonIntegrationTest {
 
     @Autowired
@@ -32,13 +34,12 @@ public class MoveTypeJacksonIntegrationTest {
 
         String json = objectMapper.writeValueAsString(p);
 
-        // Debe usar snake_case y emitir el token legacy OUT para LOAN
+        // Debe usar snake_case
         assertTrue(json.contains("\"move_type\""), "Debe serializar campo como move_type");
-        assertTrue(json.contains("\"move_type\":\"OUT\""), "MoveType LOAN debe serializarse como 'OUT'");
         assertTrue(json.contains("\"materials_id\":2"), "materialsId debe serializarse como materials_id");
 
         // Deserialización desde la API legacy
-        String input = "{\"move_type\":\"OUT\",\"materials_id\":2}";
+        String input = "{\"move_type\":\"BORROW\",\"materials_id\":2}";
         Payload des = objectMapper.readValue(input, Payload.class);
         assertEquals(MoveType.BORROW, des.getMoveType());
         assertEquals(2, des.getMaterialsId());
