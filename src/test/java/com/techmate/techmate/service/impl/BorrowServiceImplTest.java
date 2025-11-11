@@ -398,7 +398,7 @@ class BorrowServiceImplTest {
     }
 
     @Test
-    @DisplayName("📅 Filtrar préstamos por rango de fechas")
+    @DisplayName("Filtrar préstamos por rango de fechas")
     void getBorrowByDate_Success() {
         // Given: Rango de fechas válido
         Date startDate = new Date(System.currentTimeMillis() - 86400000); // Ayer

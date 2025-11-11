@@ -10,6 +10,9 @@ import java.util.*;
 
 import com.techmate.techmate.service.MaterialsService;
 import com.techmate.techmate.service.MovementsService;
+import com.techmate.techmate.service.IMovementCrudService;
+import com.techmate.techmate.service.IMovementQueryService;
+import com.techmate.techmate.service.ITokenService;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.MoveType;
@@ -26,7 +29,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
-public class MovementsServiceImpl implements MovementsService {
+public class MovementsServiceImpl implements MovementsService, IMovementCrudService, IMovementQueryService, ITokenService {
 
     private static final Logger log = LoggerFactory.getLogger(MovementsServiceImpl.class);
 
