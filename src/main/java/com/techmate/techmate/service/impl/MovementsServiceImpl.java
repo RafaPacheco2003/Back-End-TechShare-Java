@@ -27,6 +27,9 @@ import com.techmate.techmate.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.transaction.annotation.Transactional;
+import com.techmate.techmate.exception.InvalidTokenException;
+import com.techmate.techmate.exception.NotFoundException;
 
 @Service
 public class MovementsServiceImpl implements MovementsService, IMovementCrudService, IMovementQueryService, ITokenService {
@@ -63,43 +66,109 @@ public class MovementsServiceImpl implements MovementsService, IMovementCrudServ
         this.movementQueryService = movementQueryService;
     }
 
-    private Movements convertToEntity(MovementsDTO movementsDTO, Integer userId) {
-        Usuario usuario = usuarioRepository.findById(userId).orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Usuario no encontrado"));
-        Materials materials = materialsRepository.findById(movementsDTO.getMaterialsId()).orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Material no encontrado"));
-        return movementMapper.toEntity(movementsDTO, usuario, materials);
+    /**
+     * ✅ SRP REFACTORING: Métodos helper para cada responsabilidad
+     */
+
+    // ─── VALIDACIÓN ───
+    /**
+     * Cargar y validar que el usuario exista
+     */
+    private Usuario loadAndValidateUser(Integer userId) {
+        return usuarioRepository.findById(userId)
+            .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException(
+                String.format("Usuario con ID %d no encontrado", userId)
+            ));
     }
 
+    /**
+     * Cargar y validar que el material exista
+     */
+    private Materials loadAndValidateMaterial(Integer materialId) {
+        return materialsRepository.findById(materialId)
+            .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException(
+                String.format("Material con ID %d no encontrado", materialId)
+            ));
+    }
+
+    // ─── MAPEO (DTO ↔ Entity) ───
+    /**
+     * Convertir DTO a Entity (con usuarios y materiales precargados)
+     */
+    private Movements createMovement(MovementsDTO dto, Usuario usuario, Materials materials) {
+        // Delegación completa al mapper
+        return movementMapper.toEntity(dto, usuario, materials);
+    }
+
+    /**
+     * Convertir Entity a DTO (con nombres de usuario y material)
+     */
     private MovementsDTO convertToDTO(Movements movements) {
         String adminName = userService.getUsuarioUsernamById(movements.getUsuario().getId());
         String materialName = materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId());
         return movementMapper.toDTO(movements, adminName, materialName);
     }
 
+    // ─── PREPARACIÓN ───
+    /**
+     * Preparar el DTO con valores por defecto
+     */
+    private void prepareMovementDTO(MovementsDTO dto) {
+        if (dto.getDate() == null) {
+            dto.setDate(new Date());
+        }
+        if (dto.getComment() == null) {
+            dto.setComment("");
+        }
+    }
+
+    // ─── STOCK ───
+    /**
+     * Actualizar stock del material después de persistir el movimiento
+     */
+    private void updateMaterialStock(Movements movement) {
+        Materials materials = movement.getMaterials();
+        movementStockManager.adjustMaterialStock(materials, movement);
+        materialsRepository.save(materials);
+    }
+
     @Override
+    @Transactional
     public MovementsDTO createMovementsDTO(MovementsDTO movementsDTO, Integer userId) {
-
+        // 1️⃣ VALIDAR
         movementValidator.validateQuantity(movementsDTO);
+        Usuario usuario = loadAndValidateUser(userId);
+        Materials materials = loadAndValidateMaterial(movementsDTO.getMaterialsId());
 
-        String comment = movementsDTO.getComment();
-        movementsDTO.setComment(comment);
-        // Asignar la fecha actual al movimientFo
-        movementsDTO.setDate(new Date());
+        // 2️⃣ PREPARAR DTO
+        prepareMovementDTO(movementsDTO);
 
-    Movements movements = convertToEntity(movementsDTO, userId);
-    Materials materials = movements.getMaterials();
-    movementStockManager.adjustMaterialStock(materials, movements);
-    materialsRepository.save(materials);
-    movements = movementsRepository.save(movements);
-    return convertToDTO(movements);
+        // 3️⃣ CREAR ENTIDAD
+        Movements movements = createMovement(movementsDTO, usuario, materials);
+
+        // 4️⃣ PERSISTIR
+        movements = movementsRepository.save(movements);
+
+        // 5️⃣ AJUSTAR STOCK
+        updateMaterialStock(movements);
+
+        // 6️⃣ RETORNAR DTO
+        return convertToDTO(movements);
     }
 
     // Ajustar stock de material
     // Stock adjustments now delegated to MovementStockManager
 
     @Override
+    @Transactional
     public MovementsDTO getMovementsByID(Integer movementsId) {
-    Movements movements = movementsRepository.findById(movementsId)
-        .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException("Movimiento no encontrado"));
+        // 1️⃣ CARGAR movimiento
+        Movements movements = movementsRepository.findById(movementsId)
+            .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException(
+                String.format("Movimiento con ID %d no encontrado", movementsId)
+            ));
+
+        // 2️⃣ CONVERTIR a DTO
         return convertToDTO(movements);
     }
 
@@ -109,98 +178,206 @@ public class MovementsServiceImpl implements MovementsService, IMovementCrudServ
     }
 
     @Override
-    public List<MovementsDTO> getMovementsByType(String type) {
-        MoveType moveType;
+    @Transactional
+    public MovementsDTO updateMovement(Integer movementsId, MovementsDTO movementsDTO) {
+        // 1️⃣ CARGAR movimiento existente
+        Movements movement = movementsRepository.findById(movementsId)
+            .orElseThrow(() -> new com.techmate.techmate.exception.NotFoundException(
+                String.format("Movimiento con ID %d no encontrado", movementsId)
+            ));
 
-        // Convertir la cadena de texto a enum MoveType usando un switch-case
+        // 2️⃣ VALIDAR nuevos datos
+        movementValidator.validateQuantity(movementsDTO);
+
+        // 3️⃣ ACTUALIZAR campos
+        if (movementsDTO.getComment() != null) {
+            movement.setComment(movementsDTO.getComment());
+        }
+
+        // 4️⃣ PERSISTIR
+        movement = movementsRepository.save(movement);
+
+        // 5️⃣ RETORNAR DTO
+        return convertToDTO(movement);
+    }
+
+    @Override
+    public List<MovementsDTO> getMovementsByType(String type) {
+        // ✅ TAREA 3 (OCP) será: Centralizar en MoveTypeConverter
+        // Por ahora, mejorar legibilidad
+        MoveType moveType = parseMoveType(type);
+        return movementQueryService.getByMoveType(moveType);
+    }
+
+    /**
+     * Convertir string a MoveType enum
+     * (Este método será reemplazado por MoveTypeConverter en TAREA 3)
+     */
+    private MoveType parseMoveType(String type) {
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("Tipo de movimiento no puede estar vacío");
+        }
+
         switch (type.toUpperCase()) {
             case "STOCK_ADD":
             case "IN":
-                moveType = MoveType.STOCK_ADD;
-                break;
+                return MoveType.STOCK_ADD;
             case "RETURN":
             case "OUT":
-                moveType = MoveType.RETURN;
-                break;
+                return MoveType.RETURN;
             case "BORROW":
-                moveType = MoveType.BORROW;
-                break;
+                return MoveType.BORROW;
             case "ADJUSTMENT":
             case "ADJUST":
-                moveType = MoveType.ADJUSTMENT;
-                break;
+                return MoveType.ADJUSTMENT;
             default:
-                throw new IllegalArgumentException("Tipo de movimiento inválido: " + type);
+                throw new IllegalArgumentException(
+                    String.format("Tipo de movimiento inválido: %s. Tipos válidos: STOCK_ADD, RETURN, BORROW, ADJUSTMENT", type)
+                );
         }
-
-    return movementQueryService.getByMoveType(moveType);
     }
 
     @Override
     public List<MovementsDTO> getMovementsByDate(Date startDate, Date endDate) {
+        // 1️⃣ VALIDAR fechas
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Las fechas inicial y final son requeridas");
+        }
+        if (startDate.after(endDate)) {
+            throw new IllegalArgumentException("La fecha inicial debe ser anterior a la fecha final");
+        }
+
+        // 2️⃣ DELEGAR a query service
         return movementQueryService.getByDateRange(startDate, endDate);
     }
 
     @Override
-    public void deleteMovementById(Integer movementsId) {
-        if (movementsRepository.existsById(movementsId)) {
-            
-            movementsRepository.deleteById(movementsId);
-        } else {
-            throw new EntityNotFoundException("Movement not found");
+    public List<MovementsDTO> getMovementsPaged(Integer pageNumber, Integer pageSize) {
+        // 1️⃣ VALIDAR parámetros
+        if (pageNumber == null || pageNumber < 0) {
+            throw new IllegalArgumentException("El número de página debe ser >= 0");
         }
+        if (pageSize == null || pageSize <= 0) {
+            throw new IllegalArgumentException("El tamaño de página debe ser > 0");
+        }
+
+        // 2️⃣ OBTENER todos y aplicar paginación manual
+        List<MovementsDTO> allMovements = movementQueryService.getAll();
+        
+        // 3️⃣ CALCULAR índices de paginación
+        int startIndex = pageNumber * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, allMovements.size());
+        
+        // 4️⃣ RETORNAR sublist paginada
+        if (startIndex >= allMovements.size()) {
+            return Collections.emptyList();
+        }
+        
+        return allMovements.subList(startIndex, endIndex);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMovementById(Integer movementsId) {
+        // 1️⃣ VERIFICAR que existe
+        Movements movement = movementsRepository.findById(movementsId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                String.format("Movimiento con ID %d no encontrado", movementsId)
+            ));
+
+        // 2️⃣ ELIMINAR
+        movementsRepository.deleteById(movementsId);
+
+        log.info("Movimiento con ID {} eliminado correctamente", movementsId);
     }
 
 
 
+    // ─── TOKEN HANDLING (Delegado en TAREA 4 - DIP) ───
+
+    @Override
     public void decodeToken(HttpServletRequest request) {
+        // 1️⃣ EXTRAER token del request
+        String token = extractTokenFromRequest(request);
+
+        // 2️⃣ VALIDAR token
+        if (!isTokenValid(token)) {
+            throw new com.techmate.techmate.exception.InvalidTokenException("Token inválido o expirado");
+        }
+
+        // 3️⃣ DECODIFICAR y extraer claims (solo logging, ya que TokenUtils hace el trabajo)
+        Claims claims = TokenUtils.decodeToken(token);
+        if (claims != null) {
+            String email = claims.getSubject();
+            Integer userId = getUserIdFromToken(token);
+            log.debug("Token decodificado - Email: {}, UserId: {}", email, userId);
+        }
+    }
+
+    @Override
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        // 1️⃣ OBTENER Authorization header
         String bearerToken = request.getHeader("Authorization");
 
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            String token = bearerToken.replace("Bearer ", "");
-            Claims claims = TokenUtils.decodeToken(token);
+        // 2️⃣ VALIDAR formato
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new com.techmate.techmate.exception.InvalidTokenException(
+                "Token no proporcionado o formato inválido (esperado: Bearer <token>)"
+            );
+        }
 
-                if (claims != null) {
-                    String email = claims.getSubject(); // Obtener el email del token
-                    Object idClaim = claims.get("id");
-                    Integer userId = null;
-                
-                // Validar y convertir ID de forma segura
-                if (idClaim != null) {
-                    if (idClaim instanceof Integer) {
-                        userId = (Integer) idClaim;
-                    } else if (idClaim instanceof Long) {
-                        userId = ((Long) idClaim).intValue();
-                    } else if (idClaim instanceof Number) {
-                        userId = ((Number) idClaim).intValue();
-                    } else {
-                        try {
-                            userId = Integer.parseInt(idClaim.toString());
-                        } catch (NumberFormatException e) {
-                            throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "ID de usuario inválido en token");
-                        }
-                    }
-                }
-                
-                    // Log para evitar avisos de variables no usadas y para trazabilidad
-                    if (email != null) log.debug("Token email: {}", email);
-                    if (userId != null) log.debug("Token userId: {}", userId);
-                } else {
-                    throw new com.techmate.techmate.exception.BusinessException("INVALID_TOKEN", "Token no válido");
-                }
-        } else {
-            throw new com.techmate.techmate.exception.BusinessException("MISSING_TOKEN", "No se proporcionó un token");
+        // 3️⃣ EXTRAER token sin "Bearer "
+        return bearerToken.substring("Bearer ".length());
+    }
+
+    @Override
+    public boolean isTokenValid(String token) {
+        // 1️⃣ VALIDAR que el token no sea null o vacío
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+
+        // 2️⃣ INTENTAR decodificar (TokenUtils lo valida internamente)
+        try {
+            Claims claims = TokenUtils.decodeToken(token);
+            return claims != null;
+        } catch (Exception e) {
+            log.warn("Token validation failed: {}", e.getMessage());
+            return false;
         }
     }
-    
+
     @Override
     public Optional<List<Integer>> getRolesFromToken(String token) {
+        // 1️⃣ VALIDAR token
+        if (!isTokenValid(token)) {
+            return Optional.empty();
+        }
+
+        // 2️⃣ EXTRAER roles usando TokenUtils
         return TokenUtils.getRolesFromToken(token);
     }
 
     @Override
     public Integer getUserIdFromToken(String token) {
-        return TokenUtils.getUserIdFromToken(token);
+        // 1️⃣ VALIDAR token
+        if (!isTokenValid(token)) {
+            throw new com.techmate.techmate.exception.InvalidTokenException(
+                "Token inválido o expirado"
+            );
+        }
+
+        // 2️⃣ EXTRAER userId usando TokenUtils
+        Integer userId = TokenUtils.getUserIdFromToken(token);
+
+        // 3️⃣ VALIDAR que userId exista
+        if (userId == null) {
+            throw new com.techmate.techmate.exception.InvalidTokenException(
+                "Token no contiene información de usuario"
+            );
+        }
+
+        return userId;
     }
 
 }
