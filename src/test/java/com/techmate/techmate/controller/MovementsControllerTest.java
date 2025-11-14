@@ -81,7 +81,6 @@ class MovementsControllerTest {
     MovementResponse resp = new MovementResponse(10, MoveType.BORROW, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
 
         String token = JWTTestHelper.createTokenWithRoles(5, "user@example.com", "user", "USER");
-        when(movementsService.getUserIdFromToken(token)).thenReturn(5);
         when(movementsService.createMovementsDTO(any(MovementsDTO.class), eq(5))).thenReturn(created);
         when(movementsMapper.toResponse(eq(created))).thenReturn(resp);
 
