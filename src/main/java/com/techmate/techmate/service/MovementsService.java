@@ -13,17 +13,19 @@ import org.springframework.stereotype.Service;
  * - Solo CRUD → Implementan IMovementCrudService
  * - Solo Queries → Implementan IMovementQueryService
  * - Solo Token → Implementan ITokenService
- * - Todo → Implementan MovementsService (como ahora)
+ * - Todo (excepto Token) → Implementan MovementsService (como ahora)
+ * 
+ * ✨ REFACTOR: Se removió ITokenService de MovementsService
+ * Razón: ISP Principle - Los clientes de movimientos NO deben depender de token operations
  * 
  * @author TechShare Team
- * @version 1.0 (Refactored with ISP)
+ * @version 2.0 (ISP Refactored - TokenService separated)
  */
 @Service
-public interface MovementsService extends IMovementCrudService, IMovementQueryService, ITokenService {
+public interface MovementsService extends IMovementCrudService, IMovementQueryService {
 
-    // Interfaz consolidada que combina todos los métodos segregados
-    // Esto es SOLO para mantener compatibilidad hacia atrás
-    // Los nuevos clientes deben usar las interfaces segregadas específicas
+    // Interfaz consolidada que combina solo las operaciones de movimientos
+    // Token operations están en TokenService (segregadas correctamente)
 
 }
 

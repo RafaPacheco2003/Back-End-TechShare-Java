@@ -12,7 +12,6 @@ import com.techmate.techmate.service.MaterialsService;
 import com.techmate.techmate.service.MovementsService;
 import com.techmate.techmate.service.IMovementCrudService;
 import com.techmate.techmate.service.IMovementQueryService;
-import com.techmate.techmate.service.ITokenService;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.MoveType;
@@ -21,18 +20,14 @@ import com.techmate.techmate.entity.Usuario;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.MovementsRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
-import com.techmate.techmate.security.TokenUtils;
 import com.techmate.techmate.security.UserDetailsServiceImpl;
 
-import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
-import com.techmate.techmate.exception.InvalidTokenException;
 import com.techmate.techmate.exception.NotFoundException;
 
 @Service
-public class MovementsServiceImpl implements MovementsService, IMovementCrudService, IMovementQueryService, ITokenService {
+public class MovementsServiceImpl implements MovementsService, IMovementCrudService, IMovementQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(MovementsServiceImpl.class);
 
@@ -289,95 +284,6 @@ public class MovementsServiceImpl implements MovementsService, IMovementCrudServ
         movementsRepository.deleteById(movementsId);
 
         log.info("Movimiento con ID {} eliminado correctamente", movementsId);
-    }
-
-
-
-    // ─── TOKEN HANDLING (Delegado en TAREA 4 - DIP) ───
-
-    @Override
-    public void decodeToken(HttpServletRequest request) {
-        // 1️⃣ EXTRAER token del request
-        String token = extractTokenFromRequest(request);
-
-        // 2️⃣ VALIDAR token
-        if (!isTokenValid(token)) {
-            throw new com.techmate.techmate.exception.InvalidTokenException("Token inválido o expirado");
-        }
-
-        // 3️⃣ DECODIFICAR y extraer claims (solo logging, ya que TokenUtils hace el trabajo)
-        Claims claims = TokenUtils.decodeToken(token);
-        if (claims != null) {
-            String email = claims.getSubject();
-            Integer userId = getUserIdFromToken(token);
-            log.debug("Token decodificado - Email: {}, UserId: {}", email, userId);
-        }
-    }
-
-    @Override
-    public String extractTokenFromRequest(HttpServletRequest request) {
-        // 1️⃣ OBTENER Authorization header
-        String bearerToken = request.getHeader("Authorization");
-
-        // 2️⃣ VALIDAR formato
-        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-            throw new com.techmate.techmate.exception.InvalidTokenException(
-                "Token no proporcionado o formato inválido (esperado: Bearer <token>)"
-            );
-        }
-
-        // 3️⃣ EXTRAER token sin "Bearer "
-        return bearerToken.substring("Bearer ".length());
-    }
-
-    @Override
-    public boolean isTokenValid(String token) {
-        // 1️⃣ VALIDAR que el token no sea null o vacío
-        if (token == null || token.isBlank()) {
-            return false;
-        }
-
-        // 2️⃣ INTENTAR decodificar (TokenUtils lo valida internamente)
-        try {
-            Claims claims = TokenUtils.decodeToken(token);
-            return claims != null;
-        } catch (Exception e) {
-            log.warn("Token validation failed: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    @Override
-    public Optional<List<Integer>> getRolesFromToken(String token) {
-        // 1️⃣ VALIDAR token
-        if (!isTokenValid(token)) {
-            return Optional.empty();
-        }
-
-        // 2️⃣ EXTRAER roles usando TokenUtils
-        return TokenUtils.getRolesFromToken(token);
-    }
-
-    @Override
-    public Integer getUserIdFromToken(String token) {
-        // 1️⃣ VALIDAR token
-        if (!isTokenValid(token)) {
-            throw new com.techmate.techmate.exception.InvalidTokenException(
-                "Token inválido o expirado"
-            );
-        }
-
-        // 2️⃣ EXTRAER userId usando TokenUtils
-        Integer userId = TokenUtils.getUserIdFromToken(token);
-
-        // 3️⃣ VALIDAR que userId exista
-        if (userId == null) {
-            throw new com.techmate.techmate.exception.InvalidTokenException(
-                "Token no contiene información de usuario"
-            );
-        }
-
-        return userId;
     }
 
 }
