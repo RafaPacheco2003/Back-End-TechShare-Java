@@ -194,65 +194,151 @@ public class BorrowServiceImpl implements BorrowService {
     @Override
     @Transactional
     public void updateBorrowStatus(Integer borrowId, Status newStatus, Integer adminId) throws Exception {
-        // Buscar el préstamo por ID
-    Borrow borrow = borrowRepository.findById(borrowId)
-        .orElseThrow(() -> new BusinessException("BORROW_NOT_FOUND", "Préstamo no encontrado con ID: " + borrowId));
-    
-        // Verificar el estado actual del préstamo
-        if (borrow.getStatus() != Status.PENDING && borrow.getStatus() != Status.BORROWED) {
-            throw new Exception("Solo se puede modificar el estado de un préstamo en estado PENDING o BORROWED");
+        // 1. Obtener préstamo (SRP: Obtención)
+        Borrow borrow = findBorrowById(borrowId);
+        
+        // 2. Validar precondiciones (SRP: Validación)
+        validateBorrowStatusTransition(borrow, newStatus);
+        
+        // 3. Resolver admin (SRP: Resolución)
+        Usuario admin = findAdminById(adminId);
+        borrow.setAdmin(admin);
+        
+        // 4. Aplicar transición de estado (SRP: State machine)
+        applyStatusTransition(borrow, newStatus);
+        
+        // 5. Persistir (SRP: Persistencia)
+        borrowRepository.save(borrow);
+    }
+
+    // ==================== HELPERS: updateBorrowStatus() ====================
+
+    /**
+     * Busca un préstamo por su ID.
+     * 
+     * @param borrowId ID del préstamo
+     * @return Borrow entidad encontrada
+     * @throws BusinessException si no existe
+     */
+    private Borrow findBorrowById(Integer borrowId) {
+        return borrowRepository.findById(borrowId)
+                .orElseThrow(() -> new BusinessException("BORROW_NOT_FOUND", 
+                    "Préstamo no encontrado con ID: " + borrowId));
+    }
+
+    /**
+     * Valida si la transición de estado es permitida.
+     * 
+     * @param borrow Préstamo actual
+     * @param newStatus Nuevo estado solicitado
+     * @throws BusinessException si la transición no es válida
+     */
+    private void validateBorrowStatusTransition(Borrow borrow, Status newStatus) {
+        Status currentStatus = borrow.getStatus();
+        
+        if (currentStatus != Status.PENDING && currentStatus != Status.BORROWED) {
+            throw new BusinessException("INVALID_STATUS_TRANSITION",
+                    "Solo se puede modificar el estado de un préstamo en estado PENDING o BORROWED");
         }
-    
-        // Establecer el adminId en el préstamo
-    Usuario admin = usuarioRepository.findById(adminId)
-        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Administrador no encontrado con ID: " + adminId));
-        borrow.setAdmin(admin); // Asignar el admin al préstamo
-    
+        
+        // Validación específica para RETURNED
+        if (newStatus == Status.RETURNED && currentStatus != Status.BORROWED) {
+            throw new BusinessException("INVALID_STATUS_TRANSITION",
+                    "El préstamo debe estar en estado BORROWED para ser devuelto");
+        }
+    }
+
+    /**
+     * Busca un usuario administrador por su ID.
+     * 
+     * @param adminId ID del administrador
+     * @return Usuario encontrado
+     * @throws BusinessException si no existe
+     */
+    private Usuario findAdminById(Integer adminId) {
+        return usuarioRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", 
+                    "Administrador no encontrado con ID: " + adminId));
+    }
+
+    /**
+     * Aplica la transición de estado al préstamo según el nuevo estado.
+     * 
+     * @param borrow Préstamo a transicionar
+     * @param newStatus Nuevo estado
+     * @throws Exception si hay error en la transición
+     */
+    private void applyStatusTransition(Borrow borrow, Status newStatus) throws Exception {
         switch (newStatus) {
             case REJECTED:
-                borrow.setStatus(Status.REJECTED);
-                borrow.setEndDate(new Date());
+                handleBorrowRejected(borrow);
                 break;
 
             case BORROWED:
                 if (borrow.getStatus() == Status.PENDING) {
-                    for (DetailsBorrow detail : borrow.getDetails()) {
-                        Integer materialId = detail.getMaterials().getMaterialsId();
-                        int qty = detail.getQuantity();
-                        // Validar y reducir stock usando el manager especializado o fallback
-                        validateStockAvailabilityOrFallback(materialId, qty);
-                        reduceStockOrFallback(materialId, qty);
-                    }
-                    borrow.setStartDate(new Date()); // Actualizar la fecha de inicio
-                    borrow.setStatus(Status.BORROWED);
-                    
-                    // Publicar evento de préstamo creado
-                    publishBorrowCreatedEvent(borrow);
+                    handleBorrowApproved(borrow);
                 }
                 break;
-    
-            case RETURNED:
-                if (borrow.getStatus() != Status.BORROWED) {
-                    throw new Exception("El préstamo debe estar en estado BORROWED para ser devuelto");
-                }
-                for (DetailsBorrow detail : borrow.getDetails()) {
-                    Integer materialId = detail.getMaterials().getMaterialsId();
-                    int qty = detail.getQuantity();
-                    restoreStockOrFallback(materialId, qty);
-                }
-                borrow.setStatus(Status.RETURNED);
-                borrow.setReturnDate(new Date());
-                borrow.setEndDate(new Date());
-                
-                // Publicar evento de devolución
-                publishBorrowReturnedEvent(borrow);
-                break;
-    
-            default:
-                throw new BusinessException("INVALID_BORROW_STATUS", "Estado no válido para modificar el préstamo");
-        }
 
-        borrowRepository.save(borrow); // Guardar el préstamo actualizado
+            case RETURNED:
+                handleBorrowReturned(borrow);
+                break;
+
+            default:
+                throw new BusinessException("INVALID_BORROW_STATUS", 
+                    "Estado no válido para modificar el préstamo");
+        }
+    }
+
+    /**
+     * Maneja la transición de rechazo (PENDING → REJECTED).
+     * 
+     * @param borrow Préstamo a rechazar
+     */
+    private void handleBorrowRejected(Borrow borrow) {
+        borrow.setStatus(Status.REJECTED);
+        borrow.setEndDate(new Date());
+    }
+
+    /**
+     * Maneja la transición de aprobación (PENDING → BORROWED).
+     * Valida disponibilidad de stock y reduce el stock para cada detalle.
+     * 
+     * @param borrow Préstamo a aprobar
+     * @throws Exception si no hay stock disponible
+     */
+    private void handleBorrowApproved(Borrow borrow) throws Exception {
+        // Validar y reducir stock para cada detalle
+        for (DetailsBorrow detail : borrow.getDetails()) {
+            Integer materialId = detail.getMaterials().getMaterialsId();
+            int qty = detail.getQuantity();
+            validateStockAvailabilityOrFallback(materialId, qty);
+            reduceStockOrFallback(materialId, qty);
+        }
+        
+        borrow.setStartDate(new Date());
+        borrow.setStatus(Status.BORROWED);
+        publishBorrowCreatedEvent(borrow);
+    }
+
+    /**
+     * Maneja la transición de devolución (BORROWED → RETURNED).
+     * Restaura el stock para cada detalle del préstamo.
+     * 
+     * @param borrow Préstamo a devolver
+     */
+    private void handleBorrowReturned(Borrow borrow) {
+        // Restaurar stock para cada detalle
+        for (DetailsBorrow detail : borrow.getDetails()) {
+            Integer materialId = detail.getMaterials().getMaterialsId();
+            int qty = detail.getQuantity();
+            restoreStockOrFallback(materialId, qty);
+        }
+        
+        borrow.setStatus(Status.RETURNED);
+        borrow.setReturnDate(new Date());
+        borrow.setEndDate(new Date());
+        publishBorrowReturnedEvent(borrow);
     }
     
     @Override
