@@ -190,6 +190,9 @@ class BorrowServiceImplTest {
     verify(borrowStockManager).reduceStock(anyInt(), anyInt());
     verify(borrowRepository).save(any(Borrow.class));
         
+        // ✅ Verificar que se publica BorrowCreatedEvent
+        verify(eventPublisher).publishEvent(any(com.techmate.techmate.event.BorrowCreatedEvent.class));
+        
         // Verificar que el stock se redujo correctamente
         assertThat(testMaterial.getBorrowable_stock()).isEqualTo(12); // 15 - 3 = 12
         assertThat(testBorrow.getStartDate()).isNotNull();
@@ -211,6 +214,9 @@ class BorrowServiceImplTest {
     verify(borrowRepository).save(any(Borrow.class));
         assertThat(testBorrow.getStatus()).isEqualTo(Status.REJECTED);
         assertThat(testBorrow.getEndDate()).isNotNull();
+        
+        // ✅ NO debe publicar evento cuando se rechaza
+        verify(eventPublisher, never()).publishEvent(any());
         
         // Stock NO debe cambiar cuando se rechaza
         assertThat(testMaterial.getBorrowable_stock()).isEqualTo(15);
@@ -234,6 +240,9 @@ class BorrowServiceImplTest {
         // Then: Estado cambia a RETURNED, stock se restaura
     verify(borrowStockManager).restoreStock(anyInt(), anyInt());
     verify(borrowRepository).save(any(Borrow.class));
+        
+        // ✅ Verificar que se publica BorrowReturnedEvent
+        verify(eventPublisher).publishEvent(any(com.techmate.techmate.event.BorrowReturnedEvent.class));
         
         assertThat(testBorrow.getStatus()).isEqualTo(Status.RETURNED);
         assertThat(testMaterial.getBorrowable_stock()).isEqualTo(15); // 12 + 3 = 15 (restaurado)
