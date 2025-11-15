@@ -23,7 +23,7 @@ public class MovementMapper {
         return m;
     }
 
-    public MovementsDTO toDTO(Movements m, String adminName, String materialName) {
+    public MovementsDTO toDTO(Movements m, String usuarioName, String materialName) {
         if (m == null) return null;
         MovementsDTO dto = new MovementsDTO();
         dto.setMovementsId(m.getMovementsId());
@@ -33,9 +33,10 @@ public class MovementMapper {
         dto.setComment(m.getComment());
         dto.setAdminId(m.getUsuario().getId());
         dto.setMaterialsId(m.getMaterials().getMaterialsId());
-        dto.setAdminName(adminName);
+        dto.setAdminName(usuarioName);
         dto.setMaterialsName(materialName);
         return dto;
     }
 }
+
 

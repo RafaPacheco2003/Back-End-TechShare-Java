@@ -40,7 +40,7 @@ public class BorrowMapper {
         dto.setDate(borrow.getDate());
         dto.setStatus(borrow.getStatus());
         dto.setAmount(borrow.getAmount());
-        dto.setStartDate(borrow.getStartDate());
+        // Nota: startDate y admin ya no están en la Entity (fueron removidos)
         dto.setEndDate(borrow.getEndDate());
         dto.setReturnDate(borrow.getReturnDate());
 
@@ -49,18 +49,12 @@ public class BorrowMapper {
             dto.setUsuarioName(borrow.getUsuario().getUser_name());
         }
 
-        if (borrow.getAdmin() != null) {
-            dto.setAdminId(borrow.getAdmin().getId());
-            dto.setAdminName(borrow.getAdmin().getUser_name());
-        }
-
         if (borrow.getDetails() != null) {
             dto.setDetails(borrow.getDetails().stream().map(this::detailsToDTO).collect(Collectors.toList()));
         }
 
         return dto;
     }
-
     // DTO -> Entity
     public Borrow toEntity(BorrowDTO borrowDTO) {
         if (borrowDTO == null) return null;
@@ -69,7 +63,7 @@ public class BorrowMapper {
         borrow.setDate(borrowDTO.getDate());
         borrow.setStatus(borrowDTO.getStatus());
         borrow.setAmount(borrowDTO.getAmount());
-        borrow.setStartDate(borrowDTO.getStartDate());
+        // Nota: startDate no se persiste (fue removido de Entity)
         borrow.setEndDate(borrowDTO.getEndDate());
         borrow.setReturnDate(borrowDTO.getReturnDate());
         // Note: relationships should be set by services when necessary

@@ -10,14 +10,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para Movements con validaciones Bean Validation.
- * Mejora la robustez del API validando inputs antes de procesarlos.
+ * DTO para Movements con validaciones Jakarta.
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MovementsDTO {
     
+    @NotNull(message = "El ID del movimiento no puede ser nulo")
+    @Min(value = 1, message = "El ID del movimiento debe ser mayor a 0")
     private int movementsId;
     
     @NotNull(message = "El tipo de movimiento es obligatorio")
@@ -38,11 +39,19 @@ public class MovementsDTO {
     @Positive(message = "El ID del administrador debe ser positivo")
     private int adminId;
     
-    private String adminName; // Calculado, no necesita validación
+    private String adminName;
 
     @NotNull(message = "El ID del material es obligatorio")
     @Positive(message = "El ID del material debe ser positivo")
     private int materialsId;
     
-    private String materialsName; // Calculado, no necesita validación
+    private String materialsName;
+    
+    public int getMovementsId() {
+        return movementsId;
+    }
+
+    public void setMovementsId(int movementsId) {
+        this.movementsId = movementsId;
+    }
 }
