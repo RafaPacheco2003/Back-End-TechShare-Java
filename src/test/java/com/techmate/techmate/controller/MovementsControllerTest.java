@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.techmate.techmate.controller.MovementsController;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.dto.MovementResponse;
 import com.techmate.techmate.entity.MoveType;

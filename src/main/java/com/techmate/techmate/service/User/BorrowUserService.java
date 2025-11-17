@@ -3,7 +3,6 @@ package com.techmate.techmate.service.User;
 import java.util.*;
 
 import com.techmate.techmate.dto.BorrowDTO;
-import com.techmate.techmate.entity.Status;
 
 public interface BorrowUserService {
     

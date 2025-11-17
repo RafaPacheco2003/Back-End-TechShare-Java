@@ -19,7 +19,6 @@ import com.techmate.techmate.event.BorrowReturnedEvent;
 import com.techmate.techmate.exception.BorrowBusinessException;
 import com.techmate.techmate.exception.BusinessException;
 import com.techmate.techmate.repository.BorrowRepository;
-import com.techmate.techmate.repository.DetailsBorrowRepository;
 import com.techmate.techmate.repository.MaterialsRepository;
 import com.techmate.techmate.repository.UsuarioRepository;
 import com.techmate.techmate.security.TokenUtils;
@@ -30,18 +29,16 @@ import com.techmate.techmate.service.borrow.manager.IBorrowStockManager;
 public class BorrowServiceImpl implements BorrowService {
     private final BorrowRepository borrowRepository;
     private final MaterialsRepository materialsRepository;
-    private final DetailsBorrowRepository detailsBorrowRepository;
     private final UsuarioRepository usuarioRepository;
     private final IBorrowStockManager borrowStockManager;
     private final ApplicationEventPublisher eventPublisher;
 
     public BorrowServiceImpl(BorrowRepository borrowRepository, MaterialsRepository materialsRepository,
-            DetailsBorrowRepository detailsBorrowRepository, UsuarioRepository usuarioRepository,
+            UsuarioRepository usuarioRepository,
             IBorrowStockManager borrowStockManager,
             ApplicationEventPublisher eventPublisher) {
         this.borrowRepository = borrowRepository;
         this.materialsRepository = materialsRepository;
-        this.detailsBorrowRepository = detailsBorrowRepository;
         this.usuarioRepository = usuarioRepository;
         this.borrowStockManager = borrowStockManager;
         this.eventPublisher = eventPublisher;
@@ -123,51 +120,7 @@ public class BorrowServiceImpl implements BorrowService {
         return dto;
     }
     
-    private Borrow convertToEntity(BorrowDTO borrowDTO) {
-        Borrow borrow = new Borrow();
-        borrow.setBorrowId(borrowDTO.getBorrowId());
-        borrow.setDate(borrowDTO.getDate());
-    borrow.setStatus(Status.PENDING);  // Asignar un estado inicial adecuado
-        borrow.setAmount(borrowDTO.getAmount());
-    
-        // Asignación de detalles
-        borrow.setDetails(borrowDTO.getDetails().stream()
-                .map(detailDTO -> convertDetailsBorrowToEntity(detailDTO, borrow))
-                .collect(Collectors.toList()));
-    
-        // Obtener el usuario adminId
-    Usuario admin = usuarioRepository.findById(borrowDTO.getAdminId())
-        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Usuario no encontrado con ID: " + borrowDTO.getAdminId()));
-        borrow.setAdmin(admin);  // Asignamos el admin
-    
-        // Asignar el usuario (en este caso adminId también puede referirse a un usuario)
-    Usuario usuario = usuarioRepository.findById(borrowDTO.getUsuarioId())
-        .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Usuario no encontrado con ID: " + borrowDTO.getUsuarioId()));
-        borrow.setUsuario(usuario);  // Asignamos el usuario
-    
-        return borrow;
-    }
-    
 
-    private DetailsBorrow convertDetailsBorrowToEntity(DetailsBorrowDTO detailDTO, Borrow borrow) {
-        // Crear una nueva instancia de DetailsBorrow
-        DetailsBorrow detailsBorrow = new DetailsBorrow();
-
-        detailsBorrow.setBorrow(borrow);
-        detailsBorrow.setQuantity(detailDTO.getQuantity());
-
-        // Obtener el material asociado
-    Materials material = materialsRepository.findById(detailDTO.getMaterialsId())
-        .orElseThrow(
-            () -> BorrowBusinessException.materialNotFound(detailDTO.getMaterialsId()));
-        detailsBorrow.setMaterials(material); // Establecer la relación con Materials
-
-        // Asignar el precio unitario desde el material
-        detailsBorrow.setUnitPrice(material.getPrice()); // Establecer el precio unitario
-        detailsBorrow.setTotalPrice(material.getPrice() * detailDTO.getQuantity()); // Calcular el precio total
-
-        return detailsBorrow;
-    }
 
     private DetailsBorrowDTO convertDetailsBorrowToDTO(DetailsBorrow detailsBorrow) {
         DetailsBorrowDTO dto = new DetailsBorrowDTO();

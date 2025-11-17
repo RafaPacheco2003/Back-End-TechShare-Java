@@ -10,8 +10,6 @@ import java.util.*;
 
 import com.techmate.techmate.service.MaterialsService;
 import com.techmate.techmate.service.MovementsService;
-import com.techmate.techmate.service.IMovementCrudService;
-import com.techmate.techmate.service.IMovementQueryService;
 import com.techmate.techmate.dto.MovementsDTO;
 import com.techmate.techmate.entity.Materials;
 import com.techmate.techmate.entity.MoveType;
@@ -24,10 +22,9 @@ import com.techmate.techmate.security.UserDetailsServiceImpl;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
-import com.techmate.techmate.exception.NotFoundException;
 
 @Service
-public class MovementsServiceImpl implements MovementsService, IMovementCrudService, IMovementQueryService {
+public class MovementsServiceImpl implements MovementsService {
 
     private static final Logger log = LoggerFactory.getLogger(MovementsServiceImpl.class);
 
@@ -275,7 +272,7 @@ public class MovementsServiceImpl implements MovementsService, IMovementCrudServ
     @Transactional
     public void deleteMovementById(Integer movementsId) {
         // 1️⃣ VERIFICAR que existe
-        Movements movement = movementsRepository.findById(movementsId)
+        movementsRepository.findById(movementsId)
             .orElseThrow(() -> new EntityNotFoundException(
                 String.format("Movimiento con ID %d no encontrado", movementsId)
             ));
