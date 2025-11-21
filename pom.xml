@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version>
+		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.techmate</groupId>
@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<mockito.version>5.3.1</mockito.version>
 	</properties>
 	<dependencies>
     <dependency>
@@ -41,6 +42,12 @@
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+
+<!-- Spring Boot Actuator for monitoring and health checks -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
 
 
@@ -64,6 +71,8 @@
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
+        <version>1.18.36</version>
+        <scope>provided</scope>
         <optional>true</optional>
     </dependency>
     <dependency>
@@ -72,11 +81,33 @@
         <scope>test</scope>
     </dependency>
     
+    <!-- Spring Security Test -->
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+    
+    <!-- Mockito inline removed to rely on spring-boot-starter-test; add back with a compatible version if needed -->
+    
+    <!-- H2 Database for Testing -->
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    
+    <!-- AssertJ para assertions más legibles -->
+    <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <scope>test</scope>
+    </dependency>
+    
     <!-- Spring Security -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
-        <version>3.3.4</version>
     </dependency>
 
     <!-- jjwt dependencies -->
@@ -97,24 +128,144 @@
         <version>0.11.5</version>
         <scope>runtime</scope>
     </dependency>
+    <!-- Flyway for DB migrations -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+    </dependency>
+    <!-- Flyway MySQL support (required by Flyway 10+ modular distribution) -->
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-mysql</artifactId>
+        <version>10.21.0</version>
+    </dependency>
+    <!-- OpenAPI / Swagger UI -->
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>2.7.0</version>
+    </dependency>
+    
+    <!-- Spring Boot Cache Starter -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    
+    <!-- Caffeine Cache - High Performance Caching Library -->
+    <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+    </dependency>
+    
+    <!-- Bucket4j for Rate Limiting -->
+    <dependency>
+        <groupId>com.bucket4j</groupId>
+        <artifactId>bucket4j-core</artifactId>
+        <version>8.7.0</version>
+    </dependency>
+    
+    <!-- Micrometer Prometheus for Metrics -->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    
+    <!-- Logstash Logback Encoder for Structured JSON Logging -->
+    <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>7.4</version>
+    </dependency>
+
+    <!-- Jackson module to support Java 8 Date/Time (LocalDateTime) serialization -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    
+    <!-- Spring Boot Starter Data Redis -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+    
+    <!-- Lettuce (Redis client - ya viene con spring-boot-starter-data-redis) -->
+    <!-- No necesita dependency extra, pero si quieres usar Jedis en vez de Lettuce, agrégalo aquí -->
 </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <!-- Lombok annotation processing -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.36</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <!-- Enable annotation processing -->
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            
+            <!-- Flyway Maven plugin: enable `mvn flyway:info` locally to inspect migrations -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>10.21.0</version>
+            </plugin>
+            
+            <!-- Plugin de Surefire para configurar memoria de las pruebas -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!-- Configuración mejorada para JDK 23 + Mockito -->
+                    <argLine>
+                        -Xmx256m 
+                        -Xms128m 
+                        -XX:MaxMetaspaceSize=128m 
+                        -XX:+UseSerialGC
+                        -XX:+EnableDynamicAgentLoading
+                        -Djdk.instrument.traceUsage=false
+                    </argLine>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
+                    <!-- Forzar propiedades en el entorno de test para evitar que variables de entorno del SO sobreescriban application-test.properties -->
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                        <spring.datasource.url>jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</spring.datasource.url>
+                        <spring.datasource.driverClassName>org.h2.Driver</spring.datasource.driverClassName>
+                        <spring.flyway.enabled>false</spring.flyway.enabled>
+                        <spring.sql.init.mode>never</spring.sql.init.mode>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

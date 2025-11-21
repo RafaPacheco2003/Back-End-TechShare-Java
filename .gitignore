@@ -31,3 +31,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+logs/
+hs_err_pid*.log
+replay_pid*.log
+
+### Environment Variables ###
+.env
+.env.local
+.env.production
+
+### Uploaded Images (mantener solo .gitkeep) ###
+uploaded-images/*
+!uploaded-images/.gitkeep
+
+### Temporary Files ###
+temp_*.txt
+tmp_*.json
+
+### OS ###
+.DS_Store
+Thumbs.db

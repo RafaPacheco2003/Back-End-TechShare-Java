@@ -1,0 +1,40 @@
+# 🐳 Dockerfile específico para testing con Java 17
+FROM openjdk:17-jdk-alpine
+
+# Instalar Maven y dependencias necesarias
+RUN apk add --no-cache maven bash curl
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Crear usuario no-root para seguridad
+RUN addgroup -g 1000 testuser && \
+    adduser -D -s /bin/bash -u 1000 -G testuser testuser && \
+    chown -R testuser:testuser /app
+
+# Copiar archivos de configuración Maven primero (para cache)
+COPY --chown=testuser:testuser pom.xml .
+COPY --chown=testuser:testuser .mvn .mvn/
+COPY --chown=testuser:testuser mvnw mvnw.cmd ./
+
+# Hacer ejecutables los scripts Maven
+RUN chmod +x mvnw mvnw.cmd
+
+# Cambiar a usuario no-root
+USER testuser
+
+# Descargar dependencias (cache layer para optimizar builds)
+RUN ./mvnw dependency:go-offline -B || true
+
+# Copiar código fuente
+COPY --chown=testuser:testuser src ./src
+
+# Crear directorios para reportes
+RUN mkdir -p target/surefire-reports target/test-classes
+
+# Variables de entorno para testing
+ENV SPRING_PROFILES_ACTIVE=test
+ENV MAVEN_OPTS="-Xmx512m -Xms256m -XX:MaxMetaspaceSize=256m"
+
+# Comando por defecto: ejecutar todas las pruebas
+CMD ["./mvnw", "test", "-Dspring.profiles.active=test"]
