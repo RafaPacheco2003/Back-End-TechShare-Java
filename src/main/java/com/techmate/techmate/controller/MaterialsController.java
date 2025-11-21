@@ -29,10 +29,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 // CORS configurado globalmente en WebSecurityConfig - no necesita @CrossOrigin aquí
 @RestController
 @RequestMapping("/admin/materials")
+@PreAuthorize("hasRole('ADMIN')")
 public class MaterialsController {
 
     private static final Logger log = LoggerFactory.getLogger(MaterialsController.class);
