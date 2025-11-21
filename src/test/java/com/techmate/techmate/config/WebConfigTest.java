@@ -17,3 +17,4 @@ public class WebConfigTest {
         assertThat(webConfig).isNotNull();
     }
 }
+

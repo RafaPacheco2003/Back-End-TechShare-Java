@@ -26,3 +26,4 @@ public interface AuditService {
      */
     void logMaterial(Integer materialId, String action, String details);
 }
+

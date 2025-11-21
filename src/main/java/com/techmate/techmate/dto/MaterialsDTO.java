@@ -20,7 +20,7 @@ public class MaterialsDTO {
     
     @NotNull(message = "El ID del material no puede ser nulo")
     @Min(value = 1, message = "El ID del material debe ser mayor a 0")
-    private int materialsId;
+    private int id;
     
     private String imagePath;
     
@@ -51,13 +51,17 @@ public class MaterialsDTO {
     private List<Integer> roleIds; 
     private List<String> roleNames;
 
-    public int getMaterialsId() {
-        return materialsId;
+    public int getId() {
+        return id;
     }
 
-    public void setMaterialsId(int materialsId) {
-        this.materialsId = materialsId;
+    public void setId(int id) {
+        this.id = id;
     }
+    
+    // ✅ COMPATIBILITY METHOD
+    public int getMaterialsId() { return this.id; }
+    public void setMaterialsId(int materialsId) { this.id = materialsId; }
 
     public String getName() {
         return name;
@@ -107,3 +111,4 @@ public class MaterialsDTO {
         this.subCategoryName = subCategoryName;
     }
 }
+

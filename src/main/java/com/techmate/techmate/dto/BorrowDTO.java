@@ -17,7 +17,7 @@ public class BorrowDTO {
     
     @NotNull(message = "El ID del préstamo no puede ser nulo")
     @Min(value = 1, message = "El ID del préstamo debe ser mayor a 0")
-    private int borrowId;
+    private int id;
     
     @NotNull(message = "La fecha de préstamo no puede ser nula")
     private Date date;
@@ -46,5 +46,12 @@ public class BorrowDTO {
 
     @NotNull(message = "Los detalles del préstamo no pueden ser nulos")
     private List<DetailsBorrowDTO> details;
+    
+    // ══════════════════════════════════════════════════════════════
+    // ✅ COMPATIBILITY METHODS (Legacy code support)
+    // ══════════════════════════════════════════════════════════════
+    public int getBorrowId() { return this.id; }
+    public void setBorrowId(int borrowId) { this.id = borrowId; }
 }
+
 

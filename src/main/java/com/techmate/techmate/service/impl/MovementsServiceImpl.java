@@ -97,7 +97,7 @@ public class MovementsServiceImpl implements MovementsService {
      */
     private MovementsDTO convertToDTO(Movements movements) {
         String adminName = userService.getUsuarioUsernamById(movements.getUsuario().getId());
-        String materialName = materialsService.getMaterialsNameById(movements.getMaterials().getMaterialsId());
+        String materialName = materialsService.getMaterialsNameById(movements.getMaterials().getId());
         return movementMapper.toDTO(movements, adminName, materialName);
     }
 
@@ -130,7 +130,7 @@ public class MovementsServiceImpl implements MovementsService {
         // 1️⃣ VALIDAR
         movementValidator.validateQuantity(movementsDTO);
         Usuario usuario = loadAndValidateUser(userId);
-        Materials materials = loadAndValidateMaterial(movementsDTO.getMaterialsId());
+        Materials materials = loadAndValidateMaterial(movementsDTO.getId());
 
         // 2️⃣ PREPARAR DTO
         prepareMovementDTO(movementsDTO);
@@ -284,4 +284,5 @@ public class MovementsServiceImpl implements MovementsService {
     }
 
 }
+
 

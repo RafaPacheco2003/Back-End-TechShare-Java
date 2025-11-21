@@ -17,9 +17,14 @@ public class RoleDTO {
     
     @NotNull(message = "El ID del rol no puede ser nulo")
     @Min(value = 1, message = "El ID del rol debe ser mayor a 0")
-    private int roleId;
+    private int id;
     
     @NotBlank(message = "El nombre del rol no puede estar vacío")
     private String name;
+    
+    // ✅ COMPATIBILITY METHOD
+    public int getRoleId() { return this.id; }
+    public void setRoleId(int roleId) { this.id = roleId; }
 }
+
 

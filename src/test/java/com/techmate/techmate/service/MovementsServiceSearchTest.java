@@ -143,3 +143,4 @@ class MovementsServiceSearchTest {
         assertThat(isValid).isFalse();
     }
 }
+

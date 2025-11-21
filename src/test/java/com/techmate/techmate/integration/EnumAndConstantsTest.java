@@ -106,3 +106,4 @@ class EnumAndConstantsTest {
         assertNotEquals(status1, status2);
     }
 }
+

@@ -30,3 +30,4 @@ public class MockAuditService implements AuditService {
         logAudit(action, "MATERIAL", materialId, details, null);
     }
 }
+

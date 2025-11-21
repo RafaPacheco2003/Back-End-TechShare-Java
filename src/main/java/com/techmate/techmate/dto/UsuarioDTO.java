@@ -20,7 +20,7 @@ public class UsuarioDTO {
 
     @NotNull(message = "El ID del usuario no puede ser nulo")
     @Min(value = 1, message = "El ID del usuario debe ser mayor a 0")
-    private Integer usuarioId;
+    private Integer id;
     
     @NotBlank(message = "El nombre de usuario no puede estar vacío")
     private String username;
@@ -45,14 +45,14 @@ public class UsuarioDTO {
      * Método compatible para código legacy que usa 'id'.
      */
     public Integer getId() {
-        return this.usuarioId;
+        return this.id;
     }
     
     /**
      * Método compatible para código legacy que usa 'id'.
      */
     public void setId(Integer id) {
-        this.usuarioId = id;
+        this.id = id;
     }
     
     /**
@@ -69,4 +69,5 @@ public class UsuarioDTO {
         this.username = userName;
     }
 }
+
 

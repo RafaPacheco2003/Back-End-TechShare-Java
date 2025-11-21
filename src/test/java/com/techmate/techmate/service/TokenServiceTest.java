@@ -77,3 +77,4 @@ class TokenServiceTest {
         assertTrue(methods.length > 0, "Service should have methods");
     }
 }
+

@@ -270,7 +270,7 @@ public class MaterialsServiceImpl implements MaterialsService {
         material.setStock(material.getStock()); // Mantener stock actual
         
         // Resolver stock disponible desde el manager
-        int available = materialsStockManager.getAvailableStock(material.getMaterialsId());
+        int available = materialsStockManager.getAvailableStock(material.getId());
         material.setBorrowable_stock(available);
     }
 
@@ -469,4 +469,5 @@ public class MaterialsServiceImpl implements MaterialsService {
     }
 
 }
+
 

@@ -48,7 +48,7 @@ class MovementsControllerTest {
     @Test
     void getMovementById_returnsMovementResponse() throws Exception {
         MovementsDTO dto = new MovementsDTO();
-        dto.setMovementsId(1);
+        dto.setId(1);
         dto.setQuantity(5);
     dto.setMoveType(MoveType.STOCK_ADD);
 
@@ -60,7 +60,7 @@ class MovementsControllerTest {
         // call path /admin/movement/1 and include request param id=1 to satisfy the controller signature
         mockMvc.perform(get("/admin/movement/1").param("id", "1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.movements_id").value(1))
+                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.quantity").value(5));
     }
 
@@ -69,13 +69,13 @@ class MovementsControllerTest {
         MovementsDTO reqDto = new MovementsDTO();
         reqDto.setQuantity(3);
     reqDto.setMoveType(MoveType.BORROW);
-        reqDto.setMaterialsId(2);
+        reqDto.setId(2);
 
         MovementsDTO created = new MovementsDTO();
-        created.setMovementsId(10);
+        created.setId(10);
         created.setQuantity(3);
     created.setMoveType(MoveType.BORROW);
-        created.setMaterialsId(2);
+        created.setId(2);
 
     MovementResponse resp = new MovementResponse(10, MoveType.BORROW, 3, new java.util.Date(), "test", 5, "Admin", 2, "MaterialName");
 
@@ -97,7 +97,8 @@ class MovementsControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .principal(mockAuth)) // Add the mocked Authentication
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.movements_id").value(10))
+                .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.move_type").value("OUT"));
     }
 }
+

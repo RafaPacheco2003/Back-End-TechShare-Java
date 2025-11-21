@@ -35,7 +35,7 @@ public class BorrowEventListener {
         log.info(
             "✅ BORROW CREATED - User {} created borrow {} with amount ${:.2f}. EventID: {}",
             event.getUserId(),
-            event.getBorrowId(),
+            event.getId(),
             event.getAmount(),
             event.getEventId()
         );
@@ -44,20 +44,20 @@ public class BorrowEventListener {
             // 📧 Enviar confirmación de préstamo
             // emailService.sendBorrowConfirmation(
             //     event.getUserEmail(),
-            //     event.getBorrowId(),
+            //     event.getId(),
             //     event.getMaterialsDescription(),
             //     event.getAmount()
             // );
             
             // 📋 Registrar en auditoría
             auditService.logBorrow(
-                event.getBorrowId(),
+                event.getId(),
                 "CREATED",
                 event.getUserId(),
                 "Préstamo creado por usuario. Monto: $" + event.getAmount()
             );
         } catch (Exception e) {
-            log.error("Error procesando BorrowCreatedEvent para borrow {}: {}", event.getBorrowId(), e.getMessage(), e);
+            log.error("Error procesando BorrowCreatedEvent para borrow {}: {}", event.getId(), e.getMessage(), e);
         }
     }
     
@@ -77,7 +77,7 @@ public class BorrowEventListener {
                 
                 log.warn(
                     "⚠️ LATE RETURN - Borrow {} was returned {} days late. User: {}. EventID: {}",
-                    event.getBorrowId(),
+                    event.getId(),
                     daysLate,
                     event.getUserId(),
                     event.getEventId()
@@ -87,14 +87,14 @@ public class BorrowEventListener {
                 // double penalty = calculatePenalty(daysLate);
                 // emailService.sendLateReturnAlert(
                 //     event.getUserEmail(),
-                //     event.getBorrowId(),
+                //     event.getId(),
                 //     daysLate,
                 //     penalty
                 // );
                 
                 // 📋 Registrar devolución tardía
                 auditService.logBorrow(
-                    event.getBorrowId(),
+                    event.getId(),
                     "RETURNED_LATE",
                     event.getUserId(),
                     "Devolución realizada " + daysLate + " días después de la fecha programada (" + 
@@ -103,7 +103,7 @@ public class BorrowEventListener {
             } else {
                 log.info(
                     "✅ BORROW RETURNED ON TIME - Borrow {} returned punctually. User: {}. EventID: {}",
-                    event.getBorrowId(),
+                    event.getId(),
                     event.getUserId(),
                     event.getEventId()
                 );
@@ -111,20 +111,20 @@ public class BorrowEventListener {
                 // 📧 Enviar confirmación de devolución exitosa
                 // emailService.sendReturnConfirmation(
                 //     event.getUserEmail(),
-                //     event.getBorrowId(),
+                //     event.getId(),
                 //     event.getReturnDate().toString()
                 // );
                 
                 // 📋 Registrar devolución exitosa
                 auditService.logBorrow(
-                    event.getBorrowId(),
+                    event.getId(),
                     "RETURNED_ON_TIME",
                     event.getUserId(),
                     "Devolución completada a tiempo"
                 );
             }
         } catch (Exception e) {
-            log.error("Error procesando BorrowReturnedEvent para borrow {}: {}", event.getBorrowId(), e.getMessage(), e);
+            log.error("Error procesando BorrowReturnedEvent para borrow {}: {}", event.getId(), e.getMessage(), e);
         }
     }
     
@@ -136,4 +136,5 @@ public class BorrowEventListener {
         return (returnDate.getTime() - estimatedDate.getTime()) / (1000 * 60 * 60 * 24);
     }
 }
+
 

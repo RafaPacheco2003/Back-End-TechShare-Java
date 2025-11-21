@@ -88,3 +88,4 @@ class ApplicationConfigurationTest {
         assertTrue(beanNames.length > 0, "Application configuration should have loaded beans");
     }
 }
+

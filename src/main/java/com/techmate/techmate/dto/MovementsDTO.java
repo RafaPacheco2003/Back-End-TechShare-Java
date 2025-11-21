@@ -19,7 +19,7 @@ public class MovementsDTO {
     
     @NotNull(message = "El ID del movimiento no puede ser nulo")
     @Min(value = 1, message = "El ID del movimiento debe ser mayor a 0")
-    private int movementsId;
+    private int id;
     
     @NotNull(message = "El tipo de movimiento es obligatorio")
     private MoveType moveType;
@@ -47,11 +47,12 @@ public class MovementsDTO {
     
     private String materialsName;
     
-    public int getMovementsId() {
-        return movementsId;
+    public int getId() {
+        return id;
     }
 
-    public void setMovementsId(int movementsId) {
-        this.movementsId = movementsId;
+    public void setId(int id) {
+        this.id = id;
     }
 }
+

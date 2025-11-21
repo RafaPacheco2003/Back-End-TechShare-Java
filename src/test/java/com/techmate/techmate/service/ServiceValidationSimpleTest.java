@@ -32,7 +32,7 @@ class ServiceValidationSimpleTest {
     @BeforeEach
     void setUp() {
         testRole = new Role();
-        testRole.setRoleId(1);
+        testRole.setId(1);
         testRole.setName("ADMIN");
         
         testUsuario = new Usuario();
@@ -142,3 +142,4 @@ class ServiceValidationSimpleTest {
         assertThat(actual).isEqualTo(expected);
     }
 }
+

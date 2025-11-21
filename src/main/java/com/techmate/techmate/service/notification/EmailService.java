@@ -41,3 +41,4 @@ public interface EmailService {
      */
     void sendLowStockAlert(String adminEmail, String materialName, Integer currentStock, Integer threshold);
 }
+

@@ -101,3 +101,4 @@ class HttpResponseHandlingTest {
         assertEquals(response1.getStatusCode(), response2.getStatusCode());
     }
 }
+

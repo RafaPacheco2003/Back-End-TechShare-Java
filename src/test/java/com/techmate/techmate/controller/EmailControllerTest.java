@@ -145,3 +145,4 @@ class EmailControllerTest {
         verify(emailService).sendEmail(to, subject, text);
     }
 }
+

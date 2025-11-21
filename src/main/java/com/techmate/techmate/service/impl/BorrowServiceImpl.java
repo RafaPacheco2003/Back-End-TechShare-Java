@@ -93,7 +93,7 @@ public class BorrowServiceImpl implements BorrowService {
 
     private BorrowDTO convertToDTO(Borrow borrow) {
         BorrowDTO dto = new BorrowDTO();
-        dto.setBorrowId(borrow.getBorrowId());
+        dto.setId(borrow.getId());
         dto.setDate(borrow.getDate());
         dto.setStatus(borrow.getStatus());
         dto.setAmount(borrow.getAmount());
@@ -124,17 +124,17 @@ public class BorrowServiceImpl implements BorrowService {
 
     private DetailsBorrowDTO convertDetailsBorrowToDTO(DetailsBorrow detailsBorrow) {
         DetailsBorrowDTO dto = new DetailsBorrowDTO();
-        dto.setDetailsBorrowId(detailsBorrow.getDetailsBorrowId());
+        dto.setId(detailsBorrow.getId());
 
         if (detailsBorrow.getMaterials() != null) {
-            dto.setMaterialsId(detailsBorrow.getMaterials().getMaterialsId());
+            dto.setId(detailsBorrow.getMaterials().getId());
         } else {
-            dto.setMaterialsId(null); // O lanzar una excepción si es necesario
+            dto.setId(null); // O lanzar una excepción si es necesario
         }
 
         // Establecer el borrowId en el DTO
         if (detailsBorrow.getBorrow() != null) {
-            dto.setBorrowId(detailsBorrow.getBorrow().getBorrowId()); // Aquí estableces el borrowId en el DTO
+            dto.setId(detailsBorrow.getBorrow().getId()); // Aquí estableces el borrowId en el DTO
         }
 
         dto.setQuantity(detailsBorrow.getQuantity());
@@ -263,7 +263,7 @@ public class BorrowServiceImpl implements BorrowService {
     private void handleBorrowApproved(Borrow borrow) throws Exception {
         // Validar y reducir stock para cada detalle
         for (DetailsBorrow detail : borrow.getDetails()) {
-            Integer materialId = detail.getMaterials().getMaterialsId();
+            Integer materialId = detail.getMaterials().getId();
             int qty = detail.getQuantity();
             validateStockAvailabilityOrFallback(materialId, qty);
             reduceStockOrFallback(materialId, qty);
@@ -283,7 +283,7 @@ public class BorrowServiceImpl implements BorrowService {
     private void handleBorrowReturned(Borrow borrow) {
         // Restaurar stock para cada detalle
         for (DetailsBorrow detail : borrow.getDetails()) {
-            Integer materialId = detail.getMaterials().getMaterialsId();
+            Integer materialId = detail.getMaterials().getId();
             int qty = detail.getQuantity();
             restoreStockOrFallback(materialId, qty);
         }
@@ -386,4 +386,5 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
 }
+
 

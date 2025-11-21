@@ -96,3 +96,4 @@ class SpringBeansDependencyInjectionTest {
         assertTrue(applicationContext.getBeanDefinitionCount() > 0);
     }
 }
+

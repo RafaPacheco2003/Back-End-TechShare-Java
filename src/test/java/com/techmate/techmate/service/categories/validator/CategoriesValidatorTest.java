@@ -181,3 +181,4 @@ class CategoriesValidatorTest {
         assertNotNull(exception.getMessage());
     }
 }
+

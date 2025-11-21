@@ -161,3 +161,4 @@ class MaterialsServiceSearchTest {
         verify(materialsRepository).deleteById(1);
     }
 }
+

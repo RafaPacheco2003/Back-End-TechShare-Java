@@ -169,3 +169,4 @@ class MovementValidatorTest {
         assertDoesNotThrow(() -> movementValidator.validateQuantity(dto));
     }
 }
+

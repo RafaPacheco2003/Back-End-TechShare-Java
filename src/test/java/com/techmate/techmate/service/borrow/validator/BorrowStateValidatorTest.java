@@ -216,3 +216,4 @@ class BorrowStateValidatorTest {
             borrowStateValidator.validateStateTransition(Status.REJECTED, Status.BORROWED));
     }
 }
+

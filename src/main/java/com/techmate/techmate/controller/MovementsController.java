@@ -44,7 +44,7 @@ public ResponseEntity<?> createMovement(
     MovementsDTO movementsDTO = new MovementsDTO();
     movementsDTO.setQuantity(quantity);
     movementsDTO.setMoveType(moveType);
-    movementsDTO.setMaterialsId(idMaterial);
+    movementsDTO.setId(idMaterial);
     movementsDTO.setDate(new Date());
     movementsDTO.setComment(comment); // Establecer el comentario
 
@@ -181,4 +181,5 @@ public ResponseEntity<?> createMovement(
     }
 
 }
+
 

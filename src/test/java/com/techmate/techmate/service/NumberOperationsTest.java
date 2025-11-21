@@ -135,3 +135,4 @@ class NumberOperationsTest {
         assertEquals(6, a ^ b); // XOR
     }
 }
+

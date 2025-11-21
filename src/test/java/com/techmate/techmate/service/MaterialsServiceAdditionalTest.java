@@ -120,3 +120,4 @@ class MaterialsServiceAdditionalTest {
         assertThat(isLowStock).isTrue();
     }
 }
+

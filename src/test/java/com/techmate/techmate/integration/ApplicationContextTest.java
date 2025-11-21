@@ -57,3 +57,4 @@ class ApplicationContextTest {
         assertTrue(this.getClass().isAnnotationPresent(AutoConfigureMockMvc.class));
     }
 }
+

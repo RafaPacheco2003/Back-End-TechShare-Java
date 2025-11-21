@@ -111,3 +111,4 @@ class TokenControllerTest {
                 .andExpect(jsonPath("$").value(userId2));
     }
 }
+

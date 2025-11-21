@@ -203,3 +203,4 @@ class RoleValidatorTest {
         assertTrue(exception2.getMessage().contains("Ya existe"));
     }
 }
+

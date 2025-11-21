@@ -235,3 +235,4 @@ class UserValidatorTest {
         assertDoesNotThrow(() -> userValidator.validateRolesExist(roles));
     }
 }
+

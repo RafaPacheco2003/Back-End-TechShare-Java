@@ -48,3 +48,4 @@ public interface IMovementQueryService {
     List<MovementsDTO> getMovementsPaged(Integer pageNumber, Integer pageSize);
 
 }
+
