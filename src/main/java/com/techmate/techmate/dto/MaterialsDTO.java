@@ -5,6 +5,8 @@ import java.util.List;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import com.techmate.techmate.validation.SafeString;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,9 +27,13 @@ public class MaterialsDTO {
     private String imagePath;
     
     @NotBlank(message = "El nombre del material no puede estar vacío")
+    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
+    @SafeString(allowSpecial = false)
     private String name;
     
     @NotBlank(message = "La descripción del material no puede estar vacía")
+    @Size(min = 5, max = 500, message = "La descripción debe tener entre 5 y 500 caracteres")
+    @SafeString(allowSpecial = true)
     private String description;
     
     @NotNull(message = "El precio no puede ser nulo")

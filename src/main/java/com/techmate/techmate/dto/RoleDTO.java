@@ -3,6 +3,8 @@ package com.techmate.techmate.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import com.techmate.techmate.validation.SafeString;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +22,13 @@ public class RoleDTO {
     private int id;
     
     @NotBlank(message = "El nombre del rol no puede estar vacío")
+    @Size(min = 3, max = 50, message = "El nombre del rol debe tener entre 3 y 50 caracteres")
+    @SafeString(allowSpecial = false)
     private String name;
+
+    @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
+    @SafeString(allowSpecial = true)
+    private String description;
     
     // ✅ COMPATIBILITY METHOD
     public int getRoleId() { return this.id; }

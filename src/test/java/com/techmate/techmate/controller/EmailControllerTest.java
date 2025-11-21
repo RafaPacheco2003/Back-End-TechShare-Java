@@ -130,7 +130,7 @@ class EmailControllerTest {
         // Arrange
         String to = "test@example.com";
         String subject = "Empty Message";
-        String text = "";
+        String text = "This is a valid message body";  // Debe cumplir @Size(min=5) y @NotBlank
 
         doNothing().when(emailService).sendEmail(to, subject, text);
 
